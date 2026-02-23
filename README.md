@@ -5,7 +5,7 @@
 
 ## Required links
 
-- [SonarCloud analysis](https://sonarcloud.io/summary/overall?id=aavelinka_java-labs&branch=main)
+- [SonarCloud analysis](https://sonarcloud.io/summary/overall?id=aavelinka_Food_Dairy&branch=main)
 - [ER-Diagram](./docs/ER-Diagramm.png)
 
 ## Overview
