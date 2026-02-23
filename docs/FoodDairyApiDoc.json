@@ -1,0 +1,750 @@
+{
+  "info": {
+    "name": "Nutrition Tracker API",
+    "description": "Коллекция для управления питанием: пользователи, продукты, приемы пищи, заметки и nutritional values",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get all users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "Get user by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get users by name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/name?nameSearch=John",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "name"],
+              "query": [
+                {
+                  "key": "nameSearch",
+                  "value": "John"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get users by sex",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/sex?sexSearch=MALE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "sex"],
+              "query": [
+                {
+                  "key": "sexSearch",
+                  "value": "MALE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get users by age",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/age?ageSearch=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "age"],
+              "query": [
+                {
+                  "key": "ageSearch",
+                  "value": "25"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get users with meals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/with-meals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "with-meals"]
+            }
+          }
+        },
+        {
+          "name": "Get users with notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/with-notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "with-notes"]
+            }
+          }
+        },
+        {
+          "name": "Create user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"password\": \"secure123\",\n  \"email\": \"john.doe@example.com\",\n  \"measurements\": {\n    \"age\": 30,\n    \"sex\": \"MALE\",\n    \"weight\": 80.5,\n    \"height\": 185.0,\n    \"activityFactor\": 1.5\n  },\n  \"dailyGoalId\": null,\n  \"mealIds\": [],\n  \"postIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            }
+          }
+        },
+        {
+          "name": "Update user",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"password\": \"newpassword123\",\n  \"email\": \"john.updated@example.com\",\n  \"measurements\": {\n    \"age\": 31,\n    \"sex\": \"MALE\",\n    \"weight\": 82.0,\n    \"height\": 185.0,\n    \"activityFactor\": 1.5\n  },\n  \"dailyGoalId\": 1,\n  \"mealIds\": [1, 2],\n  \"postIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update user measurements",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"measurements\": {\n    \"age\": 32,\n    \"sex\": \"MALE\",\n    \"weight\": 83.5,\n    \"height\": 185.0,\n    \"activityFactor\": 1.6\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1/measurements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1", "measurements"]
+            }
+          }
+        },
+        {
+          "name": "Calculate nutritional value for user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1/nutritional",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1", "nutritional"]
+            }
+          }
+        },
+        {
+          "name": "Create user with goal and note (no transaction)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"password\": \"password123\",\n  \"email\": \"jane.smith@example.com\",\n  \"measurements\": {\n    \"age\": 28,\n    \"sex\": \"FEMALE\",\n    \"weight\": 65.0,\n    \"height\": 170.0,\n    \"activityFactor\": 1.4\n  },\n  \"dailyGoalId\": null,\n  \"mealIds\": [],\n  \"postIds\": [],\n  \"dailyGoalCalories\": 2000.0,\n  \"dailyGoalProteins\": 150.0,\n  \"dailyGoalFats\": 60.0,\n  \"dailyGoalCarbohydrates\": 200.0,\n  \"noteDate\": \"2026-03-23\",\n  \"noteTexts\": [\"First note\", \"Second note\"],\n  \"failAfterUser\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/without_transaction",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "without_transaction"]
+            }
+          }
+        },
+        {
+          "name": "Create user with goal and note (with transaction)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bob Johnson\",\n  \"password\": \"password123\",\n  \"email\": \"bob.johnson@example.com\",\n  \"measurements\": {\n    \"age\": 35,\n    \"sex\": \"MALE\",\n    \"weight\": 90.0,\n    \"height\": 180.0,\n    \"activityFactor\": 1.3\n  },\n  \"dailyGoalId\": null,\n  \"mealIds\": [],\n  \"postIds\": [],\n  \"dailyGoalCalories\": 2200.0,\n  \"dailyGoalProteins\": 170.0,\n  \"dailyGoalFats\": 70.0,\n  \"dailyGoalCarbohydrates\": 220.0,\n  \"noteDate\": \"2026-03-23\",\n  \"noteTexts\": [\"Morning note\", \"Evening note\"],\n  \"failAfterUser\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/with_transaction",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "with_transaction"]
+            }
+          }
+        },
+        {
+          "name": "Delete user",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get all products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "Get product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get products by name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/name?nameSearch=apple",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "name"],
+              "query": [
+                {
+                  "key": "nameSearch",
+                  "value": "apple"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get products by meal",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/meal_list?mealId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "meal_list"],
+              "query": [
+                {
+                  "key": "mealId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Apple\",\n  \"nutritionalValue100gId\": 1,\n  \"mealIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "Update product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Green Apple\",\n  \"nutritionalValue100gId\": 1,\n  \"mealIds\": [1, 2]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Meals",
+      "item": [
+        {
+          "name": "Get all meals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/meal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal"]
+            }
+          }
+        },
+        {
+          "name": "Get meal by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/meal/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get meals by name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/meal/name?nameSearch=breakfast",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal", "name"],
+              "query": [
+                {
+                  "key": "nameSearch",
+                  "value": "breakfast"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get meals by author",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/meal/author?authorId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal", "author"],
+              "query": [
+                {
+                  "key": "authorId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get meals by nutritional value",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/meal/total_nutritional_value?nutritionalValueId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal", "total_nutritional_value"],
+              "query": [
+                {
+                  "key": "nutritionalValueId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get meals by product list",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/meal/product_list?productIds=1&productIds=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal", "product_list"],
+              "query": [
+                {
+                  "key": "productIds",
+                  "value": "1"
+                },
+                {
+                  "key": "productIds",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create meal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Healthy Breakfast\",\n  \"totalNutritionalId\": null,\n  \"authorId\": 1,\n  \"productIds\": [1, 2],\n  \"recipeId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/meal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal"]
+            }
+          }
+        },
+        {
+          "name": "Update meal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Healthy Breakfast Updated\",\n  \"totalNutritionalId\": 1,\n  \"authorId\": 1,\n  \"productIds\": [1, 2, 3],\n  \"recipeId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/meal/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete meal",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/meal/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "meal", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Nutritional Values",
+      "item": [
+        {
+          "name": "Get all nutritional values",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/nutritional_value",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "nutritional_value"]
+            }
+          }
+        },
+        {
+          "name": "Get nutritional value by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/nutritional_value/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "nutritional_value", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create nutritional value",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calories\": 52.0,\n  \"proteins\": 0.3,\n  \"fats\": 0.2,\n  \"carbohydrates\": 14.0,\n  \"ownerId\": 1,\n  \"productId\": 1,\n  \"mealId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/nutritional_value",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "nutritional_value"]
+            }
+          }
+        },
+        {
+          "name": "Update nutritional value",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calories\": 55.0,\n  \"proteins\": 0.4,\n  \"fats\": 0.2,\n  \"carbohydrates\": 15.0,\n  \"ownerId\": 1,\n  \"productId\": 1,\n  \"mealId\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/nutritional_value/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "nutritional_value", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete nutritional value",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/nutritional_value/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "nutritional_value", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notes",
+      "item": [
+        {
+          "name": "Get all notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/note",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "note"]
+            }
+          }
+        },
+        {
+          "name": "Get note by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/note/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "note", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get notes by user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/note/user_note?userId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "note", "user_note"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get notes by date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/note/date?dateSearch=2026-03-23",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "note", "date"],
+              "query": [
+                {
+                  "key": "dateSearch",
+                  "value": "2026-03-23"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get notes by meal",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/note/meal_note?mealId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "note", "meal_note"],
+              "query": [
+                {
+                  "key": "mealId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"mealId\": 1,\n  \"date\": \"2026-03-23\",\n  \"notes\": [\"Great meal!\", \"Very satisfying\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/note",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "note"]
+            }
+          }
+        },
+        {
+          "name": "Update note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"mealId\": 1,\n  \"date\": \"2026-03-23\",\n  \"notes\": [\"Updated note\", \"Still great!\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/note/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "note", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete note",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/note/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "note", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,2426 @@
+
+Файл ProjectApplication.java
+package com.uni.project;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ProjectApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ProjectApplication.class, args);
+	}
+
+}
+
+
+Файл MealController.java
+package com.uni.project.controller;
+
+import com.uni.project.model.dto.request.MealRequest;
+import com.uni.project.model.dto.response.MealResponse;
+import com.uni.project.service.MealService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/meal")
+@AllArgsConstructor
+public class MealController {
+    private final MealService mealService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MealResponse>  getMealById(@PathVariable Integer id) {
+        return ResponseEntity.ok(mealService.getMealById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MealResponse>> getAllMeals() {
+        return ResponseEntity.ok(mealService.getAllMeals());
+    }
+    
+    @PostMapping
+    public ResponseEntity<MealResponse> mealCreate(@Valid @RequestBody MealRequest mealRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(mealService.mealCreate(mealRequest));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MealResponse> mealUpdate(@PathVariable Integer id,
+                                                   @Valid @RequestBody MealRequest mealRequest) {
+        return ResponseEntity.ok(mealService.mealUpdate(id, mealRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> mealDelete(@PathVariable Integer id) {
+        mealService.mealDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/name")
+    public ResponseEntity<List<MealResponse>> getAllMealsByName(@RequestParam String nameSearch) {
+        return ResponseEntity.ok(mealService.getAllMealsByName(nameSearch));
+    }
+
+    @GetMapping("/author")
+    public ResponseEntity<List<MealResponse>> getAllMealsByAuthor(@RequestParam("authorId") Integer authorId) {
+        return ResponseEntity.ok(mealService.getAllMealsByAuthorId(authorId));
+    }
+
+    @GetMapping("/total_nutritional_value")
+    public ResponseEntity<List<MealResponse>> getAllMealsByNutritionalValue(
+            @RequestParam("nutritionalValueId") Integer nutritionalValueId) {
+        return ResponseEntity.ok(mealService.getAllMealsByNutritionalValueId(nutritionalValueId));
+    }
+
+    @GetMapping("/product_list")
+    public ResponseEntity<List<MealResponse>> getAllMealsByProductList(
+            @RequestParam("productIds") List<Integer> productIds) {
+        return ResponseEntity.ok(mealService.getAllMealsByProductIds(productIds));
+    }
+}
+
+
+Файл NoteController.java
+package com.uni.project.controller;
+
+import com.uni.project.model.dto.request.NoteRequest;
+import com.uni.project.model.dto.response.NoteResponse;
+import com.uni.project.service.NoteService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/note")
+@AllArgsConstructor
+public class NoteController {
+    private final NoteService noteService;
+
+    @PostMapping
+    public ResponseEntity<NoteResponse> noteCreate(@Valid @RequestBody NoteRequest noteRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(noteService.noteCreate(noteRequest));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<NoteResponse> getNoteById(@PathVariable Integer id) {
+        return ResponseEntity.ok(noteService.getNoteById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<NoteResponse>> getAllNotes() {
+        return ResponseEntity.ok(noteService.getAllNotes());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<NoteResponse> noteUpdate(@PathVariable Integer id,
+                                                   @Valid @RequestBody NoteRequest noteRequest) {
+        return ResponseEntity.ok(noteService.noteUpdate(id, noteRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> noteDelete(@PathVariable Integer id) {
+        noteService.noteDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/user_note")
+    public ResponseEntity<List<NoteResponse>> getAllNotesByUser(@RequestParam("userId") Integer userId) {
+        return ResponseEntity.ok(noteService.getAllNotesByUserId(userId));
+    }
+
+    @GetMapping("/date")
+    public ResponseEntity<List<NoteResponse>> getAllNotesByDate(@RequestParam LocalDate dateSearch) {
+        return ResponseEntity.ok(noteService.getAllNotesByDate(dateSearch));
+    }
+
+    @GetMapping("/meal_note")
+    public ResponseEntity<List<NoteResponse>> getAllNotesByMeal(@RequestParam("mealId") Integer mealId) {
+        return ResponseEntity.ok(noteService.getAllNotesByMealId(mealId));
+    }
+}
+
+
+Файл NutritionalValueController.java
+package com.uni.project.controller;
+
+import com.uni.project.model.dto.request.NutritionalValueRequest;
+import com.uni.project.model.dto.response.NutritionalValueResponse;
+import com.uni.project.service.NutritionalValueService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/nutritional_value")
+@AllArgsConstructor
+public class NutritionalValueController {
+    private final NutritionalValueService nutritionalValueService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<NutritionalValueResponse> getNutritionalValueById(@PathVariable Integer id) {
+        return ResponseEntity.ok(nutritionalValueService.getNutritionalValueById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<NutritionalValueResponse>> getAllNutritionalValues() {
+        return ResponseEntity.ok(nutritionalValueService.getAllNutritionalValues());
+    }
+
+    @PostMapping
+    public ResponseEntity<NutritionalValueResponse> nutritionalValueCreate(
+            @Valid @RequestBody NutritionalValueRequest nutritionalValueRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(nutritionalValueService.nutritionalValueCreate(nutritionalValueRequest));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<NutritionalValueResponse> nutritionalValueUpdate(
+            @PathVariable Integer id, @Valid @RequestBody NutritionalValueRequest nutritionalValueRequest) {
+        return ResponseEntity.ok(nutritionalValueService.nutritionalValueUpdate(id, nutritionalValueRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> nutritionalValueDelete(@PathVariable Integer id) {
+        nutritionalValueService.nutritionalValueDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+
+
+Файл ProductController.java
+package com.uni.project.controller;
+
+import com.uni.project.model.dto.request.ProductRequest;
+import com.uni.project.model.dto.response.ProductResponse;
+import com.uni.project.service.ProductService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/products")
+@AllArgsConstructor
+public class ProductController {
+    private final ProductService productService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> getProductById
+            (@PathVariable Integer id) {
+        return ResponseEntity.ok(productService.getProductById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProductResponse>> getAllProducts() {
+        return ResponseEntity.ok(productService.getAllProducts());
+    }
+
+    @PostMapping
+    public ResponseEntity<ProductResponse> productCreate
+            (@Valid @RequestBody ProductRequest productRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.productCreate(productRequest));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponse> productUpdate
+            (@PathVariable Integer id, @Valid @RequestBody ProductRequest productRequest) {
+        return ResponseEntity.ok(productService.productUpdate(id, productRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> productDelete(@PathVariable Integer id) {
+        productService.productDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/name")
+    public ResponseEntity<List<ProductResponse>> getAllProductsByName
+            (@RequestParam String nameSearch) {
+        return ResponseEntity.ok(productService.getAllProductsByName(nameSearch));
+    }
+
+    @GetMapping("/meal_list")
+    public ResponseEntity<List<ProductResponse>> getAllProductsByMeal(@RequestParam("mealId") Integer mealId) {
+        return ResponseEntity.ok(productService.getAllProductsByMealId(mealId));
+    }
+}
+
+
+Файл UserController.java
+package com.uni.project.controller;
+
+import com.uni.project.model.dto.request.UserCompositeRequest;
+import com.uni.project.model.dto.request.UserMeasurementsRequest;
+import com.uni.project.model.dto.request.UserRequest;
+import com.uni.project.model.dto.response.NutritionalValueResponse;
+import com.uni.project.model.dto.response.UserResponse;
+import com.uni.project.model.entity.Sex;
+import com.uni.project.service.UserService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/users")
+@AllArgsConstructor
+public class UserController {
+    private final UserService userService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Integer id){
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAllUsers(){
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @PostMapping
+    public ResponseEntity<UserResponse> userCreate(@Valid @RequestBody UserRequest userRequest){
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.userCreate(userRequest));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> userUpdate(@PathVariable Integer id,
+                                                   @Valid @RequestBody UserRequest userRequest){
+        return ResponseEntity.ok(userService.userUpdate(id, userRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> userDelete(@PathVariable Integer id){
+        userService.userDelete(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/measurements")
+    public ResponseEntity<UserResponse> measurementsUpdate(@PathVariable Integer id,
+                                                           @Valid @RequestBody UserMeasurementsRequest userRequest){
+        return ResponseEntity.ok(userService.measurementsUpdate(id, userRequest));
+    }
+
+    @GetMapping("/name")
+    public ResponseEntity<List<UserResponse>> getAllUsersByName(@RequestParam String nameSearch) {
+        return ResponseEntity.ok(userService.getAllUsersByName(nameSearch));
+    }
+
+    @GetMapping("/sex")
+    public ResponseEntity<List<UserResponse>> getAllUsersBySex(@RequestParam Sex sexSearch) {
+        return ResponseEntity.ok(userService.getAllUsersBySex(sexSearch));
+    }
+
+    @GetMapping("/age")
+    public ResponseEntity<List<UserResponse>>  getAllUsersByAge(@RequestParam Integer ageSearch) {
+        return ResponseEntity.ok(userService.getAllUsersByAge(ageSearch));
+    }
+
+    @PostMapping("/{id}/nutritional")
+    public ResponseEntity<NutritionalValueResponse> calculateNutritionalValueForUser(@PathVariable Integer id) {
+        return ResponseEntity.ok(userService.calculateNutritionalValueForUser(id));
+    }
+
+    @GetMapping("/with-meals")
+    public ResponseEntity<List<UserResponse>> findAllWithMeals() {
+        return ResponseEntity.ok(userService.findAllWithMeals());
+    }
+
+    @GetMapping("/with-notes")
+    public ResponseEntity<List<UserResponse>> findAllWithNotes() {
+        return ResponseEntity.ok(userService.findAllWithNotes());
+    }
+
+    @PostMapping("/without_transaction")
+    public ResponseEntity<UserResponse> createUserWithGoalAndNoteNoTx(
+            @Valid @RequestBody UserCompositeRequest userRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.createUserWithGoalAndNoteNoTx(userRequest));
+    }
+
+    @PostMapping("/with_transaction")
+    public ResponseEntity<UserResponse> createUserWithGoalAndNoteTx(
+            @Valid @RequestBody UserCompositeRequest userRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.createUserWithGoalAndNoteTx(userRequest));
+    }
+}
+
+
+Файл MealException.java
+package com.uni.project.exception;
+
+public class MealException extends RuntimeException {
+    public MealException(String message) {
+        super(message);
+    }
+}
+
+
+Файл NoteException.java
+package com.uni.project.exception;
+
+public class NoteException extends RuntimeException {
+    public NoteException(String message) {
+        super(message);
+    }
+}
+
+
+Файл NutritionalValueException.java
+package com.uni.project.exception;
+
+public class NutritionalValueException extends RuntimeException {
+    public NutritionalValueException(String message) {
+        super(message);
+    }
+}
+
+
+Файл ProductException.java
+package com.uni.project.exception;
+
+public class ProductException extends RuntimeException {
+    public ProductException(String message) {
+        super(message);
+    }
+}
+
+
+Файл UserException.java
+package com.uni.project.exception;
+
+public class UserException extends RuntimeException {
+    public UserException(String message) {
+        super(message);
+    }
+}
+
+
+Файл MealMapper.java
+package com.uni.project.mapper;
+
+import com.uni.project.model.dto.request.MealRequest;
+import com.uni.project.model.dto.response.MealResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.Note;
+import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.Product;
+import com.uni.project.model.entity.User;
+import java.util.List;
+import java.util.Objects;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+@Mapper(componentModel = "spring")
+public interface MealMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "name", source = "mealRequest.name")
+    @Mapping(target = "author", source = "author")
+    @Mapping(target = "totalNutritional", source = "totalNutritional")
+    @Mapping(target = "productList", source = "products")
+    @Mapping(target = "recipe", source = "recipe")
+    Meal fromRequest(MealRequest mealRequest, User author, NutritionalValue totalNutritional,
+                     List<Product> products, Note recipe);
+
+    @Mapping(target = "authorId", source = "author.id")
+    @Mapping(target = "totalNutritionalId", source = "totalNutritional.id")
+    @Mapping(target = "productIds", source = "productList", qualifiedByName = "mapProductIds")
+    @Mapping(target = "recipeId", source = "recipe.id")
+    MealResponse toResponse(Meal meal);
+
+    @Named("mapProductIds")
+    default List<Integer> mapProductIds(List<Product> products) {
+        if (products == null || products.isEmpty()) {
+            return List.of();
+        }
+        return products.stream()
+                .filter(Objects::nonNull)
+                .map(Product::getId)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+}
+
+
+Файл NoteMapper.java
+package com.uni.project.mapper;
+
+import com.uni.project.model.dto.request.NoteRequest;
+import com.uni.project.model.dto.response.NoteResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.Note;
+import com.uni.project.model.entity.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(componentModel = "spring")
+public interface NoteMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", source = "user")
+    @Mapping(target = "meal", source = "meal")
+    Note fromRequest(NoteRequest noteRequest, User user, Meal meal);
+
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "mealId", source = "meal.id")
+    NoteResponse toResponse(Note note);
+}
+
+
+Файл NutritionalValueMapper.java
+package com.uni.project.mapper;
+
+import com.uni.project.model.dto.request.NutritionalValueRequest;
+import com.uni.project.model.dto.response.NutritionalValueResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.Product;
+import com.uni.project.model.entity.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(componentModel = "spring")
+public interface NutritionalValueMapper {
+    @Mapping(target = "ownerId", source = "owner.id")
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "mealId", source = "meal.id")
+    NutritionalValueResponse toResponse(NutritionalValue nutritionalValue);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "owner", source = "owner")
+    @Mapping(target = "product", source = "product")
+    @Mapping(target = "meal", source = "meal")
+    NutritionalValue fromRequest(NutritionalValueRequest nutritionalValueRequest, User owner,
+                                 Product product, Meal meal);
+}
+
+
+Файл ProductMapper.java
+package com.uni.project.mapper;
+
+import com.uni.project.model.dto.request.ProductRequest;
+import com.uni.project.model.dto.response.ProductResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.Product;
+import java.util.List;
+import java.util.Objects;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+@Mapper(componentModel = "spring")
+public interface ProductMapper {
+    @Mapping(target = "nutritionalValue100gId", source = "nutritionalValue100g.id")
+    @Mapping(target = "mealIds", source = "mealList", qualifiedByName = "mapMealIds")
+    ProductResponse toResponse(Product product);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "name", source = "productRequest.name")
+    @Mapping(target = "nutritionalValue100g", source = "nutritionalValue100g")
+    @Mapping(target = "mealList", source = "meals")
+    Product fromRequest(ProductRequest productRequest, NutritionalValue nutritionalValue100g,
+                        List<Meal> meals);
+
+    @Named("mapMealIds")
+    default List<Integer> mapMealIds(List<Meal> meals) {
+        if (meals == null || meals.isEmpty()) {
+            return List.of();
+        }
+        return meals.stream()
+                .filter(Objects::nonNull)
+                .map(Meal::getId)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+}
+
+
+Файл UserMapper.java
+package com.uni.project.mapper;
+
+import com.uni.project.model.dto.request.UserRequest;
+import com.uni.project.model.dto.response.UserResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.Note;
+import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.User;
+import java.util.List;
+import java.util.Objects;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+    @Mapping(target = "postIds", source = "posts", qualifiedByName = "mapPostIds")
+    @Mapping(target = "dailyGoalId", source = "dailyGoal.id")
+    @Mapping(target = "mealIds", source = "mealsPlan", qualifiedByName = "mapMealIds")
+    UserResponse toResponse(User user);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "name", source = "userRequest.name")
+    @Mapping(target = "password", source = "userRequest.password")
+    @Mapping(target = "email", source = "userRequest.email")
+    @Mapping(target = "measurements", source = "userRequest.measurements")
+    @Mapping(target = "dailyGoal", source = "dailyGoal")
+    @Mapping(target = "mealsPlan", source = "meals")
+    @Mapping(target = "posts", source = "posts")
+    User fromRequest(UserRequest userRequest, NutritionalValue dailyGoal,
+                     List<Meal> meals, List<Note> posts);
+
+    @Named("mapMealIds")
+    default List<Integer> mapMealIds(List<Meal> meals) {
+        if (meals == null || meals.isEmpty()) {
+            return List.of();
+        }
+        return meals.stream()
+                .filter(Objects::nonNull)
+                .map(Meal::getId)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    @Named("mapPostIds")
+    default List<Integer> mapPostIds(List<Note> notes) {
+        if (notes == null || notes.isEmpty()) {
+            return List.of();
+        }
+        return notes.stream()
+                .filter(Objects::nonNull)
+                .map(Note::getId)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+}
+
+
+Файл MealRequest.java
+package com.uni.project.model.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class MealRequest {
+    @NotBlank
+    private String name;
+
+    private Integer totalNutritionalId;
+
+    private Integer authorId;
+
+    private List<Integer> productIds;
+
+    private Integer recipeId;
+}
+
+
+Файл NoteRequest.java
+package com.uni.project.model.dto.request;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class NoteRequest {
+    @NotNull
+    private Integer userId;
+
+    private Integer mealId;
+
+    @NotNull
+    private LocalDate date;
+
+    @NotEmpty
+    private List<String> notes;
+}
+
+
+Файл NutritionalValueRequest.java
+package com.uni.project.model.dto.request;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class NutritionalValueRequest {
+    @NotNull
+    @PositiveOrZero
+    private Double calories;
+
+    @NotNull
+    @PositiveOrZero
+    private Double proteins;
+
+    @NotNull
+    @PositiveOrZero
+    private Double fats;
+
+    @NotNull
+    @PositiveOrZero
+    private Double carbohydrates;
+
+    private Integer ownerId;
+
+    private Integer productId;
+
+    private Integer mealId;
+}
+
+
+Файл ProductRequest.java
+package com.uni.project.model.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProductRequest {
+    @NotBlank
+    private String name;
+
+    @NotNull
+    private Integer nutritionalValue100gId;
+
+    private List<Integer> mealIds;
+}
+
+
+Файл UserCompositeRequest.java
+package com.uni.project.model.dto.request;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserCompositeRequest extends UserRequest {
+    @NotNull
+    @PositiveOrZero
+    private Double dailyGoalCalories;
+
+    @NotNull
+    @PositiveOrZero
+    private Double dailyGoalProteins;
+
+    @NotNull
+    @PositiveOrZero
+    private Double dailyGoalFats;
+
+    @NotNull
+    @PositiveOrZero
+    private Double dailyGoalCarbohydrates;
+
+    @NotNull
+    private LocalDate noteDate;
+
+    @NotNull
+    private List<String> noteTexts;
+
+    private boolean failAfterUser;
+}
+
+
+Файл UserMeasurementsRequest.java
+package com.uni.project.model.dto.request;
+
+import com.uni.project.model.entity.BodyParameters;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserMeasurementsRequest {
+    @NotNull
+    @Valid
+    private BodyParameters measurements;
+}
+
+
+Файл UserRequest.java
+package com.uni.project.model.dto.request;
+
+import com.uni.project.model.entity.BodyParameters;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserRequest {
+    @NotBlank
+    private String name;
+
+    @NotBlank
+    private String password;
+
+    @NotBlank
+    @Email
+    private String email;
+
+    @NotNull
+    @Valid
+    private BodyParameters measurements;
+
+    private Integer dailyGoalId;
+
+    private List<Integer> mealIds;
+
+    private List<Integer> postIds;
+}
+
+
+Файл MealResponse.java
+package com.uni.project.model.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class MealResponse {
+    private Integer id;
+
+    private String name;
+
+    private Integer totalNutritionalId;
+
+    private Integer authorId;
+
+    private List<Integer> productIds;
+
+    private Integer recipeId;
+}
+
+
+Файл NoteResponse.java
+package com.uni.project.model.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class NoteResponse {
+    private Integer id;
+
+    private Integer userId;
+
+    private Integer mealId;
+
+    private LocalDate date;
+
+    private List<String> notes;
+}
+
+
+Файл NutritionalValueResponse.java
+package com.uni.project.model.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class NutritionalValueResponse {
+    private Integer id;
+
+    private Double calories;
+
+    private Double proteins;
+
+    private Double fats;
+
+    private Double carbohydrates;
+
+    private Integer ownerId;
+
+    private Integer productId;
+
+    private Integer mealId;
+}
+
+
+Файл ProductResponse.java
+package com.uni.project.model.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProductResponse {
+    private Integer id;
+
+    private String name;
+
+    private Integer nutritionalValue100gId;
+
+    private List<Integer> mealIds;
+}
+
+
+Файл UserResponse.java
+package com.uni.project.model.dto.response;
+
+import com.uni.project.model.entity.BodyParameters;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserResponse {
+    private Integer id;
+
+    private String name;
+
+    private String email;
+
+    private BodyParameters measurements;
+
+    private Integer dailyGoalId;
+
+    private List<Integer> mealIds;
+
+    private List<Integer> postIds;
+}
+
+
+Файл BodyParameters.java
+package com.uni.project.model.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class BodyParameters {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @NotNull
+    private Sex sex;
+
+    @Column
+    @NotNull
+    @Positive
+    private Double weight;
+
+    @Column
+    @NotNull
+    @Positive
+    private Double height;
+
+    @Column
+    @NotNull
+    @Positive
+    private Integer age;
+
+    @Column
+    @PositiveOrZero
+    private Double chest;
+
+    @Column
+    @PositiveOrZero
+    private Double waist;
+
+    @Column
+    @PositiveOrZero
+    private Double hips;
+}
+
+
+Файл Meal.java
+package com.uni.project.model.entity;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Entity
+@Table
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Meal {
+    @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
+    private Integer id;
+
+    @Column(nullable = false, length = 50)
+    private String name;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
+    private NutritionalValue totalNutritional;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    private User author;
+
+    @ManyToMany(mappedBy = "mealList", fetch = FetchType.LAZY)
+    private List<Product> productList;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
+    private Note recipe;
+}
+
+
+Файл Note.java
+package com.uni.project.model.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Entity
+@Table
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Note {
+    @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn
+    private User user;
+
+    @OneToOne(mappedBy = "recipe", fetch = FetchType.EAGER)
+    private Meal meal;
+
+    @Column
+    private LocalDate date;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "note_notes",
+            joinColumns = @JoinColumn(name = "note_id")
+    )
+    @Column(name = "note_text", nullable = false)
+    private List<String> notes;
+}
+
+
+Файл NutritionalValue.java
+package com.uni.project.model.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@Table
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class NutritionalValue {
+    @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
+    private Integer id;
+
+    @Column(nullable = false)
+    private Double calories;
+
+    @Column(nullable = false)
+    private Double proteins;
+
+    @Column(nullable = false)
+    private Double fats;
+
+    @Column(nullable = false)
+    private Double carbohydrates;
+
+    @OneToOne(mappedBy = "dailyGoal", fetch = FetchType.EAGER)
+    private User owner;
+
+    @OneToOne(mappedBy = "nutritionalValue100g", fetch = FetchType.EAGER)
+    private Product product;
+
+    @OneToOne(mappedBy = "totalNutritional", fetch = FetchType.EAGER)
+    private Meal meal;
+}
+
+
+Файл Product.java
+package com.uni.project.model.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Entity
+@Table(name = "products")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Product {
+    @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @Column(name = "name", nullable = false, length = 50)
+    private String name;
+
+    @OneToOne
+    @JoinColumn(name = "nutritional_value_100g_id")
+    private NutritionalValue nutritionalValue100g;
+
+    @ManyToMany
+    @JoinTable(
+            name = "meals_lists",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "meal_id")
+    )
+    private List<Meal> mealList;
+}
+
+
+Файл Sex.java
+package com.uni.project.model.entity;
+
+public enum Sex {
+    FEMALE,
+    MALE
+}
+
+
+Файл User.java
+package com.uni.project.model.entity;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
+
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class User {
+    @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @Column(name = "name", nullable = false, length = 50)
+    private String name;
+
+    @Column(name = "password", nullable = false, length = 50)
+    private String password;
+
+    @Column(name = "email", nullable = false, length = 50)
+    private String email;
+
+    @Embedded
+    private BodyParameters measurements;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "nutritional_values")
+    private NutritionalValue dailyGoal;
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Meal> mealsPlan;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Note> posts;
+}
+
+
+Файл MealRepository.java
+package com.uni.project.repository;
+
+import com.uni.project.model.entity.Meal;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface MealRepository extends JpaRepository<Meal, Integer> {
+    List<Meal> findAllByName(String name);
+
+    @Query("select m from Meal m where m.author.id = :authorId")
+    List<Meal> findAllByAuthorId(@Param("authorId") Integer authorId);
+
+    @Query("select m from Meal m where m.totalNutritional.id = :totalNutritionalId")
+    List<Meal> findAllByTotalNutritionalId(@Param("totalNutritionalId") Integer totalNutritionalId);
+
+    @Query("select distinct m from Meal m join m.productList p where p.id in :productIds")
+    List<Meal> findAllByProductIds(@Param("productIds") List<Integer> productIds);
+}
+
+
+Файл NoteRepository.java
+package com.uni.project.repository;
+
+import com.uni.project.model.entity.Note;
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface NoteRepository extends JpaRepository<Note, Integer> {
+    List<Note> findAllByDate(LocalDate date);
+
+    @Query("select n from Note n where n.user.id = :userId ")
+    List<Note> findAllByUserId(@Param("userId") Integer userId);
+
+    @Query(" select n from Note n where n.meal.id = :mealId ")
+    List<Note> findAllByMealId(@Param("mealId") Integer mealId);
+}
+
+
+Файл NutritionalValueRepository.java
+package com.uni.project.repository;
+
+import com.uni.project.model.entity.NutritionalValue;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface NutritionalValueRepository extends JpaRepository<NutritionalValue, Integer> {
+}
+
+
+Файл ProductRepository.java
+package com.uni.project.repository;
+
+import com.uni.project.model.entity.Product;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ProductRepository extends JpaRepository<Product, Integer> {
+    List<Product> findAllByName(String name);
+
+    @Query("select distinct p from Product p join p.mealList m where m.id = :mealId")
+    List<Product> findAllByMealId(@Param("mealId") Integer mealId);
+}
+
+
+Файл UserRepository.java
+package com.uni.project.repository;
+
+import com.uni.project.model.entity.User;
+import com.uni.project.model.entity.Sex;
+import java.util.List;
+import org.jspecify.annotations.NullMarked;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Integer> {
+    List<User> findAllByName(String name);
+
+    @Query("select u from User u where u.measurements.sex = :sex")
+    List<User> findAllBySex(@Param("sex") Sex sex);
+
+    @Query("select u from User u where u.measurements.age = :age")
+    List<User> findAllByAge(@Param("age") Integer age);
+
+    @Query("SELECT DISTINCT users FROM User users LEFT JOIN FETCH users.mealsPlan")
+    List<User> findAllWithMeals();
+
+    @Override
+    @EntityGraph(attributePaths = {"posts"})
+    @NullMarked
+    List<User> findAll();
+}
+
+
+Файл MealService.java
+package com.uni.project.service;
+
+import com.uni.project.model.dto.request.MealRequest;
+import com.uni.project.model.dto.response.MealResponse;
+
+import java.util.List;
+
+public interface MealService {
+    MealResponse mealCreate(MealRequest mealRequest);
+
+    MealResponse getMealById(Integer id);
+
+    List<MealResponse> getAllMeals();
+
+    MealResponse mealUpdate(Integer id, MealRequest mealRequest);
+
+    void mealDelete(Integer id);
+
+    List<MealResponse> getAllMealsByName(String nameSearch);
+
+    List<MealResponse> getAllMealsByAuthorId(Integer authorId);
+
+    List<MealResponse> getAllMealsByNutritionalValueId(Integer nutritionalValueId);
+
+    List<MealResponse> getAllMealsByProductIds(List<Integer> productIds);
+}
+
+
+Файл NoteService.java
+package com.uni.project.service;
+
+import com.uni.project.model.dto.request.NoteRequest;
+import com.uni.project.model.dto.response.NoteResponse;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public interface NoteService {
+    NoteResponse noteCreate(NoteRequest noteRequest);
+
+    NoteResponse getNoteById(Integer id);
+
+    List<NoteResponse> getAllNotes();
+
+    NoteResponse noteUpdate(Integer id, NoteRequest noteRequest);
+
+    void noteDelete(Integer id);
+
+    List<NoteResponse> getAllNotesByUserId(Integer userId);
+
+    List<NoteResponse> getAllNotesByDate(LocalDate dateSearch);
+
+    List<NoteResponse> getAllNotesByMealId(Integer mealId);
+}
+
+
+Файл NutritionalValueService.java
+package com.uni.project.service;
+
+
+import com.uni.project.model.dto.request.NutritionalValueRequest;
+import com.uni.project.model.dto.response.NutritionalValueResponse;
+
+import java.util.List;
+
+public interface NutritionalValueService {
+    NutritionalValueResponse nutritionalValueCreate(NutritionalValueRequest nutritionalValueRequest);
+
+    NutritionalValueResponse getNutritionalValueById(Integer id);
+
+    List<NutritionalValueResponse> getAllNutritionalValues();
+
+    NutritionalValueResponse nutritionalValueUpdate(Integer id, NutritionalValueRequest nutritionalValueRequest);
+
+    void nutritionalValueDelete(Integer id);
+}
+
+
+Файл ProductService.java
+package com.uni.project.service;
+
+import com.uni.project.model.dto.request.ProductRequest;
+import com.uni.project.model.dto.response.ProductResponse;
+
+import java.util.List;
+
+public interface ProductService {
+    ProductResponse productCreate(ProductRequest productRequest);
+
+    ProductResponse getProductById(Integer id);
+
+    List<ProductResponse> getAllProducts();
+
+    ProductResponse productUpdate(Integer id, ProductRequest productRequest);
+
+    void productDelete(Integer id);
+
+    List<ProductResponse> getAllProductsByName(String nameSearch);
+
+    List<ProductResponse> getAllProductsByMealId(Integer mealId);
+}
+
+
+Файл UserService.java
+package com.uni.project.service;
+
+import com.uni.project.model.dto.request.UserRequest;
+import com.uni.project.model.dto.request.UserCompositeRequest;
+import com.uni.project.model.dto.request.UserMeasurementsRequest;
+import com.uni.project.model.dto.response.NutritionalValueResponse;
+import com.uni.project.model.dto.response.UserResponse;
+import com.uni.project.model.entity.Sex;
+
+import java.util.List;
+
+public interface UserService {
+    UserResponse userCreate(UserRequest userRequest);
+
+    UserResponse getUserById(Integer id);
+
+    List<UserResponse> getAllUsers();
+
+    UserResponse userUpdate(Integer id, UserRequest userRequest);
+
+    void userDelete(Integer id);
+
+    UserResponse measurementsUpdate(Integer id, UserMeasurementsRequest userRequest);
+
+    List<UserResponse> getAllUsersByName(String nameSearch);
+
+    List<UserResponse> getAllUsersBySex(Sex sexSearch);
+
+    List<UserResponse> getAllUsersByAge(Integer ageSearch);
+
+    NutritionalValueResponse calculateNutritionalValueForUser(Integer id);
+
+    List<UserResponse> findAllWithMeals();
+
+    List<UserResponse> findAllWithNotes();
+
+    UserResponse createUserWithGoalAndNoteNoTx(UserCompositeRequest userRequest);
+
+    UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest);
+}
+
+
+Файл MealServiceImpl.java
+package com.uni.project.service.impl;
+
+import com.uni.project.exception.MealException;
+import com.uni.project.mapper.MealMapper;
+import com.uni.project.model.dto.request.MealRequest;
+import com.uni.project.model.dto.response.MealResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.Note;
+import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.Product;
+import com.uni.project.model.entity.User;
+import com.uni.project.repository.MealRepository;
+import com.uni.project.repository.NoteRepository;
+import com.uni.project.repository.NutritionalValueRepository;
+import com.uni.project.repository.ProductRepository;
+import com.uni.project.repository.UserRepository;
+import com.uni.project.service.MealService;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+@Transactional(readOnly = true)
+public class MealServiceImpl implements MealService {
+    private final MealRepository mealRepository;
+    private final UserRepository userRepository;
+    private final NutritionalValueRepository nutritionalValueRepository;
+    private final ProductRepository productRepository;
+    private final NoteRepository noteRepository;
+
+    private final MealMapper mealMapper;
+
+    @Override
+    @Transactional
+    public MealResponse mealCreate(MealRequest mealRequest) {
+        User author = getAuthor(mealRequest.getAuthorId());
+        NutritionalValue totalNutritional = getTotalNutritional(mealRequest.getTotalNutritionalId());
+        List<Product> products = getProducts(mealRequest.getProductIds());
+        Note recipe = getRecipe(mealRequest.getRecipeId());
+        Meal meal = mealRepository
+                .save(mealMapper.fromRequest(mealRequest, author, totalNutritional, products, recipe));
+
+        return mealMapper.toResponse(meal);
+    }
+
+    @Override
+    public MealResponse getMealById(Integer id) {
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new MealException("Meal not found bu Id"));
+
+        return mealMapper.toResponse(meal);
+    }
+
+    @Override
+    public List<MealResponse> getAllMeals() {
+        return toResponses(mealRepository.findAll());
+    }
+
+    @Override
+    @Transactional
+    public MealResponse mealUpdate(Integer id, MealRequest mealRequest) {
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new MealException("Meal not found by Id"));
+        User author = getAuthor(mealRequest.getAuthorId());
+        NutritionalValue totalNutritional = getTotalNutritional(mealRequest.getTotalNutritionalId());
+        List<Product> products = getProducts(mealRequest.getProductIds());
+        Note recipe = getRecipe(mealRequest.getRecipeId());
+        meal.setName(mealRequest.getName());
+        meal.setAuthor(author);
+        meal.setProductList(products);
+        meal.setTotalNutritional(totalNutritional);
+        meal.setRecipe(recipe);
+        mealRepository.save(meal);
+
+        return mealMapper.toResponse(meal);
+    }
+
+    @Override
+    @Transactional
+    public void mealDelete(Integer id) {
+        mealRepository.deleteById(id);
+    }
+
+    @Override
+    public List<MealResponse> getAllMealsByName(String nameSearch) {
+        return toResponses(mealRepository.findAllByName(nameSearch));
+    }
+
+    @Override
+    public List<MealResponse> getAllMealsByAuthorId(Integer authorId) {
+        return toResponses(mealRepository.findAllByAuthorId(authorId));
+    }
+
+    @Override
+    public List<MealResponse> getAllMealsByNutritionalValueId(Integer nutritionalValueId) {
+        return toResponses(mealRepository.findAllByTotalNutritionalId(nutritionalValueId));
+    }
+
+    @Override
+    public List<MealResponse> getAllMealsByProductIds(List<Integer> productIds) {
+        return toResponses(mealRepository.findAllByProductIds(productIds));
+    }
+
+    private List<MealResponse> toResponses(List<Meal> meals) {
+        return meals.stream()
+                .map(mealMapper::toResponse)
+                .toList();
+    }
+
+    private User getAuthor(Integer authorId) {
+        if (authorId == null) {
+            return null;
+        }
+        return userRepository.findById(authorId)
+                .orElseThrow(() -> new MealException("Author not found by Id"));
+    }
+
+    private NutritionalValue getTotalNutritional(Integer totalNutritionalId) {
+        if (totalNutritionalId == null) {
+            return null;
+        }
+        return nutritionalValueRepository.findById(totalNutritionalId)
+                .orElseThrow(() -> new MealException("Nutritional Value not found by Id"));
+    }
+
+    private Note getRecipe(Integer recipeId) {
+        if (recipeId == null) {
+            return null;
+        }
+        return noteRepository.findById(recipeId)
+                .orElseThrow(() -> new MealException("Recipe not found by Id"));
+    }
+
+    private List<Product> getProducts(List<Integer> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return List.of();
+        }
+        List<Product> products = productRepository.findAllById(productIds);
+        if (products.size() != productIds.size()) {
+            throw new MealException("Some products not found");
+        }
+        return products;
+    }
+}
+
+
+Файл NoteServiceImpl.java
+package com.uni.project.service.impl;
+
+import com.uni.project.exception.NoteException;
+import com.uni.project.mapper.NoteMapper;
+import com.uni.project.model.dto.request.NoteRequest;
+import com.uni.project.model.dto.response.NoteResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.Note;
+import com.uni.project.model.entity.User;
+import com.uni.project.repository.MealRepository;
+import com.uni.project.repository.NoteRepository;
+import com.uni.project.repository.UserRepository;
+import com.uni.project.service.NoteService;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+@Transactional(readOnly = true)
+public class NoteServiceImpl implements NoteService {
+    private final NoteRepository noteRepository;
+    private final UserRepository userRepository;
+    private final MealRepository mealRepository;
+
+    private final NoteMapper noteMapper;
+
+    @Override
+    @Transactional
+    public NoteResponse noteCreate(NoteRequest noteRequest) {
+        User user = getUser(noteRequest.getUserId());
+        Meal meal = getMeal(noteRequest.getMealId());
+        Note note = noteRepository
+                .save(noteMapper.fromRequest(noteRequest, user, meal));
+
+        return noteMapper.toResponse(note);
+    }
+
+    @Override
+    public NoteResponse getNoteById(Integer id) {
+        Note note = noteRepository.findById(id)
+                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+
+        return noteMapper.toResponse(note);
+    }
+
+    @Override
+    public List<NoteResponse> getAllNotes() {
+        return toResponses(noteRepository.findAll());
+    }
+
+    @Override
+    @Transactional
+    public NoteResponse noteUpdate(Integer id, NoteRequest noteRequest) {
+        Note note = noteRepository.findById(id)
+                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+        User user = getUser(noteRequest.getUserId());
+        Meal meal = getMeal(noteRequest.getMealId());
+        note.setUser(user);
+        note.setMeal(meal);
+        note.setDate(noteRequest.getDate());
+        note.setNotes(noteRequest.getNotes());
+        noteRepository.save(note);
+
+        return noteMapper.toResponse(note);
+    }
+
+    @Override
+    @Transactional
+    public void noteDelete(Integer id) {
+        noteRepository.deleteById(id);
+    }
+
+    @Override
+    public List<NoteResponse> getAllNotesByUserId(Integer userId) {
+        return toResponses(noteRepository.findAllByUserId(userId));
+    }
+
+    @Override
+    public List<NoteResponse> getAllNotesByDate(LocalDate dateSearch) {
+        return toResponses(noteRepository.findAllByDate(dateSearch));
+    }
+
+    @Override
+    public List<NoteResponse> getAllNotesByMealId(Integer mealId) {
+        return toResponses(noteRepository.findAllByMealId(mealId));
+    }
+
+    private List<NoteResponse> toResponses(List<Note> notes) {
+        return notes.stream()
+                .map(noteMapper::toResponse)
+                .toList();
+    }
+
+    private User getUser(Integer userId) {
+        if (userId == null) {
+            return null;
+        }
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NoteException("User not found by Id"));
+    }
+
+    private Meal getMeal(Integer mealId) {
+        if (mealId == null) {
+            return null;
+        }
+        return mealRepository.findById(mealId)
+                .orElseThrow(() -> new NoteException("Meal not found by Id"));
+    }
+}
+
+
+Файл NutritionalValueServiceImpl.java
+package com.uni.project.service.impl;
+
+import com.uni.project.exception.NutritionalValueException;
+import com.uni.project.mapper.NutritionalValueMapper;
+import com.uni.project.model.dto.request.NutritionalValueRequest;
+import com.uni.project.model.dto.response.NutritionalValueResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.Product;
+import com.uni.project.model.entity.User;
+import com.uni.project.repository.MealRepository;
+import com.uni.project.repository.NutritionalValueRepository;
+import com.uni.project.repository.ProductRepository;
+import com.uni.project.repository.UserRepository;
+import com.uni.project.service.NutritionalValueService;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+@Transactional(readOnly = true)
+public class NutritionalValueServiceImpl implements NutritionalValueService {
+    private final NutritionalValueRepository nutritionalValueRepository;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final MealRepository mealRepository;
+
+    private final NutritionalValueMapper nutritionalValueMapper;
+
+    @Override
+    @Transactional
+    public NutritionalValueResponse nutritionalValueCreate(NutritionalValueRequest nutritionalValueRequest) {
+        User owner = getOwner(nutritionalValueRequest.getOwnerId());
+        Product product = getProduct(nutritionalValueRequest.getProductId());
+        Meal meal = getMeal(nutritionalValueRequest.getMealId());
+        NutritionalValue nutritionalValue = nutritionalValueRepository
+                .save(nutritionalValueMapper.fromRequest(nutritionalValueRequest, owner, product, meal));
+
+        return nutritionalValueMapper.toResponse(nutritionalValue);
+    }
+
+    @Override
+    public NutritionalValueResponse getNutritionalValueById(Integer id) {
+        NutritionalValue nutritionalValue = nutritionalValueRepository.findById(id)
+                .orElseThrow(() -> new NutritionalValueException("Nutritional Value not found by Id"));
+
+        return nutritionalValueMapper.toResponse(nutritionalValue);
+    }
+
+    @Override
+    public List<NutritionalValueResponse> getAllNutritionalValues() {
+        return toResponses(nutritionalValueRepository.findAll());
+    }
+
+    @Override
+    @Transactional
+    public NutritionalValueResponse nutritionalValueUpdate(Integer id,
+                                                           NutritionalValueRequest nutritionalValueRequest) {
+        NutritionalValue nutritionalValue = nutritionalValueRepository.findById(id)
+                .orElseThrow(() -> new NutritionalValueException("Nutritional Value not found by Id"));
+        User owner = getOwner(nutritionalValueRequest.getOwnerId());
+        Product product = getProduct(nutritionalValueRequest.getProductId());
+        Meal meal = getMeal(nutritionalValueRequest.getMealId());
+        nutritionalValue.setCalories(nutritionalValueRequest.getCalories());
+        nutritionalValue.setProteins(nutritionalValueRequest.getProteins());
+        nutritionalValue.setFats(nutritionalValueRequest.getFats());
+        nutritionalValue.setCarbohydrates(nutritionalValueRequest.getCarbohydrates());
+        nutritionalValue.setOwner(owner);
+        nutritionalValue.setProduct(product);
+        nutritionalValue.setMeal(meal);
+        nutritionalValueRepository.save(nutritionalValue);
+
+        return nutritionalValueMapper.toResponse(nutritionalValue);
+    }
+
+    @Override
+    @Transactional
+    public void nutritionalValueDelete(Integer id) {
+        nutritionalValueRepository.deleteById(id);
+    }
+
+    private List<NutritionalValueResponse> toResponses(List<NutritionalValue> values) {
+        return values.stream()
+                .map(nutritionalValueMapper::toResponse)
+                .toList();
+    }
+
+    private User getOwner(Integer ownerId) {
+        if (ownerId == null) {
+            return null;
+        }
+        return userRepository.findById(ownerId)
+                .orElseThrow(() -> new NutritionalValueException("Owner not found by Id"));
+    }
+
+    private Product getProduct(Integer productId) {
+        if (productId == null) {
+            return null;
+        }
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new NutritionalValueException("Product not found by Id"));
+    }
+
+    private Meal getMeal(Integer mealId) {
+        if (mealId == null) {
+            return null;
+        }
+        return mealRepository.findById(mealId)
+                .orElseThrow(() -> new NutritionalValueException("Meal not found by Id"));
+    }
+}
+
+
+Файл ProductServiceImpl.java
+package com.uni.project.service.impl;
+
+import com.uni.project.exception.ProductException;
+import com.uni.project.mapper.ProductMapper;
+import com.uni.project.model.dto.request.ProductRequest;
+import com.uni.project.model.dto.response.ProductResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.Product;
+import com.uni.project.repository.MealRepository;
+import com.uni.project.repository.NutritionalValueRepository;
+import com.uni.project.repository.ProductRepository;
+import com.uni.project.service.ProductService;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+@Transactional(readOnly = true)
+public class ProductServiceImpl implements ProductService {
+    private final ProductRepository productRepository;
+    private final NutritionalValueRepository nutritionalValueRepository;
+    private final MealRepository mealRepository;
+
+    private final ProductMapper productMapper;
+
+    @Override
+    @Transactional
+    public ProductResponse productCreate(ProductRequest productRequest) {
+        NutritionalValue nutritionalValue100g = getNutritionalValue(productRequest.getNutritionalValue100gId());
+        List<Meal> meals = getMeals(productRequest.getMealIds());
+        Product product = productRepository
+                .save(productMapper.fromRequest(productRequest, nutritionalValue100g, meals));
+
+        return productMapper.toResponse(product);
+    }
+
+    @Override
+    public ProductResponse getProductById(Integer id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductException("Product not found by Id"));
+
+        return productMapper.toResponse(product);
+    }
+
+    @Override
+    public List<ProductResponse> getAllProducts() {
+        return toResponses(productRepository.findAll());
+    }
+
+    @Override
+    @Transactional
+    public ProductResponse productUpdate(Integer id, ProductRequest productRequest) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductException("Product not found by Id"));
+        NutritionalValue nutritionalValue100g = getNutritionalValue(productRequest.getNutritionalValue100gId());
+        List<Meal> meals = getMeals(productRequest.getMealIds());
+        product.setName(productRequest.getName());
+        product.setNutritionalValue100g(nutritionalValue100g);
+        product.setMealList(meals);
+        productRepository.save(product);
+
+        return productMapper.toResponse(product);
+    }
+
+    @Override
+    @Transactional
+    public void productDelete(Integer id) {
+        productRepository.deleteById(id);
+    }
+
+    @Override
+    public List<ProductResponse> getAllProductsByName(String nameSearch) {
+        return toResponses(productRepository.findAllByName(nameSearch));
+    }
+
+    @Override
+    public List<ProductResponse> getAllProductsByMealId(Integer mealId) {
+        return toResponses(productRepository.findAllByMealId(mealId));
+    }
+
+    private List<ProductResponse> toResponses(List<Product> products) {
+        return products.stream()
+                .map(productMapper::toResponse)
+                .toList();
+    }
+
+    private NutritionalValue getNutritionalValue(Integer nutritionalValueId) {
+        if (nutritionalValueId == null) {
+            return null;
+        }
+        return nutritionalValueRepository.findById(nutritionalValueId)
+                .orElseThrow(() -> new ProductException("Nutritional Value not found by Id"));
+    }
+
+    private List<Meal> getMeals(List<Integer> mealIds) {
+        if (mealIds == null || mealIds.isEmpty()) {
+            return List.of();
+        }
+        List<Meal> meals = mealRepository.findAllById(mealIds);
+        if (meals.size() != mealIds.size()) {
+            throw new ProductException("Some meals not found");
+        }
+        return meals;
+    }
+}
+
+
+Файл UserServiceImpl.java
+package com.uni.project.service.impl;
+
+import com.uni.project.exception.UserException;
+import com.uni.project.mapper.NutritionalValueMapper;
+import com.uni.project.mapper.UserMapper;
+import com.uni.project.model.dto.request.UserCompositeRequest;
+import com.uni.project.model.dto.request.UserMeasurementsRequest;
+import com.uni.project.model.dto.request.UserRequest;
+import com.uni.project.model.dto.response.NutritionalValueResponse;
+import com.uni.project.model.dto.response.UserResponse;
+import com.uni.project.model.entity.BodyParameters;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.Note;
+import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.Sex;
+import com.uni.project.model.entity.User;
+import com.uni.project.repository.MealRepository;
+import com.uni.project.repository.NoteRepository;
+import com.uni.project.repository.NutritionalValueRepository;
+import com.uni.project.repository.UserRepository;
+import com.uni.project.service.UserService;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@AllArgsConstructor
+@Transactional(readOnly = true)
+public class UserServiceImpl implements UserService {
+    private final UserRepository userRepository;
+    private final MealRepository mealRepository;
+    private final NoteRepository noteRepository;
+    private final NutritionalValueRepository nutritionalValueRepository;
+    private final UserMapper userMapper;
+    private final NutritionalValueMapper nutritionalValueMapper;
+    private static final String USER_FAIL_MESSAGE = "User not found by Id";
+
+    @Override
+    @Transactional
+    public UserResponse userCreate(UserRequest userRequest) {
+        NutritionalValue dailyGoal = getDailyGoal(userRequest.getDailyGoalId());
+        List<Meal> meals = getMeals(userRequest.getMealIds());
+        List<Note> posts = getPosts(userRequest.getPostIds());
+        User user = userRepository.save(userMapper.fromRequest(userRequest, dailyGoal, meals, posts));
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public UserResponse getUserById(Integer id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return toResponses(userRepository.findAll());
+    }
+
+    @Override
+    @Transactional
+    public UserResponse userUpdate(Integer id, UserRequest userRequest) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+        NutritionalValue dailyGoal = getDailyGoal(userRequest.getDailyGoalId());
+        List<Meal> meals = getMeals(userRequest.getMealIds());
+        List<Note> posts = getPosts(userRequest.getPostIds());
+        user.setName(userRequest.getName());
+        user.setPassword(userRequest.getPassword());
+        user.setEmail(userRequest.getEmail());
+        user.setMeasurements(userRequest.getMeasurements());
+        user.setDailyGoal(dailyGoal);
+        user.setMealsPlan(meals);
+        user.setPosts(posts);
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public void userDelete(Integer id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse measurementsUpdate(Integer id, UserMeasurementsRequest userRequest) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+        user.setMeasurements(userRequest.getMeasurements());
+        userRepository.save(user);
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public List<UserResponse> getAllUsersByName(String nameSearch) {
+        return toResponses(userRepository.findAllByName(nameSearch));
+    }
+
+    @Override
+    public List<UserResponse> getAllUsersBySex(Sex sexSearch) {
+        return toResponses(userRepository.findAllBySex(sexSearch));
+    }
+
+    @Override
+    public List<UserResponse> getAllUsersByAge(Integer ageSearch) {
+        return toResponses(userRepository.findAllByAge(ageSearch));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public NutritionalValueResponse calculateNutritionalValueForUser(Integer idUser) {
+        User user = userRepository.findById(idUser).
+                orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+        BodyParameters measurements = user.getMeasurements();
+        if (measurements == null
+                || measurements.getWeight() == null
+                || measurements.getHeight() == null
+                || measurements.getAge() == null
+                || measurements.getSex() == null) {
+            throw new UserException("User measurements are incomplete for nutritional value calculation");
+        }
+        NutritionalValue goalNutritionalValue = getNutritionalValue(measurements);
+        user.setDailyGoal(goalNutritionalValue);
+        userRepository.save(user);
+        nutritionalValueRepository.save(goalNutritionalValue);
+
+        return nutritionalValueMapper.toResponse(goalNutritionalValue);
+    }
+
+    private static @NonNull NutritionalValue getNutritionalValue(BodyParameters measurements) {
+        NutritionalValue goalNutritionalValue = new NutritionalValue();
+        double baseValues = (measurements.getWeight() * 10
+                + measurements.getHeight() * 6.25
+                - measurements.getAge() * 5);
+        baseValues = (measurements.getSex() == Sex.FEMALE)
+                ? (baseValues - 161)
+                : (baseValues + 5);
+        goalNutritionalValue.setCalories(baseValues);
+        goalNutritionalValue.setProteins(baseValues * 0.25);
+        goalNutritionalValue.setFats(baseValues * 0.2);
+        goalNutritionalValue.setCarbohydrates(baseValues * 0.55);
+        return goalNutritionalValue;
+    }
+
+    @Override
+    public List<UserResponse> findAllWithMeals() {
+        List<User> userList = userRepository.findAllWithMeals();
+        return toResponses(userList);
+    }
+
+    @Override
+    public List<UserResponse> findAllWithNotes() {
+        List<User> userList = userRepository.findAll();
+        return toResponses(userList);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public UserResponse createUserWithGoalAndNoteNoTx(UserCompositeRequest userRequest) {
+        return createCompositeInternal(userRequest);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest) {
+        return createCompositeInternal(userRequest);
+    }
+
+    private List<UserResponse> toResponses(List<User> users) {
+        return users.stream()
+                .map(userMapper::toResponse)
+                .toList();
+    }
+
+    private NutritionalValue getDailyGoal(Integer dailyGoalId) {
+        if (dailyGoalId == null) {
+            return null;
+        }
+        return nutritionalValueRepository.findById(dailyGoalId)
+                .orElseThrow(() -> new UserException("Nutritional Value not found by Id"));
+    }
+
+    private List<Meal> getMeals(List<Integer> mealIds) {
+        if (mealIds == null || mealIds.isEmpty()) {
+            return List.of();
+        }
+        List<Meal> meals = mealRepository.findAllById(mealIds);
+        if (meals.size() != mealIds.size()) {
+            throw new UserException("Some meals not found");
+        }
+        return meals;
+    }
+
+    private List<Note> getPosts(List<Integer> postIds) {
+        if (postIds == null || postIds.isEmpty()) {
+            return List.of();
+        }
+        List<Note> posts = noteRepository.findAllById(postIds);
+        if (posts.size() != postIds.size()) {
+            throw new UserException("Some posts not found");
+        }
+        return posts;
+    }
+
+    private UserResponse createCompositeInternal(UserCompositeRequest request) {
+        NutritionalValue dailyGoal = new NutritionalValue();
+        dailyGoal.setCalories(request.getDailyGoalCalories());
+        dailyGoal.setProteins(request.getDailyGoalProteins());
+        dailyGoal.setFats(request.getDailyGoalFats());
+        dailyGoal.setCarbohydrates(request.getDailyGoalCarbohydrates());
+
+        User user = userRepository.save(
+                userMapper.fromRequest(request, dailyGoal, List.of(), List.of())
+        );
+
+        user.setDailyGoal(dailyGoal);
+        userRepository.save(user);
+
+        if (request.isFailAfterUser()) {
+            throw new UserException("Forced error after saving user and daily goal");
+        }
+
+        Note note = new Note();
+        note.setUser(user);
+        note.setDate(request.getNoteDate());
+        note.setNotes(request.getNoteTexts());
+        noteRepository.save(note);
+
+        return userMapper.toResponse(user);
+    }
+}
+
+
+Файл ProjectApplicationTests.java
+package com.uni.project;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+
+@Import(TestcontainersConfiguration.class)
+@SpringBootTest
+class ProjectApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
+
+
+Файл TestProjectApplication.java
+package com.uni.project;
+
+import org.springframework.boot.SpringApplication;
+
+public class TestProjectApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.from(ProjectApplication::main).with(TestcontainersConfiguration.class).run(args);
+	}
+
+}
+
+
+Файл TestcontainersConfiguration.java
+package com.uni.project;
+
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
+
+@TestConfiguration(proxyBeanMethods = false)
+class TestcontainersConfiguration {
+
+	@Bean
+	@ServiceConnection
+	PostgreSQLContainer postgresContainer() {
+		return new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
+	}
+
+}
+
