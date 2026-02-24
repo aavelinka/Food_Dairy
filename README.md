@@ -1,8 +1,5 @@
 # Food Diary API
 
-**Author:** Klimova Avelina  
-**Group:** 450502
-
 ## Required links
 
 - [SonarCloud analysis](https://sonarcloud.io/summary/overall?id=aavelinka_Food_Dairy&branch=main)

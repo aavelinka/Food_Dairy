@@ -26,8 +26,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProductById
-            (@PathVariable Integer id) {
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable Integer id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
@@ -37,14 +36,14 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponse> productCreate
-            (@Valid @RequestBody ProductRequest productRequest) {
+    public ResponseEntity<ProductResponse> productCreate(@Valid @RequestBody
+                                                         ProductRequest productRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.productCreate(productRequest));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> productUpdate
-            (@PathVariable Integer id, @Valid @RequestBody ProductRequest productRequest) {
+    public ResponseEntity<ProductResponse> productUpdate(@PathVariable Integer id,
+                                                         @Valid @RequestBody ProductRequest productRequest) {
         return ResponseEntity.ok(productService.productUpdate(id, productRequest));
     }
 
@@ -55,8 +54,7 @@ public class ProductController {
     }
 
     @GetMapping("/name")
-    public ResponseEntity<List<ProductResponse>> getAllProductsByName
-            (@RequestParam String nameSearch) {
+    public ResponseEntity<List<ProductResponse>> getAllProductsByName(@RequestParam String nameSearch) {
         return ResponseEntity.ok(productService.getAllProductsByName(nameSearch));
     }
 
