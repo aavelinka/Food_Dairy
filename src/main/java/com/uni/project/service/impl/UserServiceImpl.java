@@ -19,6 +19,7 @@ import com.uni.project.repository.NoteRepository;
 import com.uni.project.repository.NutritionalValueRepository;
 import com.uni.project.repository.UserRepository;
 import com.uni.project.service.UserService;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -73,8 +74,8 @@ public class UserServiceImpl implements UserService {
         user.setEmail(userRequest.getEmail());
         user.setMeasurements(userRequest.getMeasurements());
         user.setDailyGoal(dailyGoal);
-        user.setMealsPlan(meals);
-        user.setPosts(posts);
+        replaceMeals(user, meals);
+        replacePosts(user, posts);
         userRepository.save(user);
         return userMapper.toResponse(user);
     }
@@ -204,6 +205,38 @@ public class UserServiceImpl implements UserService {
             throw new UserException("Some posts not found");
         }
         return posts;
+    }
+
+    private void replaceMeals(User user, List<Meal> meals) {
+        if (user.getMealsPlan() == null) {
+            user.setMealsPlan(new ArrayList<>());
+        }
+
+        for (Meal meal : user.getMealsPlan()) {
+            meal.setAuthor(null);
+        }
+        user.getMealsPlan().clear();
+
+        for (Meal meal : meals) {
+            meal.setAuthor(user);
+            user.getMealsPlan().add(meal);
+        }
+    }
+
+    private void replacePosts(User user, List<Note> posts) {
+        if (user.getPosts() == null) {
+            user.setPosts(new ArrayList<>());
+        }
+
+        for (Note note : user.getPosts()) {
+            note.setUser(null);
+        }
+        user.getPosts().clear();
+
+        for (Note note : posts) {
+            note.setUser(user);
+            user.getPosts().add(note);
+        }
     }
 
     private UserResponse createCompositeInternal(UserCompositeRequest request) {
