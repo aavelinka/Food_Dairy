@@ -37,7 +37,8 @@ public class NutritionalValueServiceImpl implements NutritionalValueService {
         Product product = getProduct(nutritionalValueRequest.getProductId());
         Meal meal = getMeal(nutritionalValueRequest.getMealId());
         NutritionalValue nutritionalValue = nutritionalValueRepository
-                .save(nutritionalValueMapper.fromRequest(nutritionalValueRequest, owner, product, meal));
+                .save(nutritionalValueMapper.fromRequest(nutritionalValueRequest, product, meal));
+        assignDailyGoalIfRequested(owner, nutritionalValue);
 
         return nutritionalValueMapper.toResponse(nutritionalValue);
     }
@@ -68,10 +69,10 @@ public class NutritionalValueServiceImpl implements NutritionalValueService {
         nutritionalValue.setProteins(nutritionalValueRequest.getProteins());
         nutritionalValue.setFats(nutritionalValueRequest.getFats());
         nutritionalValue.setCarbohydrates(nutritionalValueRequest.getCarbohydrates());
-        nutritionalValue.setOwner(owner);
         nutritionalValue.setProduct(product);
         nutritionalValue.setMeal(meal);
         nutritionalValueRepository.save(nutritionalValue);
+        assignDailyGoalIfRequested(owner, nutritionalValue);
 
         return nutritionalValueMapper.toResponse(nutritionalValue);
     }
@@ -110,5 +111,13 @@ public class NutritionalValueServiceImpl implements NutritionalValueService {
         }
         return mealRepository.findById(mealId)
                 .orElseThrow(() -> new NutritionalValueException("Meal not found by Id"));
+    }
+
+    private void assignDailyGoalIfRequested(User owner, NutritionalValue nutritionalValue) {
+        if (owner == null) {
+            return;
+        }
+        owner.setDailyGoal(nutritionalValue);
+        userRepository.save(owner);
     }
 }

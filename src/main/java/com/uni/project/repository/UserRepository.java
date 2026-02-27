@@ -24,7 +24,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findAllWithMeals();
 
     @Override
-    @EntityGraph(attributePaths = {"posts"})
+    @EntityGraph(attributePaths = {"mealsPlan", "mealsPlan.recipe"})
     @NullMarked
     List<User> findAll();
 }

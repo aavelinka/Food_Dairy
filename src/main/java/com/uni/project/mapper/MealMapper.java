@@ -17,6 +17,7 @@ import org.mapstruct.Named;
 public interface MealMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", source = "mealRequest.name")
+    @Mapping(target = "date", source = "mealRequest.date")
     @Mapping(target = "author", source = "author")
     @Mapping(target = "totalNutritional", source = "totalNutritional")
     @Mapping(target = "productList", source = "products")
@@ -25,6 +26,7 @@ public interface MealMapper {
                      List<Product> products, Note recipe);
 
     @Mapping(target = "authorId", source = "author.id")
+    @Mapping(target = "date", source = "date")
     @Mapping(target = "totalNutritionalId", source = "totalNutritional.id")
     @Mapping(target = "productIds", source = "productList", qualifiedByName = "mapProductIds")
     @Mapping(target = "recipeId", source = "recipe.id")

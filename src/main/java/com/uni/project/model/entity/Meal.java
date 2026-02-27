@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -36,6 +37,9 @@ public class Meal {
 
     @Column(nullable = false, length = 50)
     private String name;
+
+    @Column
+    private LocalDate date;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn

@@ -34,6 +34,4 @@ public class UserRequest {
     private Integer dailyGoalId;
 
     private List<Integer> mealIds;
-
-    private List<Integer> postIds;
 }

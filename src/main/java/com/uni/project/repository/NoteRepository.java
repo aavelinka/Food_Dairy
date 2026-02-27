@@ -10,11 +10,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NoteRepository extends JpaRepository<Note, Integer> {
-    List<Note> findAllByDate(LocalDate date);
+    @Query("select n from Note n where n.meal.date = :date")
+    List<Note> findAllByDate(@Param("date") LocalDate date);
 
-    @Query("select n from Note n where n.user.id = :userId ")
+    @Query("select n from Note n where n.meal.author.id = :userId")
     List<Note> findAllByUserId(@Param("userId") Integer userId);
 
-    @Query(" select n from Note n where n.meal.id = :mealId ")
+    @Query("select n from Note n where n.meal.id = :mealId")
     List<Note> findAllByMealId(@Param("mealId") Integer mealId);
 }

@@ -24,6 +24,4 @@ public class UserResponse {
     private Integer dailyGoalId;
 
     private List<Integer> mealIds;
-
-    private List<Integer> postIds;
 }

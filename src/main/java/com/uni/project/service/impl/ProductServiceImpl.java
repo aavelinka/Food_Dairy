@@ -69,7 +69,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void productDelete(Integer id) {
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductException("Product not found by Id"));
+
+        if (product.getMealList() != null) {
+            product.getMealList().clear();
+        }
+
+        if (product.getNutritionalValue100g() != null) {
+            product.getNutritionalValue100g().setProduct(null);
+            product.setNutritionalValue100g(null);
+        }
+
+        productRepository.save(product);
+        productRepository.delete(product);
     }
 
     @Override

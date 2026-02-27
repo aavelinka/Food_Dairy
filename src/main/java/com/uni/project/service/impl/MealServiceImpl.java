@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -69,6 +70,7 @@ public class MealServiceImpl implements MealService {
         List<Product> products = getProducts(mealRequest.getProductIds());
         Note recipe = getRecipe(mealRequest.getRecipeId());
         meal.setName(mealRequest.getName());
+        meal.setDate(mealRequest.getDate());
         meal.setAuthor(author);
         meal.setProductList(products);
         meal.setTotalNutritional(totalNutritional);
@@ -81,7 +83,19 @@ public class MealServiceImpl implements MealService {
     @Override
     @Transactional
     public void mealDelete(Integer id) {
-        mealRepository.deleteById(id);
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new MealException("Meal not found by Id"));
+
+        if (meal.getProductList() != null) {
+            for (Product product : new ArrayList<>(meal.getProductList())) {
+                if (product.getMealList() != null) {
+                    product.getMealList().remove(meal);
+                }
+            }
+            meal.getProductList().clear();
+        }
+
+        mealRepository.delete(meal);
     }
 
     @Override

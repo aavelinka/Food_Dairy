@@ -12,15 +12,18 @@ import com.uni.project.model.entity.BodyParameters;
 import com.uni.project.model.entity.Meal;
 import com.uni.project.model.entity.Note;
 import com.uni.project.model.entity.NutritionalValue;
+import com.uni.project.model.entity.Product;
 import com.uni.project.model.entity.Sex;
 import com.uni.project.model.entity.User;
 import com.uni.project.repository.MealRepository;
-import com.uni.project.repository.NoteRepository;
 import com.uni.project.repository.NutritionalValueRepository;
 import com.uni.project.repository.UserRepository;
 import com.uni.project.service.UserService;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
@@ -33,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final MealRepository mealRepository;
-    private final NoteRepository noteRepository;
     private final NutritionalValueRepository nutritionalValueRepository;
     private final UserMapper userMapper;
     private final NutritionalValueMapper nutritionalValueMapper;
@@ -44,8 +46,9 @@ public class UserServiceImpl implements UserService {
     public UserResponse userCreate(UserRequest userRequest) {
         NutritionalValue dailyGoal = getDailyGoal(userRequest.getDailyGoalId());
         List<Meal> meals = getMeals(userRequest.getMealIds());
-        List<Note> posts = getPosts(userRequest.getPostIds());
-        User user = userRepository.save(userMapper.fromRequest(userRequest, dailyGoal, meals, posts));
+        User user = userMapper.fromRequest(userRequest, dailyGoal, new ArrayList<>());
+        replaceMeals(user, meals);
+        user = userRepository.save(user);
         return userMapper.toResponse(user);
     }
 
@@ -66,16 +69,21 @@ public class UserServiceImpl implements UserService {
     public UserResponse userUpdate(Integer id, UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
-        NutritionalValue dailyGoal = getDailyGoal(userRequest.getDailyGoalId());
-        List<Meal> meals = getMeals(userRequest.getMealIds());
-        List<Note> posts = getPosts(userRequest.getPostIds());
         user.setName(userRequest.getName());
         user.setPassword(userRequest.getPassword());
         user.setEmail(userRequest.getEmail());
         user.setMeasurements(userRequest.getMeasurements());
-        user.setDailyGoal(dailyGoal);
-        replaceMeals(user, meals);
-        replacePosts(user, posts);
+
+        // Treat omitted relation fields in update payload as "do not change".
+        if (userRequest.getDailyGoalId() != null) {
+            NutritionalValue dailyGoal = getDailyGoal(userRequest.getDailyGoalId());
+            user.setDailyGoal(dailyGoal);
+        }
+        if (userRequest.getMealIds() != null) {
+            List<Meal> meals = getMeals(userRequest.getMealIds());
+            replaceMeals(user, meals);
+        }
+
         userRepository.save(user);
         return userMapper.toResponse(user);
     }
@@ -83,7 +91,16 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void userDelete(Integer id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+
+        if (user.getMealsPlan() != null) {
+            for (Meal meal : new ArrayList<>(user.getMealsPlan())) {
+                unlinkMealProducts(meal);
+            }
+        }
+
+        userRepository.delete(user);
     }
 
     @Override
@@ -125,9 +142,9 @@ public class UserServiceImpl implements UserService {
             throw new UserException("User measurements are incomplete for nutritional value calculation");
         }
         NutritionalValue goalNutritionalValue = getNutritionalValue(measurements);
+        nutritionalValueRepository.save(goalNutritionalValue);
         user.setDailyGoal(goalNutritionalValue);
         userRepository.save(user);
-        nutritionalValueRepository.save(goalNutritionalValue);
 
         return nutritionalValueMapper.toResponse(goalNutritionalValue);
     }
@@ -196,47 +213,88 @@ public class UserServiceImpl implements UserService {
         return meals;
     }
 
-    private List<Note> getPosts(List<Integer> postIds) {
-        if (postIds == null || postIds.isEmpty()) {
-            return List.of();
+    private void unlinkMealProducts(Meal meal) {
+        if (meal == null || meal.getProductList() == null) {
+            return;
         }
-        List<Note> posts = noteRepository.findAllById(postIds);
-        if (posts.size() != postIds.size()) {
-            throw new UserException("Some posts not found");
+
+        for (Product product : new ArrayList<>(meal.getProductList())) {
+            if (product.getMealList() != null) {
+                product.getMealList().remove(meal);
+            }
         }
-        return posts;
+        meal.getProductList().clear();
     }
 
     private void replaceMeals(User user, List<Meal> meals) {
+        ensureMealsPlanInitialized(user);
+        Set<Integer> targetIds = collectMealIds(meals);
+        removeMealsMissingInTarget(user, targetIds);
+        addOrRelinkMeals(user, meals);
+    }
+
+    private void ensureMealsPlanInitialized(User user) {
         if (user.getMealsPlan() == null) {
             user.setMealsPlan(new ArrayList<>());
         }
+    }
 
-        for (Meal meal : user.getMealsPlan()) {
-            meal.setAuthor(null);
-        }
-        user.getMealsPlan().clear();
-
+    private Set<Integer> collectMealIds(List<Meal> meals) {
+        Set<Integer> targetIds = new HashSet<>();
         for (Meal meal : meals) {
-            meal.setAuthor(user);
-            user.getMealsPlan().add(meal);
+            if (meal != null && meal.getId() != null) {
+                targetIds.add(meal.getId());
+            }
+        }
+        return targetIds;
+    }
+
+    private void removeMealsMissingInTarget(User user, Set<Integer> targetIds) {
+        Iterator<Meal> iterator = user.getMealsPlan().iterator();
+        while (iterator.hasNext()) {
+            Meal currentMeal = iterator.next();
+            if (shouldRemoveMeal(currentMeal, targetIds)) {
+                iterator.remove();
+                detachMealAuthorIfOwnedByUser(currentMeal, user);
+            }
         }
     }
 
-    private void replacePosts(User user, List<Note> posts) {
-        if (user.getPosts() == null) {
-            user.setPosts(new ArrayList<>());
-        }
+    private boolean shouldRemoveMeal(Meal meal, Set<Integer> targetIds) {
+        Integer mealId = meal.getId();
+        return mealId == null || !targetIds.contains(mealId);
+    }
 
-        for (Note note : user.getPosts()) {
-            note.setUser(null);
+    private void detachMealAuthorIfOwnedByUser(Meal meal, User user) {
+        if (isAuthoredByUser(meal, user)) {
+            meal.setAuthor(null);
         }
-        user.getPosts().clear();
+    }
 
-        for (Note note : posts) {
-            note.setUser(user);
-            user.getPosts().add(note);
+    private boolean isAuthoredByUser(Meal meal, User user) {
+        return meal.getAuthor() != null
+                && meal.getAuthor().getId() != null
+                && meal.getAuthor().getId().equals(user.getId());
+    }
+
+    private void addOrRelinkMeals(User user, List<Meal> meals) {
+        for (Meal meal : meals) {
+            if (meal == null) {
+                continue;
+            }
+            if (requiresAuthorSync(meal, user)) {
+                meal.setAuthor(user);
+            }
+            if (!user.getMealsPlan().contains(meal)) {
+                user.getMealsPlan().add(meal);
+            }
         }
+    }
+
+    private boolean requiresAuthorSync(Meal meal, User user) {
+        return meal.getAuthor() == null
+                || meal.getAuthor().getId() == null
+                || !meal.getAuthor().getId().equals(user.getId());
     }
 
     private UserResponse createCompositeInternal(UserCompositeRequest request) {
@@ -245,9 +303,10 @@ public class UserServiceImpl implements UserService {
         dailyGoal.setProteins(request.getDailyGoalProteins());
         dailyGoal.setFats(request.getDailyGoalFats());
         dailyGoal.setCarbohydrates(request.getDailyGoalCarbohydrates());
+        nutritionalValueRepository.save(dailyGoal);
 
         User user = userRepository.save(
-                userMapper.fromRequest(request, dailyGoal, List.of(), List.of())
+                userMapper.fromRequest(request, dailyGoal, new ArrayList<>())
         );
 
         user.setDailyGoal(dailyGoal);
@@ -258,10 +317,17 @@ public class UserServiceImpl implements UserService {
         }
 
         Note note = new Note();
-        note.setUser(user);
-        note.setDate(request.getNoteDate());
         note.setNotes(request.getNoteTexts());
-        noteRepository.save(note);
+
+        Meal meal = new Meal();
+        meal.setName("Meal note");
+        meal.setDate(request.getNoteDate());
+        meal.setAuthor(user);
+        meal.setRecipe(note);
+        mealRepository.save(meal);
+        if (user.getMealsPlan() != null) {
+            user.getMealsPlan().add(meal);
+        }
 
         return userMapper.toResponse(user);
     }

@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -16,12 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class NoteRequest {
     @NotNull
-    private Integer userId;
-
     private Integer mealId;
-
-    @NotNull
-    private LocalDate date;
 
     @NotEmpty
     private List<String> notes;
