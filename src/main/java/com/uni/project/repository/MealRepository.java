@@ -14,9 +14,6 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
     @Query("select m from Meal m where m.author.id = :authorId")
     List<Meal> findAllByAuthorId(@Param("authorId") Integer authorId);
 
-    @Query("select m from Meal m where m.totalNutritional.id = :totalNutritionalId")
-    List<Meal> findAllByTotalNutritionalId(@Param("totalNutritionalId") Integer totalNutritionalId);
-
     @Query("select distinct m from Meal m join m.productList p where p.id in :productIds")
     List<Meal> findAllByProductIds(@Param("productIds") List<Integer> productIds);
 }

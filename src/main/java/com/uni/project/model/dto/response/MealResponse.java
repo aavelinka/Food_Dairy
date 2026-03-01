@@ -19,7 +19,7 @@ public class MealResponse {
 
     private LocalDate date;
 
-    private Integer totalNutritionalId;
+    private NutritionalValueResponse totalNutritional;
 
     private Integer authorId;
 

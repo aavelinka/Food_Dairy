@@ -89,10 +89,10 @@ public class UserController {
     }
 
     @PostMapping("/without_transaction")
-    public ResponseEntity<UserResponse> createUserWithGoalAndNoteNoTx(
+    public ResponseEntity<UserResponse> createUserWithoutGoalAndNoteNoTx(
             @Valid @RequestBody UserCompositeRequest userRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.createUserWithGoalAndNoteNoTx(userRequest));
+                .body(userService.createUserWithoutGoalAndNoteNoTx(userRequest));
     }
 
     @PostMapping("/with_transaction")

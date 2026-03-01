@@ -21,7 +21,7 @@ public class UserResponse {
 
     private BodyParameters measurements;
 
-    private Integer dailyGoalId;
+    private NutritionalValueResponse dailyGoal;
 
     private List<Integer> mealIds;
 }

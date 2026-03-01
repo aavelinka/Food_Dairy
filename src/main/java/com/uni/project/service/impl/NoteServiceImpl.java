@@ -22,8 +22,8 @@ import java.util.List;
 public class NoteServiceImpl implements NoteService {
     private final NoteRepository noteRepository;
     private final MealRepository mealRepository;
-
     private final NoteMapper noteMapper;
+    private static final String NOTE_FAIL_MESSAGE = "Note is not found by Id";
 
     @Override
     @Transactional
@@ -43,21 +43,21 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public NoteResponse getNoteById(Integer id) {
         Note note = noteRepository.findById(id)
-                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+                .orElseThrow(() -> new NoteException(NOTE_FAIL_MESSAGE));
 
         return noteMapper.toResponse(note);
     }
 
     @Override
     public List<NoteResponse> getAllNotes() {
-        return toResponses(noteRepository.findAll());
+        return noteMapper.toResponses(noteRepository.findAll());
     }
 
     @Override
     @Transactional
     public NoteResponse noteUpdate(Integer id, NoteRequest noteRequest) {
         Note note = noteRepository.findById(id)
-                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+                .orElseThrow(() -> new NoteException(NOTE_FAIL_MESSAGE));
         Meal targetMeal = getMeal(noteRequest.getMealId());
         Meal currentMeal = note.getMeal();
         note.setNotes(noteRequest.getNotes());
@@ -82,7 +82,7 @@ public class NoteServiceImpl implements NoteService {
     @Transactional
     public void noteDelete(Integer id) {
         Note note = noteRepository.findById(id)
-                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+                .orElseThrow(() -> new NoteException(NOTE_FAIL_MESSAGE));
         Meal meal = note.getMeal();
         if (meal == null) {
             noteRepository.delete(note);
@@ -94,24 +94,13 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public List<NoteResponse> getAllNotesByUserId(Integer userId) {
-        return toResponses(noteRepository.findAllByUserId(userId));
-    }
-
-    @Override
     public List<NoteResponse> getAllNotesByDate(LocalDate dateSearch) {
-        return toResponses(noteRepository.findAllByDate(dateSearch));
+        return noteMapper.toResponses(noteRepository.findAllByDate(dateSearch));
     }
 
     @Override
     public List<NoteResponse> getAllNotesByMealId(Integer mealId) {
-        return toResponses(noteRepository.findAllByMealId(mealId));
-    }
-
-    private List<NoteResponse> toResponses(List<Note> notes) {
-        return notes.stream()
-                .map(noteMapper::toResponse)
-                .toList();
+        return noteMapper.toResponses(noteRepository.findAllByMealId(mealId));
     }
 
     private Meal getMeal(Integer mealId) {

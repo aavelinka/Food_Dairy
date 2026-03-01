@@ -1,6 +1,8 @@
 package com.uni.project.model.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -35,8 +36,11 @@ public class Product {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @OneToOne
-    @JoinColumn(name = "nutritional_value_100g_id")
+    @Embedded
+    @AttributeOverride(name = "calories", column = @Column(name = "nv100_calories"))
+    @AttributeOverride(name = "proteins", column = @Column(name = "nv100_proteins"))
+    @AttributeOverride(name = "fats", column = @Column(name = "nv100_fats"))
+    @AttributeOverride(name = "carbohydrates", column = @Column(name = "nv100_carbohydrates"))
     private NutritionalValue nutritionalValue100g;
 
     @ManyToMany

@@ -1,6 +1,7 @@
 package com.uni.project.model.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -8,8 +9,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -46,10 +45,13 @@ public class User {
     @Embedded
     private BodyParameters measurements;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nutritional_values")
+    @Embedded
+    @AttributeOverride(name = "calories", column = @Column(name = "daily_goal_calories"))
+    @AttributeOverride(name = "proteins", column = @Column(name = "daily_goal_proteins"))
+    @AttributeOverride(name = "fats", column = @Column(name = "daily_goal_fats"))
+    @AttributeOverride(name = "carbohydrates", column = @Column(name = "daily_goal_carbohydrates"))
     private NutritionalValue dailyGoal;
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Meal> mealsPlan;
 }

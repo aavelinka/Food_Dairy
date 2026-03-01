@@ -62,12 +62,6 @@ public class MealController {
         return ResponseEntity.ok(mealService.getAllMealsByAuthorId(authorId));
     }
 
-    @GetMapping("/total_nutritional_value")
-    public ResponseEntity<List<MealResponse>> getAllMealsByNutritionalValue(
-            @RequestParam("nutritionalValueId") Integer nutritionalValueId) {
-        return ResponseEntity.ok(mealService.getAllMealsByNutritionalValueId(nutritionalValueId));
-    }
-
     @GetMapping("/product_list")
     public ResponseEntity<List<MealResponse>> getAllMealsByProductList(
             @RequestParam("productIds") List<Integer> productIds) {

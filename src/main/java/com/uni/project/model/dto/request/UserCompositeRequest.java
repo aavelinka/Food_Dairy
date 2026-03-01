@@ -1,7 +1,7 @@
 package com.uni.project.model.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,21 +14,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCompositeRequest extends UserRequest {
+    @Override
     @NotNull
-    @PositiveOrZero
-    private Double dailyGoalCalories;
-
-    @NotNull
-    @PositiveOrZero
-    private Double dailyGoalProteins;
-
-    @NotNull
-    @PositiveOrZero
-    private Double dailyGoalFats;
-
-    @NotNull
-    @PositiveOrZero
-    private Double dailyGoalCarbohydrates;
+    @Valid
+    public NutritionalValueRequest getDailyGoal() {
+        return super.getDailyGoal();
+    }
 
     @NotNull
     private LocalDate noteDate;

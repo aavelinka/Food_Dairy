@@ -17,8 +17,6 @@ public interface NoteService {
 
     void noteDelete(Integer id);
 
-    List<NoteResponse> getAllNotesByUserId(Integer userId);
-
     List<NoteResponse> getAllNotesByDate(LocalDate dateSearch);
 
     List<NoteResponse> getAllNotesByMealId(Integer mealId);

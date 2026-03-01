@@ -27,10 +27,4 @@ public class NutritionalValueRequest {
     @NotNull
     @PositiveOrZero
     private Double carbohydrates;
-
-    private Integer ownerId;
-
-    private Integer productId;
-
-    private Integer mealId;
 }

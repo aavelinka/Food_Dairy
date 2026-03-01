@@ -16,7 +16,7 @@ public class ProductResponse {
 
     private String name;
 
-    private Integer nutritionalValue100gId;
+    private NutritionalValueResponse nutritionalValue100g;
 
     private List<Integer> mealIds;
 }

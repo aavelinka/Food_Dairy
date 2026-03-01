@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,7 +32,7 @@ public class Note {
     @Column
     private Integer id;
 
-    @OneToOne(mappedBy = "recipe", fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "recipe")
     private Meal meal;
 
     @ElementCollection

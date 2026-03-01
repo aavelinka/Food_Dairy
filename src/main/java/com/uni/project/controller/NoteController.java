@@ -53,11 +53,6 @@ public class NoteController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/user_note")
-    public ResponseEntity<List<NoteResponse>> getAllNotesByUser(@RequestParam("userId") Integer userId) {
-        return ResponseEntity.ok(noteService.getAllNotesByUserId(userId));
-    }
-
     @GetMapping("/date")
     public ResponseEntity<List<NoteResponse>> getAllNotesByDate(@RequestParam LocalDate dateSearch) {
         return ResponseEntity.ok(noteService.getAllNotesByDate(dateSearch));

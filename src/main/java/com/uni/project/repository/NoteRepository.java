@@ -13,9 +13,6 @@ public interface NoteRepository extends JpaRepository<Note, Integer> {
     @Query("select n from Note n where n.meal.date = :date")
     List<Note> findAllByDate(@Param("date") LocalDate date);
 
-    @Query("select n from Note n where n.meal.author.id = :userId")
-    List<Note> findAllByUserId(@Param("userId") Integer userId);
-
     @Query("select n from Note n where n.meal.id = :mealId")
     List<Note> findAllByMealId(@Param("mealId") Integer mealId);
 }

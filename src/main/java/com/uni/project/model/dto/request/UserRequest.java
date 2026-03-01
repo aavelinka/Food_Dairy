@@ -10,8 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,7 +29,6 @@ public class UserRequest {
     @Valid
     private BodyParameters measurements;
 
-    private Integer dailyGoalId;
-
-    private List<Integer> mealIds;
+    @Valid
+    private NutritionalValueRequest dailyGoal;
 }

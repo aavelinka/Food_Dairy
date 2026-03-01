@@ -32,7 +32,7 @@ public interface UserService {
 
     List<UserResponse> findAllWithMeals();
 
-    UserResponse createUserWithGoalAndNoteNoTx(UserCompositeRequest userRequest);
+    UserResponse createUserWithoutGoalAndNoteNoTx(UserCompositeRequest userRequest);
 
     UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest);
 }

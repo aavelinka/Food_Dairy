@@ -10,8 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NutritionalValueResponse {
-    private Integer id;
-
     private Double calories;
 
     private Double proteins;
@@ -19,10 +17,4 @@ public class NutritionalValueResponse {
     private Double fats;
 
     private Double carbohydrates;
-
-    private Integer ownerId;
-
-    private Integer productId;
-
-    private Integer mealId;
 }

@@ -1,5 +1,6 @@
 package com.uni.project.model.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,8 @@ public class ProductRequest {
     private String name;
 
     @NotNull
-    private Integer nutritionalValue100gId;
+    @Valid
+    private NutritionalValueRequest nutritionalValue100g;
 
     private List<Integer> mealIds;
 }

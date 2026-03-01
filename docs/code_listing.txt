@@ -8,9 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ProjectApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ProjectApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ProjectApplication.class, args);
+    }
 
 }
 
@@ -80,12 +80,6 @@ public class MealController {
         return ResponseEntity.ok(mealService.getAllMealsByAuthorId(authorId));
     }
 
-    @GetMapping("/total_nutritional_value")
-    public ResponseEntity<List<MealResponse>> getAllMealsByNutritionalValue(
-            @RequestParam("nutritionalValueId") Integer nutritionalValueId) {
-        return ResponseEntity.ok(mealService.getAllMealsByNutritionalValueId(nutritionalValueId));
-    }
-
     @GetMapping("/product_list")
     public ResponseEntity<List<MealResponse>> getAllMealsByProductList(
             @RequestParam("productIds") List<Integer> productIds) {
@@ -150,11 +144,6 @@ public class NoteController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/user_note")
-    public ResponseEntity<List<NoteResponse>> getAllNotesByUser(@RequestParam("userId") Integer userId) {
-        return ResponseEntity.ok(noteService.getAllNotesByUserId(userId));
-    }
-
     @GetMapping("/date")
     public ResponseEntity<List<NoteResponse>> getAllNotesByDate(@RequestParam LocalDate dateSearch) {
         return ResponseEntity.ok(noteService.getAllNotesByDate(dateSearch));
@@ -163,64 +152,6 @@ public class NoteController {
     @GetMapping("/meal_note")
     public ResponseEntity<List<NoteResponse>> getAllNotesByMeal(@RequestParam("mealId") Integer mealId) {
         return ResponseEntity.ok(noteService.getAllNotesByMealId(mealId));
-    }
-}
-
-
-Файл NutritionalValueController.java
-package com.uni.project.controller;
-
-import com.uni.project.model.dto.request.NutritionalValueRequest;
-import com.uni.project.model.dto.response.NutritionalValueResponse;
-import com.uni.project.service.NutritionalValueService;
-import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/nutritional_value")
-@AllArgsConstructor
-public class NutritionalValueController {
-    private final NutritionalValueService nutritionalValueService;
-
-    @GetMapping("/{id}")
-    public ResponseEntity<NutritionalValueResponse> getNutritionalValueById(@PathVariable Integer id) {
-        return ResponseEntity.ok(nutritionalValueService.getNutritionalValueById(id));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<NutritionalValueResponse>> getAllNutritionalValues() {
-        return ResponseEntity.ok(nutritionalValueService.getAllNutritionalValues());
-    }
-
-    @PostMapping
-    public ResponseEntity<NutritionalValueResponse> nutritionalValueCreate(
-            @Valid @RequestBody NutritionalValueRequest nutritionalValueRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(nutritionalValueService.nutritionalValueCreate(nutritionalValueRequest));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<NutritionalValueResponse> nutritionalValueUpdate(
-            @PathVariable Integer id, @Valid @RequestBody NutritionalValueRequest nutritionalValueRequest) {
-        return ResponseEntity.ok(nutritionalValueService.nutritionalValueUpdate(id, nutritionalValueRequest));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> nutritionalValueDelete(@PathVariable Integer id) {
-        nutritionalValueService.nutritionalValueDelete(id);
-        return ResponseEntity.noContent().build();
     }
 }
 
@@ -254,8 +185,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> getProductById
-            (@PathVariable Integer id) {
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable Integer id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
@@ -265,14 +195,14 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponse> productCreate
-            (@Valid @RequestBody ProductRequest productRequest) {
+    public ResponseEntity<ProductResponse> productCreate(@Valid @RequestBody
+                                                         ProductRequest productRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.productCreate(productRequest));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> productUpdate
-            (@PathVariable Integer id, @Valid @RequestBody ProductRequest productRequest) {
+    public ResponseEntity<ProductResponse> productUpdate(@PathVariable Integer id,
+                                                         @Valid @RequestBody ProductRequest productRequest) {
         return ResponseEntity.ok(productService.productUpdate(id, productRequest));
     }
 
@@ -283,8 +213,7 @@ public class ProductController {
     }
 
     @GetMapping("/name")
-    public ResponseEntity<List<ProductResponse>> getAllProductsByName
-            (@RequestParam String nameSearch) {
+    public ResponseEntity<List<ProductResponse>> getAllProductsByName(@RequestParam String nameSearch) {
         return ResponseEntity.ok(productService.getAllProductsByName(nameSearch));
     }
 
@@ -386,11 +315,6 @@ public class UserController {
         return ResponseEntity.ok(userService.findAllWithMeals());
     }
 
-    @GetMapping("/with-notes")
-    public ResponseEntity<List<UserResponse>> findAllWithNotes() {
-        return ResponseEntity.ok(userService.findAllWithNotes());
-    }
-
     @PostMapping("/without_transaction")
     public ResponseEntity<UserResponse> createUserWithGoalAndNoteNoTx(
             @Valid @RequestBody UserCompositeRequest userRequest) {
@@ -427,16 +351,6 @@ public class NoteException extends RuntimeException {
 }
 
 
-Файл NutritionalValueException.java
-package com.uni.project.exception;
-
-public class NutritionalValueException extends RuntimeException {
-    public NutritionalValueException(String message) {
-        super(message);
-    }
-}
-
-
 Файл ProductException.java
 package com.uni.project.exception;
 
@@ -463,8 +377,6 @@ package com.uni.project.mapper;
 import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.response.MealResponse;
 import com.uni.project.model.entity.Meal;
-import com.uni.project.model.entity.Note;
-import com.uni.project.model.entity.NutritionalValue;
 import com.uni.project.model.entity.Product;
 import com.uni.project.model.entity.User;
 import java.util.List;
@@ -473,22 +385,23 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = NutritionalValueMapper.class)
 public interface MealMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", source = "mealRequest.name")
+    @Mapping(target = "date", source = "mealRequest.date")
+    @Mapping(target = "totalNutritional", source = "mealRequest.totalNutritional")
     @Mapping(target = "author", source = "author")
-    @Mapping(target = "totalNutritional", source = "totalNutritional")
-    @Mapping(target = "productList", source = "products")
-    @Mapping(target = "recipe", source = "recipe")
-    Meal fromRequest(MealRequest mealRequest, User author, NutritionalValue totalNutritional,
-                     List<Product> products, Note recipe);
+    @Mapping(target = "productList", ignore = true)
+    @Mapping(target = "recipe", ignore = true)
+    Meal fromRequest(MealRequest mealRequest, User author);
 
     @Mapping(target = "authorId", source = "author.id")
-    @Mapping(target = "totalNutritionalId", source = "totalNutritional.id")
     @Mapping(target = "productIds", source = "productList", qualifiedByName = "mapProductIds")
     @Mapping(target = "recipeId", source = "recipe.id")
     MealResponse toResponse(Meal meal);
+
+    List<MealResponse> toResponses(List<Meal> meals);
 
     @Named("mapProductIds")
     default List<Integer> mapProductIds(List<Product> products) {
@@ -511,20 +424,20 @@ import com.uni.project.model.dto.request.NoteRequest;
 import com.uni.project.model.dto.response.NoteResponse;
 import com.uni.project.model.entity.Meal;
 import com.uni.project.model.entity.Note;
-import com.uni.project.model.entity.User;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface NoteMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "user", source = "user")
     @Mapping(target = "meal", source = "meal")
-    Note fromRequest(NoteRequest noteRequest, User user, Meal meal);
+    Note fromRequest(NoteRequest noteRequest, Meal meal);
 
-    @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "mealId", source = "meal.id")
     NoteResponse toResponse(Note note);
+
+    List<NoteResponse> toResponses(List<Note> notes);
 }
 
 
@@ -533,26 +446,17 @@ package com.uni.project.mapper;
 
 import com.uni.project.model.dto.request.NutritionalValueRequest;
 import com.uni.project.model.dto.response.NutritionalValueResponse;
-import com.uni.project.model.entity.Meal;
 import com.uni.project.model.entity.NutritionalValue;
-import com.uni.project.model.entity.Product;
-import com.uni.project.model.entity.User;
+import java.util.List;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface NutritionalValueMapper {
-    @Mapping(target = "ownerId", source = "owner.id")
-    @Mapping(target = "productId", source = "product.id")
-    @Mapping(target = "mealId", source = "meal.id")
     NutritionalValueResponse toResponse(NutritionalValue nutritionalValue);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "owner", source = "owner")
-    @Mapping(target = "product", source = "product")
-    @Mapping(target = "meal", source = "meal")
-    NutritionalValue fromRequest(NutritionalValueRequest nutritionalValueRequest, User owner,
-                                 Product product, Meal meal);
+    List<NutritionalValueResponse> toResponses(List<NutritionalValue> values);
+
+    NutritionalValue fromRequest(NutritionalValueRequest nutritionalValueRequest);
 }
 
 
@@ -562,7 +466,6 @@ package com.uni.project.mapper;
 import com.uni.project.model.dto.request.ProductRequest;
 import com.uni.project.model.dto.response.ProductResponse;
 import com.uni.project.model.entity.Meal;
-import com.uni.project.model.entity.NutritionalValue;
 import com.uni.project.model.entity.Product;
 import java.util.List;
 import java.util.Objects;
@@ -570,18 +473,16 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = NutritionalValueMapper.class)
 public interface ProductMapper {
-    @Mapping(target = "nutritionalValue100gId", source = "nutritionalValue100g.id")
     @Mapping(target = "mealIds", source = "mealList", qualifiedByName = "mapMealIds")
     ProductResponse toResponse(Product product);
 
+    List<ProductResponse> toResponses(List<Product> products);
+
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "name", source = "productRequest.name")
-    @Mapping(target = "nutritionalValue100g", source = "nutritionalValue100g")
     @Mapping(target = "mealList", source = "meals")
-    Product fromRequest(ProductRequest productRequest, NutritionalValue nutritionalValue100g,
-                        List<Meal> meals);
+    Product fromRequest(ProductRequest productRequest, List<Meal> meals);
 
     @Named("mapMealIds")
     default List<Integer> mapMealIds(List<Meal> meals) {
@@ -603,8 +504,6 @@ package com.uni.project.mapper;
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.Meal;
-import com.uni.project.model.entity.Note;
-import com.uni.project.model.entity.NutritionalValue;
 import com.uni.project.model.entity.User;
 import java.util.List;
 import java.util.Objects;
@@ -612,23 +511,16 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = NutritionalValueMapper.class)
 public interface UserMapper {
-    @Mapping(target = "postIds", source = "posts", qualifiedByName = "mapPostIds")
-    @Mapping(target = "dailyGoalId", source = "dailyGoal.id")
     @Mapping(target = "mealIds", source = "mealsPlan", qualifiedByName = "mapMealIds")
     UserResponse toResponse(User user);
 
+    List<UserResponse> toResponses(List<User> users);
+
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "name", source = "userRequest.name")
-    @Mapping(target = "password", source = "userRequest.password")
-    @Mapping(target = "email", source = "userRequest.email")
-    @Mapping(target = "measurements", source = "userRequest.measurements")
-    @Mapping(target = "dailyGoal", source = "dailyGoal")
-    @Mapping(target = "mealsPlan", source = "meals")
-    @Mapping(target = "posts", source = "posts")
-    User fromRequest(UserRequest userRequest, NutritionalValue dailyGoal,
-                     List<Meal> meals, List<Note> posts);
+    @Mapping(target = "mealsPlan", ignore = true)
+    User fromRequest(UserRequest userRequest);
 
     @Named("mapMealIds")
     default List<Integer> mapMealIds(List<Meal> meals) {
@@ -642,30 +534,20 @@ public interface UserMapper {
                 .toList();
     }
 
-    @Named("mapPostIds")
-    default List<Integer> mapPostIds(List<Note> notes) {
-        if (notes == null || notes.isEmpty()) {
-            return List.of();
-        }
-        return notes.stream()
-                .filter(Objects::nonNull)
-                .map(Note::getId)
-                .filter(Objects::nonNull)
-                .toList();
-    }
 }
 
 
 Файл MealRequest.java
 package com.uni.project.model.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -675,13 +557,13 @@ public class MealRequest {
     @NotBlank
     private String name;
 
-    private Integer totalNutritionalId;
+    @NotNull
+    private LocalDate date;
+
+    @Valid
+    private NutritionalValueRequest totalNutritional;
 
     private Integer authorId;
-
-    private List<Integer> productIds;
-
-    private Integer recipeId;
 }
 
 
@@ -695,7 +577,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -704,12 +585,7 @@ import java.util.List;
 @AllArgsConstructor
 public class NoteRequest {
     @NotNull
-    private Integer userId;
-
     private Integer mealId;
-
-    @NotNull
-    private LocalDate date;
 
     @NotEmpty
     private List<String> notes;
@@ -746,18 +622,13 @@ public class NutritionalValueRequest {
     @NotNull
     @PositiveOrZero
     private Double carbohydrates;
-
-    private Integer ownerId;
-
-    private Integer productId;
-
-    private Integer mealId;
 }
 
 
 Файл ProductRequest.java
 package com.uni.project.model.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -776,7 +647,8 @@ public class ProductRequest {
     private String name;
 
     @NotNull
-    private Integer nutritionalValue100gId;
+    @Valid
+    private NutritionalValueRequest nutritionalValue100g;
 
     private List<Integer> mealIds;
 }
@@ -785,8 +657,8 @@ public class ProductRequest {
 Файл UserCompositeRequest.java
 package com.uni.project.model.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -799,21 +671,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCompositeRequest extends UserRequest {
+    @Override
     @NotNull
-    @PositiveOrZero
-    private Double dailyGoalCalories;
-
-    @NotNull
-    @PositiveOrZero
-    private Double dailyGoalProteins;
-
-    @NotNull
-    @PositiveOrZero
-    private Double dailyGoalFats;
-
-    @NotNull
-    @PositiveOrZero
-    private Double dailyGoalCarbohydrates;
+    @Valid
+    public NutritionalValueRequest getDailyGoal() {
+        return super.getDailyGoal();
+    }
 
     @NotNull
     private LocalDate noteDate;
@@ -860,8 +723,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -881,17 +742,15 @@ public class UserRequest {
     @Valid
     private BodyParameters measurements;
 
-    private Integer dailyGoalId;
-
-    private List<Integer> mealIds;
-
-    private List<Integer> postIds;
+    @Valid
+    private NutritionalValueRequest dailyGoal;
 }
 
 
 Файл MealResponse.java
 package com.uni.project.model.dto.response;
 
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -908,7 +767,9 @@ public class MealResponse {
 
     private String name;
 
-    private Integer totalNutritionalId;
+    private LocalDate date;
+
+    private NutritionalValueResponse totalNutritional;
 
     private Integer authorId;
 
@@ -926,7 +787,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -936,11 +796,7 @@ import java.util.List;
 public class NoteResponse {
     private Integer id;
 
-    private Integer userId;
-
     private Integer mealId;
-
-    private LocalDate date;
 
     private List<String> notes;
 }
@@ -959,8 +815,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NutritionalValueResponse {
-    private Integer id;
-
     private Double calories;
 
     private Double proteins;
@@ -968,12 +822,6 @@ public class NutritionalValueResponse {
     private Double fats;
 
     private Double carbohydrates;
-
-    private Integer ownerId;
-
-    private Integer productId;
-
-    private Integer mealId;
 }
 
 
@@ -996,7 +844,7 @@ public class ProductResponse {
 
     private String name;
 
-    private Integer nutritionalValue100gId;
+    private NutritionalValueResponse nutritionalValue100g;
 
     private List<Integer> mealIds;
 }
@@ -1026,11 +874,9 @@ public class UserResponse {
 
     private BodyParameters measurements;
 
-    private Integer dailyGoalId;
+    private NutritionalValueResponse dailyGoal;
 
     private List<Integer> mealIds;
-
-    private List<Integer> postIds;
 }
 
 
@@ -1093,7 +939,10 @@ public class BodyParameters {
 package com.uni.project.model.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -1102,6 +951,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PreRemove;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -1110,6 +960,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -1129,8 +981,16 @@ public class Meal {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn
+    @Column
+    private LocalDate date;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "calories", column = @Column(name = "total_calories")),
+            @AttributeOverride(name = "proteins", column = @Column(name = "total_proteins")),
+            @AttributeOverride(name = "fats", column = @Column(name = "total_fats")),
+            @AttributeOverride(name = "carbohydrates", column = @Column(name = "total_carbohydrates"))
+    })
     private NutritionalValue totalNutritional;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -1143,6 +1003,19 @@ public class Meal {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn
     private Note recipe;
+
+    @PreRemove
+    private void unlinkProducts() {
+        if (productList == null) {
+            return;
+        }
+        for (Product product : new ArrayList<>(productList)) {
+            if (product.getMealList() != null) {
+                product.getMealList().remove(this);
+            }
+        }
+        productList.clear();
+    }
 }
 
 
@@ -1158,7 +1031,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -1167,7 +1039,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -1184,15 +1055,8 @@ public class Note {
     @Column
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn
-    private User user;
-
     @OneToOne(mappedBy = "recipe", fetch = FetchType.EAGER)
     private Meal meal;
-
-    @Column
-    private LocalDate date;
 
     @ElementCollection
     @CollectionTable(
@@ -1208,33 +1072,18 @@ public class Note {
 package com.uni.project.model.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Embeddable
 @Getter
 @Setter
-@Table
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class NutritionalValue {
-    @EqualsAndHashCode.Include
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
-    private Integer id;
-
     @Column(nullable = false)
     private Double calories;
 
@@ -1246,15 +1095,6 @@ public class NutritionalValue {
 
     @Column(nullable = false)
     private Double carbohydrates;
-
-    @OneToOne(mappedBy = "dailyGoal", fetch = FetchType.EAGER)
-    private User owner;
-
-    @OneToOne(mappedBy = "nutritionalValue100g", fetch = FetchType.EAGER)
-    private Product product;
-
-    @OneToOne(mappedBy = "totalNutritional", fetch = FetchType.EAGER)
-    private Meal meal;
 }
 
 
@@ -1262,6 +1102,9 @@ public class NutritionalValue {
 package com.uni.project.model.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -1269,7 +1112,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -1296,8 +1138,13 @@ public class Product {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @OneToOne
-    @JoinColumn(name = "nutritional_value_100g_id")
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "calories", column = @Column(name = "nv100_calories")),
+            @AttributeOverride(name = "proteins", column = @Column(name = "nv100_proteins")),
+            @AttributeOverride(name = "fats", column = @Column(name = "nv100_fats")),
+            @AttributeOverride(name = "carbohydrates", column = @Column(name = "nv100_carbohydrates"))
+    })
     private NutritionalValue nutritionalValue100g;
 
     @ManyToMany
@@ -1323,6 +1170,8 @@ public enum Sex {
 package com.uni.project.model.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -1330,9 +1179,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -1343,7 +1190,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name="users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -1368,15 +1215,17 @@ public class User {
     @Embedded
     private BodyParameters measurements;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "nutritional_values")
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "calories", column = @Column(name = "daily_goal_calories")),
+            @AttributeOverride(name = "proteins", column = @Column(name = "daily_goal_proteins")),
+            @AttributeOverride(name = "fats", column = @Column(name = "daily_goal_fats")),
+            @AttributeOverride(name = "carbohydrates", column = @Column(name = "daily_goal_carbohydrates"))
+    })
     private NutritionalValue dailyGoal;
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Meal> mealsPlan;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Note> posts;
 }
 
 
@@ -1397,9 +1246,6 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
     @Query("select m from Meal m where m.author.id = :authorId")
     List<Meal> findAllByAuthorId(@Param("authorId") Integer authorId);
 
-    @Query("select m from Meal m where m.totalNutritional.id = :totalNutritionalId")
-    List<Meal> findAllByTotalNutritionalId(@Param("totalNutritionalId") Integer totalNutritionalId);
-
     @Query("select distinct m from Meal m join m.productList p where p.id in :productIds")
     List<Meal> findAllByProductIds(@Param("productIds") List<Integer> productIds);
 }
@@ -1418,25 +1264,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NoteRepository extends JpaRepository<Note, Integer> {
-    List<Note> findAllByDate(LocalDate date);
+    @Query("select n from Note n where n.meal.date = :date")
+    List<Note> findAllByDate(@Param("date") LocalDate date);
 
-    @Query("select n from Note n where n.user.id = :userId ")
-    List<Note> findAllByUserId(@Param("userId") Integer userId);
-
-    @Query(" select n from Note n where n.meal.id = :mealId ")
+    @Query("select n from Note n where n.meal.id = :mealId")
     List<Note> findAllByMealId(@Param("mealId") Integer mealId);
-}
-
-
-Файл NutritionalValueRepository.java
-package com.uni.project.repository;
-
-import com.uni.project.model.entity.NutritionalValue;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-@Repository
-public interface NutritionalValueRepository extends JpaRepository<NutritionalValue, Integer> {
 }
 
 
@@ -1486,7 +1318,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findAllWithMeals();
 
     @Override
-    @EntityGraph(attributePaths = {"posts"})
+    @EntityGraph(attributePaths = {"mealsPlan", "mealsPlan.recipe"})
     @NullMarked
     List<User> findAll();
 }
@@ -1515,8 +1347,6 @@ public interface MealService {
 
     List<MealResponse> getAllMealsByAuthorId(Integer authorId);
 
-    List<MealResponse> getAllMealsByNutritionalValueId(Integer nutritionalValueId);
-
     List<MealResponse> getAllMealsByProductIds(List<Integer> productIds);
 }
 
@@ -1541,33 +1371,9 @@ public interface NoteService {
 
     void noteDelete(Integer id);
 
-    List<NoteResponse> getAllNotesByUserId(Integer userId);
-
     List<NoteResponse> getAllNotesByDate(LocalDate dateSearch);
 
     List<NoteResponse> getAllNotesByMealId(Integer mealId);
-}
-
-
-Файл NutritionalValueService.java
-package com.uni.project.service;
-
-
-import com.uni.project.model.dto.request.NutritionalValueRequest;
-import com.uni.project.model.dto.response.NutritionalValueResponse;
-
-import java.util.List;
-
-public interface NutritionalValueService {
-    NutritionalValueResponse nutritionalValueCreate(NutritionalValueRequest nutritionalValueRequest);
-
-    NutritionalValueResponse getNutritionalValueById(Integer id);
-
-    List<NutritionalValueResponse> getAllNutritionalValues();
-
-    NutritionalValueResponse nutritionalValueUpdate(Integer id, NutritionalValueRequest nutritionalValueRequest);
-
-    void nutritionalValueDelete(Integer id);
 }
 
 
@@ -1631,8 +1437,6 @@ public interface UserService {
 
     List<UserResponse> findAllWithMeals();
 
-    List<UserResponse> findAllWithNotes();
-
     UserResponse createUserWithGoalAndNoteNoTx(UserCompositeRequest userRequest);
 
     UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest);
@@ -1647,20 +1451,16 @@ import com.uni.project.mapper.MealMapper;
 import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.response.MealResponse;
 import com.uni.project.model.entity.Meal;
-import com.uni.project.model.entity.Note;
-import com.uni.project.model.entity.NutritionalValue;
 import com.uni.project.model.entity.Product;
 import com.uni.project.model.entity.User;
 import com.uni.project.repository.MealRepository;
-import com.uni.project.repository.NoteRepository;
-import com.uni.project.repository.NutritionalValueRepository;
-import com.uni.project.repository.ProductRepository;
 import com.uni.project.repository.UserRepository;
 import com.uni.project.service.MealService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -1669,9 +1469,6 @@ import java.util.List;
 public class MealServiceImpl implements MealService {
     private final MealRepository mealRepository;
     private final UserRepository userRepository;
-    private final NutritionalValueRepository nutritionalValueRepository;
-    private final ProductRepository productRepository;
-    private final NoteRepository noteRepository;
 
     private final MealMapper mealMapper;
 
@@ -1679,11 +1476,8 @@ public class MealServiceImpl implements MealService {
     @Transactional
     public MealResponse mealCreate(MealRequest mealRequest) {
         User author = getAuthor(mealRequest.getAuthorId());
-        NutritionalValue totalNutritional = getTotalNutritional(mealRequest.getTotalNutritionalId());
-        List<Product> products = getProducts(mealRequest.getProductIds());
-        Note recipe = getRecipe(mealRequest.getRecipeId());
         Meal meal = mealRepository
-                .save(mealMapper.fromRequest(mealRequest, author, totalNutritional, products, recipe));
+                .save(mealMapper.fromRequest(mealRequest, author));
 
         return mealMapper.toResponse(meal);
     }
@@ -1698,7 +1492,7 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public List<MealResponse> getAllMeals() {
-        return toResponses(mealRepository.findAll());
+        return mealMapper.toResponses(mealRepository.findAll());
     }
 
     @Override
@@ -1707,14 +1501,11 @@ public class MealServiceImpl implements MealService {
         Meal meal = mealRepository.findById(id)
                 .orElseThrow(() -> new MealException("Meal not found by Id"));
         User author = getAuthor(mealRequest.getAuthorId());
-        NutritionalValue totalNutritional = getTotalNutritional(mealRequest.getTotalNutritionalId());
-        List<Product> products = getProducts(mealRequest.getProductIds());
-        Note recipe = getRecipe(mealRequest.getRecipeId());
+        Meal mappedMeal = mealMapper.fromRequest(mealRequest, author);
         meal.setName(mealRequest.getName());
+        meal.setDate(mealRequest.getDate());
         meal.setAuthor(author);
-        meal.setProductList(products);
-        meal.setTotalNutritional(totalNutritional);
-        meal.setRecipe(recipe);
+        meal.setTotalNutritional(mappedMeal.getTotalNutritional());
         mealRepository.save(meal);
 
         return mealMapper.toResponse(meal);
@@ -1723,33 +1514,34 @@ public class MealServiceImpl implements MealService {
     @Override
     @Transactional
     public void mealDelete(Integer id) {
-        mealRepository.deleteById(id);
+        Meal meal = mealRepository.findById(id)
+                .orElseThrow(() -> new MealException("Meal not found by Id"));
+
+        if (meal.getProductList() != null) {
+            for (Product product : new ArrayList<>(meal.getProductList())) {
+                if (product.getMealList() != null) {
+                    product.getMealList().remove(meal);
+                }
+            }
+            meal.getProductList().clear();
+        }
+
+        mealRepository.delete(meal);
     }
 
     @Override
     public List<MealResponse> getAllMealsByName(String nameSearch) {
-        return toResponses(mealRepository.findAllByName(nameSearch));
+        return mealMapper.toResponses(mealRepository.findAllByName(nameSearch));
     }
 
     @Override
     public List<MealResponse> getAllMealsByAuthorId(Integer authorId) {
-        return toResponses(mealRepository.findAllByAuthorId(authorId));
-    }
-
-    @Override
-    public List<MealResponse> getAllMealsByNutritionalValueId(Integer nutritionalValueId) {
-        return toResponses(mealRepository.findAllByTotalNutritionalId(nutritionalValueId));
+        return mealMapper.toResponses(mealRepository.findAllByAuthorId(authorId));
     }
 
     @Override
     public List<MealResponse> getAllMealsByProductIds(List<Integer> productIds) {
-        return toResponses(mealRepository.findAllByProductIds(productIds));
-    }
-
-    private List<MealResponse> toResponses(List<Meal> meals) {
-        return meals.stream()
-                .map(mealMapper::toResponse)
-                .toList();
+        return mealMapper.toResponses(mealRepository.findAllByProductIds(productIds));
     }
 
     private User getAuthor(Integer authorId) {
@@ -1758,33 +1550,6 @@ public class MealServiceImpl implements MealService {
         }
         return userRepository.findById(authorId)
                 .orElseThrow(() -> new MealException("Author not found by Id"));
-    }
-
-    private NutritionalValue getTotalNutritional(Integer totalNutritionalId) {
-        if (totalNutritionalId == null) {
-            return null;
-        }
-        return nutritionalValueRepository.findById(totalNutritionalId)
-                .orElseThrow(() -> new MealException("Nutritional Value not found by Id"));
-    }
-
-    private Note getRecipe(Integer recipeId) {
-        if (recipeId == null) {
-            return null;
-        }
-        return noteRepository.findById(recipeId)
-                .orElseThrow(() -> new MealException("Recipe not found by Id"));
-    }
-
-    private List<Product> getProducts(List<Integer> productIds) {
-        if (productIds == null || productIds.isEmpty()) {
-            return List.of();
-        }
-        List<Product> products = productRepository.findAllById(productIds);
-        if (products.size() != productIds.size()) {
-            throw new MealException("Some products not found");
-        }
-        return products;
     }
 }
 
@@ -1798,10 +1563,8 @@ import com.uni.project.model.dto.request.NoteRequest;
 import com.uni.project.model.dto.response.NoteResponse;
 import com.uni.project.model.entity.Meal;
 import com.uni.project.model.entity.Note;
-import com.uni.project.model.entity.User;
 import com.uni.project.repository.MealRepository;
 import com.uni.project.repository.NoteRepository;
-import com.uni.project.repository.UserRepository;
 import com.uni.project.service.NoteService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -1815,7 +1578,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class NoteServiceImpl implements NoteService {
     private final NoteRepository noteRepository;
-    private final UserRepository userRepository;
     private final MealRepository mealRepository;
 
     private final NoteMapper noteMapper;
@@ -1823,12 +1585,16 @@ public class NoteServiceImpl implements NoteService {
     @Override
     @Transactional
     public NoteResponse noteCreate(NoteRequest noteRequest) {
-        User user = getUser(noteRequest.getUserId());
         Meal meal = getMeal(noteRequest.getMealId());
-        Note note = noteRepository
-                .save(noteMapper.fromRequest(noteRequest, user, meal));
+        if (meal.getRecipe() != null) {
+            throw new NoteException("Meal already has a note");
+        }
 
-        return noteMapper.toResponse(note);
+        Note note = noteMapper.fromRequest(noteRequest, meal);
+        meal.setRecipe(note);
+        Meal savedMeal = mealRepository.save(meal);
+
+        return noteMapper.toResponse(savedMeal.getRecipe());
     }
 
     @Override
@@ -1841,7 +1607,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public List<NoteResponse> getAllNotes() {
-        return toResponses(noteRepository.findAll());
+        return noteMapper.toResponses(noteRepository.findAll());
     }
 
     @Override
@@ -1849,13 +1615,22 @@ public class NoteServiceImpl implements NoteService {
     public NoteResponse noteUpdate(Integer id, NoteRequest noteRequest) {
         Note note = noteRepository.findById(id)
                 .orElseThrow(() -> new NoteException("Note is not found by Id"));
-        User user = getUser(noteRequest.getUserId());
-        Meal meal = getMeal(noteRequest.getMealId());
-        note.setUser(user);
-        note.setMeal(meal);
-        note.setDate(noteRequest.getDate());
+        Meal targetMeal = getMeal(noteRequest.getMealId());
+        Meal currentMeal = note.getMeal();
         note.setNotes(noteRequest.getNotes());
-        noteRepository.save(note);
+
+        if (targetMeal.getRecipe() != null && !targetMeal.getRecipe().getId().equals(note.getId())) {
+            throw new NoteException("Target meal already has another note");
+        }
+
+        if (currentMeal != null && !currentMeal.getId().equals(targetMeal.getId())) {
+            currentMeal.setRecipe(null);
+            mealRepository.save(currentMeal);
+        }
+
+        note.setMeal(targetMeal);
+        targetMeal.setRecipe(note);
+        mealRepository.save(targetMeal);
 
         return noteMapper.toResponse(note);
     }
@@ -1863,161 +1638,31 @@ public class NoteServiceImpl implements NoteService {
     @Override
     @Transactional
     public void noteDelete(Integer id) {
-        noteRepository.deleteById(id);
-    }
+        Note note = noteRepository.findById(id)
+                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+        Meal meal = note.getMeal();
+        if (meal == null) {
+            noteRepository.delete(note);
+            return;
+        }
 
-    @Override
-    public List<NoteResponse> getAllNotesByUserId(Integer userId) {
-        return toResponses(noteRepository.findAllByUserId(userId));
+        meal.setRecipe(null);
+        mealRepository.save(meal);
     }
 
     @Override
     public List<NoteResponse> getAllNotesByDate(LocalDate dateSearch) {
-        return toResponses(noteRepository.findAllByDate(dateSearch));
+        return noteMapper.toResponses(noteRepository.findAllByDate(dateSearch));
     }
 
     @Override
     public List<NoteResponse> getAllNotesByMealId(Integer mealId) {
-        return toResponses(noteRepository.findAllByMealId(mealId));
-    }
-
-    private List<NoteResponse> toResponses(List<Note> notes) {
-        return notes.stream()
-                .map(noteMapper::toResponse)
-                .toList();
-    }
-
-    private User getUser(Integer userId) {
-        if (userId == null) {
-            return null;
-        }
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NoteException("User not found by Id"));
+        return noteMapper.toResponses(noteRepository.findAllByMealId(mealId));
     }
 
     private Meal getMeal(Integer mealId) {
-        if (mealId == null) {
-            return null;
-        }
         return mealRepository.findById(mealId)
                 .orElseThrow(() -> new NoteException("Meal not found by Id"));
-    }
-}
-
-
-Файл NutritionalValueServiceImpl.java
-package com.uni.project.service.impl;
-
-import com.uni.project.exception.NutritionalValueException;
-import com.uni.project.mapper.NutritionalValueMapper;
-import com.uni.project.model.dto.request.NutritionalValueRequest;
-import com.uni.project.model.dto.response.NutritionalValueResponse;
-import com.uni.project.model.entity.Meal;
-import com.uni.project.model.entity.NutritionalValue;
-import com.uni.project.model.entity.Product;
-import com.uni.project.model.entity.User;
-import com.uni.project.repository.MealRepository;
-import com.uni.project.repository.NutritionalValueRepository;
-import com.uni.project.repository.ProductRepository;
-import com.uni.project.repository.UserRepository;
-import com.uni.project.service.NutritionalValueService;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-@Service
-@AllArgsConstructor
-@Transactional(readOnly = true)
-public class NutritionalValueServiceImpl implements NutritionalValueService {
-    private final NutritionalValueRepository nutritionalValueRepository;
-    private final UserRepository userRepository;
-    private final ProductRepository productRepository;
-    private final MealRepository mealRepository;
-
-    private final NutritionalValueMapper nutritionalValueMapper;
-
-    @Override
-    @Transactional
-    public NutritionalValueResponse nutritionalValueCreate(NutritionalValueRequest nutritionalValueRequest) {
-        User owner = getOwner(nutritionalValueRequest.getOwnerId());
-        Product product = getProduct(nutritionalValueRequest.getProductId());
-        Meal meal = getMeal(nutritionalValueRequest.getMealId());
-        NutritionalValue nutritionalValue = nutritionalValueRepository
-                .save(nutritionalValueMapper.fromRequest(nutritionalValueRequest, owner, product, meal));
-
-        return nutritionalValueMapper.toResponse(nutritionalValue);
-    }
-
-    @Override
-    public NutritionalValueResponse getNutritionalValueById(Integer id) {
-        NutritionalValue nutritionalValue = nutritionalValueRepository.findById(id)
-                .orElseThrow(() -> new NutritionalValueException("Nutritional Value not found by Id"));
-
-        return nutritionalValueMapper.toResponse(nutritionalValue);
-    }
-
-    @Override
-    public List<NutritionalValueResponse> getAllNutritionalValues() {
-        return toResponses(nutritionalValueRepository.findAll());
-    }
-
-    @Override
-    @Transactional
-    public NutritionalValueResponse nutritionalValueUpdate(Integer id,
-                                                           NutritionalValueRequest nutritionalValueRequest) {
-        NutritionalValue nutritionalValue = nutritionalValueRepository.findById(id)
-                .orElseThrow(() -> new NutritionalValueException("Nutritional Value not found by Id"));
-        User owner = getOwner(nutritionalValueRequest.getOwnerId());
-        Product product = getProduct(nutritionalValueRequest.getProductId());
-        Meal meal = getMeal(nutritionalValueRequest.getMealId());
-        nutritionalValue.setCalories(nutritionalValueRequest.getCalories());
-        nutritionalValue.setProteins(nutritionalValueRequest.getProteins());
-        nutritionalValue.setFats(nutritionalValueRequest.getFats());
-        nutritionalValue.setCarbohydrates(nutritionalValueRequest.getCarbohydrates());
-        nutritionalValue.setOwner(owner);
-        nutritionalValue.setProduct(product);
-        nutritionalValue.setMeal(meal);
-        nutritionalValueRepository.save(nutritionalValue);
-
-        return nutritionalValueMapper.toResponse(nutritionalValue);
-    }
-
-    @Override
-    @Transactional
-    public void nutritionalValueDelete(Integer id) {
-        nutritionalValueRepository.deleteById(id);
-    }
-
-    private List<NutritionalValueResponse> toResponses(List<NutritionalValue> values) {
-        return values.stream()
-                .map(nutritionalValueMapper::toResponse)
-                .toList();
-    }
-
-    private User getOwner(Integer ownerId) {
-        if (ownerId == null) {
-            return null;
-        }
-        return userRepository.findById(ownerId)
-                .orElseThrow(() -> new NutritionalValueException("Owner not found by Id"));
-    }
-
-    private Product getProduct(Integer productId) {
-        if (productId == null) {
-            return null;
-        }
-        return productRepository.findById(productId)
-                .orElseThrow(() -> new NutritionalValueException("Product not found by Id"));
-    }
-
-    private Meal getMeal(Integer mealId) {
-        if (mealId == null) {
-            return null;
-        }
-        return mealRepository.findById(mealId)
-                .orElseThrow(() -> new NutritionalValueException("Meal not found by Id"));
     }
 }
 
@@ -2030,10 +1675,8 @@ import com.uni.project.mapper.ProductMapper;
 import com.uni.project.model.dto.request.ProductRequest;
 import com.uni.project.model.dto.response.ProductResponse;
 import com.uni.project.model.entity.Meal;
-import com.uni.project.model.entity.NutritionalValue;
 import com.uni.project.model.entity.Product;
 import com.uni.project.repository.MealRepository;
-import com.uni.project.repository.NutritionalValueRepository;
 import com.uni.project.repository.ProductRepository;
 import com.uni.project.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -2047,7 +1690,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
-    private final NutritionalValueRepository nutritionalValueRepository;
     private final MealRepository mealRepository;
 
     private final ProductMapper productMapper;
@@ -2055,10 +1697,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse productCreate(ProductRequest productRequest) {
-        NutritionalValue nutritionalValue100g = getNutritionalValue(productRequest.getNutritionalValue100gId());
         List<Meal> meals = getMeals(productRequest.getMealIds());
         Product product = productRepository
-                .save(productMapper.fromRequest(productRequest, nutritionalValue100g, meals));
+                .save(productMapper.fromRequest(productRequest, meals));
 
         return productMapper.toResponse(product);
     }
@@ -2073,7 +1714,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponse> getAllProducts() {
-        return toResponses(productRepository.findAll());
+        return productMapper.toResponses(productRepository.findAll());
     }
 
     @Override
@@ -2081,10 +1722,10 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse productUpdate(Integer id, ProductRequest productRequest) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductException("Product not found by Id"));
-        NutritionalValue nutritionalValue100g = getNutritionalValue(productRequest.getNutritionalValue100gId());
         List<Meal> meals = getMeals(productRequest.getMealIds());
+        Product mappedProduct = productMapper.fromRequest(productRequest, meals);
         product.setName(productRequest.getName());
-        product.setNutritionalValue100g(nutritionalValue100g);
+        product.setNutritionalValue100g(mappedProduct.getNutritionalValue100g());
         product.setMealList(meals);
         productRepository.save(product);
 
@@ -2094,31 +1735,29 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void productDelete(Integer id) {
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductException("Product not found by Id"));
+
+        if (product.getMealList() != null) {
+            product.getMealList().clear();
+        }
+
+        if (product.getNutritionalValue100g() != null) {
+            product.setNutritionalValue100g(null);
+        }
+
+        productRepository.save(product);
+        productRepository.delete(product);
     }
 
     @Override
     public List<ProductResponse> getAllProductsByName(String nameSearch) {
-        return toResponses(productRepository.findAllByName(nameSearch));
+        return productMapper.toResponses(productRepository.findAllByName(nameSearch));
     }
 
     @Override
     public List<ProductResponse> getAllProductsByMealId(Integer mealId) {
-        return toResponses(productRepository.findAllByMealId(mealId));
-    }
-
-    private List<ProductResponse> toResponses(List<Product> products) {
-        return products.stream()
-                .map(productMapper::toResponse)
-                .toList();
-    }
-
-    private NutritionalValue getNutritionalValue(Integer nutritionalValueId) {
-        if (nutritionalValueId == null) {
-            return null;
-        }
-        return nutritionalValueRepository.findById(nutritionalValueId)
-                .orElseThrow(() -> new ProductException("Nutritional Value not found by Id"));
+        return productMapper.toResponses(productRepository.findAllByMealId(mealId));
     }
 
     private List<Meal> getMeals(List<Integer> mealIds) {
@@ -2152,10 +1791,9 @@ import com.uni.project.model.entity.NutritionalValue;
 import com.uni.project.model.entity.Sex;
 import com.uni.project.model.entity.User;
 import com.uni.project.repository.MealRepository;
-import com.uni.project.repository.NoteRepository;
-import com.uni.project.repository.NutritionalValueRepository;
 import com.uni.project.repository.UserRepository;
 import com.uni.project.service.UserService;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -2169,8 +1807,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final MealRepository mealRepository;
-    private final NoteRepository noteRepository;
-    private final NutritionalValueRepository nutritionalValueRepository;
     private final UserMapper userMapper;
     private final NutritionalValueMapper nutritionalValueMapper;
     private static final String USER_FAIL_MESSAGE = "User not found by Id";
@@ -2178,10 +1814,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse userCreate(UserRequest userRequest) {
-        NutritionalValue dailyGoal = getDailyGoal(userRequest.getDailyGoalId());
-        List<Meal> meals = getMeals(userRequest.getMealIds());
-        List<Note> posts = getPosts(userRequest.getPostIds());
-        User user = userRepository.save(userMapper.fromRequest(userRequest, dailyGoal, meals, posts));
+        User user = userMapper.fromRequest(userRequest);
+        user.setMealsPlan(new ArrayList<>());
+        user = userRepository.save(user);
         return userMapper.toResponse(user);
     }
 
@@ -2194,7 +1829,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllUsers() {
-        return toResponses(userRepository.findAll());
+        return userMapper.toResponses(userRepository.findAll());
     }
 
     @Override
@@ -2202,16 +1837,14 @@ public class UserServiceImpl implements UserService {
     public UserResponse userUpdate(Integer id, UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
-        NutritionalValue dailyGoal = getDailyGoal(userRequest.getDailyGoalId());
-        List<Meal> meals = getMeals(userRequest.getMealIds());
-        List<Note> posts = getPosts(userRequest.getPostIds());
         user.setName(userRequest.getName());
         user.setPassword(userRequest.getPassword());
         user.setEmail(userRequest.getEmail());
         user.setMeasurements(userRequest.getMeasurements());
-        user.setDailyGoal(dailyGoal);
-        user.setMealsPlan(meals);
-        user.setPosts(posts);
+        if (userRequest.getDailyGoal() != null) {
+            user.setDailyGoal(nutritionalValueMapper.fromRequest(userRequest.getDailyGoal()));
+        }
+
         userRepository.save(user);
         return userMapper.toResponse(user);
     }
@@ -2219,7 +1852,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void userDelete(Integer id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+        userRepository.delete(user);
     }
 
     @Override
@@ -2234,17 +1869,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllUsersByName(String nameSearch) {
-        return toResponses(userRepository.findAllByName(nameSearch));
+        return userMapper.toResponses(userRepository.findAllByName(nameSearch));
     }
 
     @Override
     public List<UserResponse> getAllUsersBySex(Sex sexSearch) {
-        return toResponses(userRepository.findAllBySex(sexSearch));
+        return userMapper.toResponses(userRepository.findAllBySex(sexSearch));
     }
 
     @Override
     public List<UserResponse> getAllUsersByAge(Integer ageSearch) {
-        return toResponses(userRepository.findAllByAge(ageSearch));
+        return userMapper.toResponses(userRepository.findAllByAge(ageSearch));
     }
 
     @Override
@@ -2263,12 +1898,12 @@ public class UserServiceImpl implements UserService {
         NutritionalValue goalNutritionalValue = getNutritionalValue(measurements);
         user.setDailyGoal(goalNutritionalValue);
         userRepository.save(user);
-        nutritionalValueRepository.save(goalNutritionalValue);
 
         return nutritionalValueMapper.toResponse(goalNutritionalValue);
     }
 
-    private static @NonNull NutritionalValue getNutritionalValue(BodyParameters measurements) {
+    @NonNull
+    private static NutritionalValue getNutritionalValue(BodyParameters measurements) {
         NutritionalValue goalNutritionalValue = new NutritionalValue();
         double baseValues = (measurements.getWeight() * 10
                 + measurements.getHeight() * 6.25
@@ -2286,13 +1921,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponse> findAllWithMeals() {
         List<User> userList = userRepository.findAllWithMeals();
-        return toResponses(userList);
-    }
-
-    @Override
-    public List<UserResponse> findAllWithNotes() {
-        List<User> userList = userRepository.findAll();
-        return toResponses(userList);
+        return userMapper.toResponses(userList);
     }
 
     @Override
@@ -2307,65 +1936,32 @@ public class UserServiceImpl implements UserService {
         return createCompositeInternal(userRequest);
     }
 
-    private List<UserResponse> toResponses(List<User> users) {
-        return users.stream()
-                .map(userMapper::toResponse)
-                .toList();
-    }
-
-    private NutritionalValue getDailyGoal(Integer dailyGoalId) {
-        if (dailyGoalId == null) {
-            return null;
-        }
-        return nutritionalValueRepository.findById(dailyGoalId)
-                .orElseThrow(() -> new UserException("Nutritional Value not found by Id"));
-    }
-
-    private List<Meal> getMeals(List<Integer> mealIds) {
-        if (mealIds == null || mealIds.isEmpty()) {
-            return List.of();
-        }
-        List<Meal> meals = mealRepository.findAllById(mealIds);
-        if (meals.size() != mealIds.size()) {
-            throw new UserException("Some meals not found");
-        }
-        return meals;
-    }
-
-    private List<Note> getPosts(List<Integer> postIds) {
-        if (postIds == null || postIds.isEmpty()) {
-            return List.of();
-        }
-        List<Note> posts = noteRepository.findAllById(postIds);
-        if (posts.size() != postIds.size()) {
-            throw new UserException("Some posts not found");
-        }
-        return posts;
-    }
-
     private UserResponse createCompositeInternal(UserCompositeRequest request) {
-        NutritionalValue dailyGoal = new NutritionalValue();
-        dailyGoal.setCalories(request.getDailyGoalCalories());
-        dailyGoal.setProteins(request.getDailyGoalProteins());
-        dailyGoal.setFats(request.getDailyGoalFats());
-        dailyGoal.setCarbohydrates(request.getDailyGoalCarbohydrates());
-
-        User user = userRepository.save(
-                userMapper.fromRequest(request, dailyGoal, List.of(), List.of())
-        );
-
+        if (request.getDailyGoal() == null) {
+            throw new UserException("Daily goal is required");
+        }
+        NutritionalValue dailyGoal = nutritionalValueMapper.fromRequest(request.getDailyGoal());
+        User user = userMapper.fromRequest(request);
         user.setDailyGoal(dailyGoal);
-        userRepository.save(user);
+        user.setMealsPlan(new ArrayList<>());
+        user = userRepository.save(user);
 
         if (request.isFailAfterUser()) {
             throw new UserException("Forced error after saving user and daily goal");
         }
 
         Note note = new Note();
-        note.setUser(user);
-        note.setDate(request.getNoteDate());
         note.setNotes(request.getNoteTexts());
-        noteRepository.save(note);
+
+        Meal meal = new Meal();
+        meal.setName("Meal note");
+        meal.setDate(request.getNoteDate());
+        meal.setAuthor(user);
+        meal.setRecipe(note);
+        mealRepository.save(meal);
+        if (user.getMealsPlan() != null) {
+            user.getMealsPlan().add(meal);
+        }
 
         return userMapper.toResponse(user);
     }
@@ -2423,4 +2019,5 @@ class TestcontainersConfiguration {
 	}
 
 }
+
 

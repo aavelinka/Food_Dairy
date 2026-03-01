@@ -20,7 +20,5 @@ public interface MealService {
 
     List<MealResponse> getAllMealsByAuthorId(Integer authorId);
 
-    List<MealResponse> getAllMealsByNutritionalValueId(Integer nutritionalValueId);
-
     List<MealResponse> getAllMealsByProductIds(List<Integer> productIds);
 }
