@@ -32,8 +32,6 @@ public interface UserService {
 
     List<UserResponse> findAllWithMeals();
 
-    List<UserResponse> findAllWithNotes();
-
     UserResponse createUserWithGoalAndNoteNoTx(UserCompositeRequest userRequest);
 
     UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest);

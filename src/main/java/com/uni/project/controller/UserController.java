@@ -88,11 +88,6 @@ public class UserController {
         return ResponseEntity.ok(userService.findAllWithMeals());
     }
 
-    @GetMapping("/with-notes")
-    public ResponseEntity<List<UserResponse>> findAllWithNotes() {
-        return ResponseEntity.ok(userService.findAllWithNotes());
-    }
-
     @PostMapping("/without_transaction")
     public ResponseEntity<UserResponse> createUserWithGoalAndNoteNoTx(
             @Valid @RequestBody UserCompositeRequest userRequest) {
