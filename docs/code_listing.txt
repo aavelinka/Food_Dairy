@@ -15,6 +15,7 @@ public class ProjectApplication {
 }
 
 
+
 Файл MealController.java
 package com.uni.project.controller;
 
@@ -88,6 +89,7 @@ public class MealController {
 }
 
 
+
 Файл NoteController.java
 package com.uni.project.controller;
 
@@ -156,6 +158,7 @@ public class NoteController {
 }
 
 
+
 Файл ProductController.java
 package com.uni.project.controller;
 
@@ -222,6 +225,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProductsByMealId(mealId));
     }
 }
+
 
 
 Файл UserController.java
@@ -316,10 +320,10 @@ public class UserController {
     }
 
     @PostMapping("/without_transaction")
-    public ResponseEntity<UserResponse> createUserWithGoalAndNoteNoTx(
+    public ResponseEntity<UserResponse> createUserWithoutGoalAndNoteNoTx(
             @Valid @RequestBody UserCompositeRequest userRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.createUserWithGoalAndNoteNoTx(userRequest));
+                .body(userService.createUserWithoutGoalAndNoteNoTx(userRequest));
     }
 
     @PostMapping("/with_transaction")
@@ -329,6 +333,87 @@ public class UserController {
                 .body(userService.createUserWithGoalAndNoteTx(userRequest));
     }
 }
+
+
+
+Файл WaterIntakeController.java
+package com.uni.project.controller;
+
+import com.uni.project.model.dto.request.WaterIntakeRequest;
+import com.uni.project.model.dto.response.WaterIntakeResponse;
+import com.uni.project.service.WaterIntakeService;
+import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/water-intakes")
+@AllArgsConstructor
+public class WaterIntakeController {
+    private final WaterIntakeService waterIntakeService;
+
+    @PostMapping
+    public ResponseEntity<WaterIntakeResponse> waterIntakeCreate(
+            @Valid @RequestBody WaterIntakeRequest waterIntakeRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(waterIntakeService.waterIntakeCreate(waterIntakeRequest));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<WaterIntakeResponse> getWaterIntakeById(@PathVariable Integer id) {
+        return ResponseEntity.ok(waterIntakeService.getWaterIntakeById(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WaterIntakeResponse>> getAllWaterIntakes() {
+        return ResponseEntity.ok(waterIntakeService.getAllWaterIntakes());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<WaterIntakeResponse> waterIntakeUpdate(@PathVariable Integer id,
+                                                                 @Valid @RequestBody
+                                                                 WaterIntakeRequest waterIntakeRequest) {
+        return ResponseEntity.ok(waterIntakeService.waterIntakeUpdate(id, waterIntakeRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> waterIntakeDelete(@PathVariable Integer id) {
+        waterIntakeService.waterIntakeDelete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<WaterIntakeResponse>> getAllWaterIntakesByUserId(
+            @RequestParam("userId") Integer userId) {
+        return ResponseEntity.ok(waterIntakeService.getAllWaterIntakesByUserId(userId));
+    }
+
+    @GetMapping("/date")
+    public ResponseEntity<List<WaterIntakeResponse>> getAllWaterIntakesByDate(
+            @RequestParam("userId") Integer userId,
+            @RequestParam("date") LocalDate date) {
+        return ResponseEntity.ok(waterIntakeService.getAllWaterIntakesByUserIdAndDate(userId, date));
+    }
+
+    @GetMapping("/daily-total")
+    public ResponseEntity<Integer> getDailyTotalByUserIdAndDate(
+            @RequestParam("userId") Integer userId,
+            @RequestParam("date") LocalDate date) {
+        return ResponseEntity.ok(waterIntakeService.getDailyTotalByUserIdAndDate(userId, date));
+    }
+}
+
 
 
 Файл MealException.java
@@ -341,6 +426,7 @@ public class MealException extends RuntimeException {
 }
 
 
+
 Файл NoteException.java
 package com.uni.project.exception;
 
@@ -349,6 +435,7 @@ public class NoteException extends RuntimeException {
         super(message);
     }
 }
+
 
 
 Файл ProductException.java
@@ -361,6 +448,7 @@ public class ProductException extends RuntimeException {
 }
 
 
+
 Файл UserException.java
 package com.uni.project.exception;
 
@@ -369,6 +457,18 @@ public class UserException extends RuntimeException {
         super(message);
     }
 }
+
+
+
+Файл WaterIntakeException.java
+package com.uni.project.exception;
+
+public class WaterIntakeException extends RuntimeException {
+    public WaterIntakeException(String message) {
+        super(message);
+    }
+}
+
 
 
 Файл MealMapper.java
@@ -417,6 +517,7 @@ public interface MealMapper {
 }
 
 
+
 Файл NoteMapper.java
 package com.uni.project.mapper;
 
@@ -441,6 +542,7 @@ public interface NoteMapper {
 }
 
 
+
 Файл NutritionalValueMapper.java
 package com.uni.project.mapper;
 
@@ -458,6 +560,7 @@ public interface NutritionalValueMapper {
 
     NutritionalValue fromRequest(NutritionalValueRequest nutritionalValueRequest);
 }
+
 
 
 Файл ProductMapper.java
@@ -496,6 +599,7 @@ public interface ProductMapper {
                 .toList();
     }
 }
+
 
 
 Файл UserMapper.java
@@ -537,6 +641,29 @@ public interface UserMapper {
 }
 
 
+
+Файл WaterIntakeMapper.java
+package com.uni.project.mapper;
+
+import com.uni.project.model.dto.request.WaterIntakeRequest;
+import com.uni.project.model.dto.response.WaterIntakeResponse;
+import com.uni.project.model.entity.WaterIntake;
+import java.util.List;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(componentModel = "spring")
+public interface WaterIntakeMapper {
+    @Mapping(target = "id", ignore = true)
+    WaterIntake fromRequest(WaterIntakeRequest waterIntakeRequest);
+
+    WaterIntakeResponse toResponse(WaterIntake waterIntake);
+
+    List<WaterIntakeResponse> toResponses(List<WaterIntake> waterIntakes);
+}
+
+
+
 Файл MealRequest.java
 package com.uni.project.model.dto.request;
 
@@ -567,6 +694,7 @@ public class MealRequest {
 }
 
 
+
 Файл NoteRequest.java
 package com.uni.project.model.dto.request;
 
@@ -590,6 +718,7 @@ public class NoteRequest {
     @NotEmpty
     private List<String> notes;
 }
+
 
 
 Файл NutritionalValueRequest.java
@@ -625,6 +754,7 @@ public class NutritionalValueRequest {
 }
 
 
+
 Файл ProductRequest.java
 package com.uni.project.model.dto.request;
 
@@ -652,6 +782,7 @@ public class ProductRequest {
 
     private List<Integer> mealIds;
 }
+
 
 
 Файл UserCompositeRequest.java
@@ -688,6 +819,7 @@ public class UserCompositeRequest extends UserRequest {
 }
 
 
+
 Файл UserMeasurementsRequest.java
 package com.uni.project.model.dto.request;
 
@@ -708,6 +840,7 @@ public class UserMeasurementsRequest {
     @Valid
     private BodyParameters measurements;
 }
+
 
 
 Файл UserRequest.java
@@ -747,6 +880,44 @@ public class UserRequest {
 }
 
 
+
+Файл WaterIntakeRequest.java
+package com.uni.project.model.dto.request;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class WaterIntakeRequest {
+    @NotNull
+    @Positive
+    private Integer userId;
+
+    @NotNull
+    private LocalDate date;
+
+    @NotNull
+    @Positive
+    private Integer amountMl;
+
+    @Size(max = 30)
+    private String drinkType;
+
+    @Size(max = 255)
+    private String comment;
+}
+
+
+
 Файл MealResponse.java
 package com.uni.project.model.dto.response;
 
@@ -779,6 +950,7 @@ public class MealResponse {
 }
 
 
+
 Файл NoteResponse.java
 package com.uni.project.model.dto.response;
 
@@ -800,6 +972,7 @@ public class NoteResponse {
 
     private List<String> notes;
 }
+
 
 
 Файл NutritionalValueResponse.java
@@ -825,6 +998,7 @@ public class NutritionalValueResponse {
 }
 
 
+
 Файл ProductResponse.java
 package com.uni.project.model.dto.response;
 
@@ -848,6 +1022,7 @@ public class ProductResponse {
 
     private List<Integer> mealIds;
 }
+
 
 
 Файл UserResponse.java
@@ -878,6 +1053,36 @@ public class UserResponse {
 
     private List<Integer> mealIds;
 }
+
+
+
+Файл WaterIntakeResponse.java
+package com.uni.project.model.dto.response;
+
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class WaterIntakeResponse {
+    private Integer id;
+
+    private Integer userId;
+
+    private LocalDate date;
+
+    private Integer amountMl;
+
+    private String drinkType;
+
+    private String comment;
+}
+
 
 
 Файл BodyParameters.java
@@ -935,12 +1140,12 @@ public class BodyParameters {
 }
 
 
+
 Файл Meal.java
 package com.uni.project.model.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -985,12 +1190,10 @@ public class Meal {
     private LocalDate date;
 
     @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "calories", column = @Column(name = "total_calories")),
-            @AttributeOverride(name = "proteins", column = @Column(name = "total_proteins")),
-            @AttributeOverride(name = "fats", column = @Column(name = "total_fats")),
-            @AttributeOverride(name = "carbohydrates", column = @Column(name = "total_carbohydrates"))
-    })
+    @AttributeOverride(name = "calories", column = @Column(name = "total_calories"))
+    @AttributeOverride(name = "proteins", column = @Column(name = "total_proteins"))
+    @AttributeOverride(name = "fats", column = @Column(name = "total_fats"))
+    @AttributeOverride(name = "carbohydrates", column = @Column(name = "total_carbohydrates"))
     private NutritionalValue totalNutritional;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -1000,7 +1203,7 @@ public class Meal {
     @ManyToMany(mappedBy = "mealList", fetch = FetchType.LAZY)
     private List<Product> productList;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn
     private Note recipe;
 
@@ -1019,6 +1222,7 @@ public class Meal {
 }
 
 
+
 Файл Note.java
 package com.uni.project.model.entity;
 
@@ -1026,7 +1230,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -1055,7 +1258,7 @@ public class Note {
     @Column
     private Integer id;
 
-    @OneToOne(mappedBy = "recipe", fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "recipe")
     private Meal meal;
 
     @ElementCollection
@@ -1066,6 +1269,7 @@ public class Note {
     @Column(name = "note_text", nullable = false)
     private List<String> notes;
 }
+
 
 
 Файл NutritionalValue.java
@@ -1098,12 +1302,12 @@ public class NutritionalValue {
 }
 
 
+
 Файл Product.java
 package com.uni.project.model.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -1139,12 +1343,10 @@ public class Product {
     private String name;
 
     @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "calories", column = @Column(name = "nv100_calories")),
-            @AttributeOverride(name = "proteins", column = @Column(name = "nv100_proteins")),
-            @AttributeOverride(name = "fats", column = @Column(name = "nv100_fats")),
-            @AttributeOverride(name = "carbohydrates", column = @Column(name = "nv100_carbohydrates"))
-    })
+    @AttributeOverride(name = "calories", column = @Column(name = "nv100_calories"))
+    @AttributeOverride(name = "proteins", column = @Column(name = "nv100_proteins"))
+    @AttributeOverride(name = "fats", column = @Column(name = "nv100_fats"))
+    @AttributeOverride(name = "carbohydrates", column = @Column(name = "nv100_carbohydrates"))
     private NutritionalValue nutritionalValue100g;
 
     @ManyToMany
@@ -1157,6 +1359,7 @@ public class Product {
 }
 
 
+
 Файл Sex.java
 package com.uni.project.model.entity;
 
@@ -1166,12 +1369,12 @@ public enum Sex {
 }
 
 
+
 Файл User.java
 package com.uni.project.model.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -1216,17 +1419,64 @@ public class User {
     private BodyParameters measurements;
 
     @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "calories", column = @Column(name = "daily_goal_calories")),
-            @AttributeOverride(name = "proteins", column = @Column(name = "daily_goal_proteins")),
-            @AttributeOverride(name = "fats", column = @Column(name = "daily_goal_fats")),
-            @AttributeOverride(name = "carbohydrates", column = @Column(name = "daily_goal_carbohydrates"))
-    })
+    @AttributeOverride(name = "calories", column = @Column(name = "daily_goal_calories"))
+    @AttributeOverride(name = "proteins", column = @Column(name = "daily_goal_proteins"))
+    @AttributeOverride(name = "fats", column = @Column(name = "daily_goal_fats"))
+    @AttributeOverride(name = "carbohydrates", column = @Column(name = "daily_goal_carbohydrates"))
     private NutritionalValue dailyGoal;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Meal> mealsPlan;
 }
+
+
+
+Файл WaterIntake.java
+package com.uni.project.model.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "water_intakes")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class WaterIntake {
+    @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
+    @Column(name = "date", nullable = false)
+    private LocalDate date;
+
+    @Column(name = "amount_ml", nullable = false)
+    private Integer amountMl;
+
+    @Column(name = "drink_type", length = 30)
+    private String drinkType;
+
+    @Column(name = "comment", length = 255)
+    private String comment;
+}
+
 
 
 Файл MealRepository.java
@@ -1251,6 +1501,7 @@ public interface MealRepository extends JpaRepository<Meal, Integer> {
 }
 
 
+
 Файл NoteRepository.java
 package com.uni.project.repository;
 
@@ -1272,6 +1523,7 @@ public interface NoteRepository extends JpaRepository<Note, Integer> {
 }
 
 
+
 Файл ProductRepository.java
 package com.uni.project.repository;
 
@@ -1289,6 +1541,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("select distinct p from Product p join p.mealList m where m.id = :mealId")
     List<Product> findAllByMealId(@Param("mealId") Integer mealId);
 }
+
 
 
 Файл UserRepository.java
@@ -1324,6 +1577,32 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 }
 
 
+
+Файл WaterIntakeRepository.java
+package com.uni.project.repository;
+
+import com.uni.project.model.entity.WaterIntake;
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface WaterIntakeRepository extends JpaRepository<WaterIntake, Integer> {
+    List<WaterIntake> findAllByUserIdOrderByDateDesc(Integer userId);
+
+    List<WaterIntake> findAllByUserIdAndDate(Integer userId, LocalDate date);
+
+    @Query("select coalesce(sum(w.amountMl), 0) "
+            + "from WaterIntake w where w.userId = :userId and w.date = :date")
+    Integer getDailyTotalByUserIdAndDate(@Param("userId") Integer userId,
+                                         @Param("date") LocalDate date);
+}
+
+
+
 Файл MealService.java
 package com.uni.project.service;
 
@@ -1349,6 +1628,7 @@ public interface MealService {
 
     List<MealResponse> getAllMealsByProductIds(List<Integer> productIds);
 }
+
 
 
 Файл NoteService.java
@@ -1377,6 +1657,7 @@ public interface NoteService {
 }
 
 
+
 Файл ProductService.java
 package com.uni.project.service;
 
@@ -1400,6 +1681,7 @@ public interface ProductService {
 
     List<ProductResponse> getAllProductsByMealId(Integer mealId);
 }
+
 
 
 Файл UserService.java
@@ -1437,10 +1719,39 @@ public interface UserService {
 
     List<UserResponse> findAllWithMeals();
 
-    UserResponse createUserWithGoalAndNoteNoTx(UserCompositeRequest userRequest);
+    UserResponse createUserWithoutGoalAndNoteNoTx(UserCompositeRequest userRequest);
 
     UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest);
 }
+
+
+
+Файл WaterIntakeService.java
+package com.uni.project.service;
+
+import com.uni.project.model.dto.request.WaterIntakeRequest;
+import com.uni.project.model.dto.response.WaterIntakeResponse;
+import java.time.LocalDate;
+import java.util.List;
+
+public interface WaterIntakeService {
+    WaterIntakeResponse waterIntakeCreate(WaterIntakeRequest waterIntakeRequest);
+
+    WaterIntakeResponse getWaterIntakeById(Integer id);
+
+    List<WaterIntakeResponse> getAllWaterIntakes();
+
+    WaterIntakeResponse waterIntakeUpdate(Integer id, WaterIntakeRequest waterIntakeRequest);
+
+    void waterIntakeDelete(Integer id);
+
+    List<WaterIntakeResponse> getAllWaterIntakesByUserId(Integer userId);
+
+    List<WaterIntakeResponse> getAllWaterIntakesByUserIdAndDate(Integer userId, LocalDate date);
+
+    Integer getDailyTotalByUserIdAndDate(Integer userId, LocalDate date);
+}
+
 
 
 Файл MealServiceImpl.java
@@ -1469,8 +1780,8 @@ import java.util.List;
 public class MealServiceImpl implements MealService {
     private final MealRepository mealRepository;
     private final UserRepository userRepository;
-
     private final MealMapper mealMapper;
+    private static final String MEAL_FAIL_MESSAGE = "Meal is not found by Id";
 
     @Override
     @Transactional
@@ -1485,7 +1796,7 @@ public class MealServiceImpl implements MealService {
     @Override
     public MealResponse getMealById(Integer id) {
         Meal meal = mealRepository.findById(id)
-                .orElseThrow(() -> new MealException("Meal not found bu Id"));
+                .orElseThrow(() -> new MealException(MEAL_FAIL_MESSAGE));
 
         return mealMapper.toResponse(meal);
     }
@@ -1499,7 +1810,7 @@ public class MealServiceImpl implements MealService {
     @Transactional
     public MealResponse mealUpdate(Integer id, MealRequest mealRequest) {
         Meal meal = mealRepository.findById(id)
-                .orElseThrow(() -> new MealException("Meal not found by Id"));
+                .orElseThrow(() -> new MealException(MEAL_FAIL_MESSAGE));
         User author = getAuthor(mealRequest.getAuthorId());
         Meal mappedMeal = mealMapper.fromRequest(mealRequest, author);
         meal.setName(mealRequest.getName());
@@ -1515,7 +1826,7 @@ public class MealServiceImpl implements MealService {
     @Transactional
     public void mealDelete(Integer id) {
         Meal meal = mealRepository.findById(id)
-                .orElseThrow(() -> new MealException("Meal not found by Id"));
+                .orElseThrow(() -> new MealException(MEAL_FAIL_MESSAGE));
 
         if (meal.getProductList() != null) {
             for (Product product : new ArrayList<>(meal.getProductList())) {
@@ -1554,6 +1865,7 @@ public class MealServiceImpl implements MealService {
 }
 
 
+
 Файл NoteServiceImpl.java
 package com.uni.project.service.impl;
 
@@ -1579,8 +1891,8 @@ import java.util.List;
 public class NoteServiceImpl implements NoteService {
     private final NoteRepository noteRepository;
     private final MealRepository mealRepository;
-
     private final NoteMapper noteMapper;
+    private static final String NOTE_FAIL_MESSAGE = "Note is not found by Id";
 
     @Override
     @Transactional
@@ -1600,7 +1912,7 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public NoteResponse getNoteById(Integer id) {
         Note note = noteRepository.findById(id)
-                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+                .orElseThrow(() -> new NoteException(NOTE_FAIL_MESSAGE));
 
         return noteMapper.toResponse(note);
     }
@@ -1614,7 +1926,7 @@ public class NoteServiceImpl implements NoteService {
     @Transactional
     public NoteResponse noteUpdate(Integer id, NoteRequest noteRequest) {
         Note note = noteRepository.findById(id)
-                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+                .orElseThrow(() -> new NoteException(NOTE_FAIL_MESSAGE));
         Meal targetMeal = getMeal(noteRequest.getMealId());
         Meal currentMeal = note.getMeal();
         note.setNotes(noteRequest.getNotes());
@@ -1639,7 +1951,7 @@ public class NoteServiceImpl implements NoteService {
     @Transactional
     public void noteDelete(Integer id) {
         Note note = noteRepository.findById(id)
-                .orElseThrow(() -> new NoteException("Note is not found by Id"));
+                .orElseThrow(() -> new NoteException(NOTE_FAIL_MESSAGE));
         Meal meal = note.getMeal();
         if (meal == null) {
             noteRepository.delete(note);
@@ -1667,6 +1979,7 @@ public class NoteServiceImpl implements NoteService {
 }
 
 
+
 Файл ProductServiceImpl.java
 package com.uni.project.service.impl;
 
@@ -1691,8 +2004,8 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final MealRepository mealRepository;
-
     private final ProductMapper productMapper;
+    private static final String PRODUCT_FAIL_MESSAGE = "Product not found by Id";
 
     @Override
     @Transactional
@@ -1707,7 +2020,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse getProductById(Integer id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductException("Product not found by Id"));
+                .orElseThrow(() -> new ProductException(PRODUCT_FAIL_MESSAGE));
 
         return productMapper.toResponse(product);
     }
@@ -1721,7 +2034,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponse productUpdate(Integer id, ProductRequest productRequest) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductException("Product not found by Id"));
+                .orElseThrow(() -> new ProductException(PRODUCT_FAIL_MESSAGE));
         List<Meal> meals = getMeals(productRequest.getMealIds());
         Product mappedProduct = productMapper.fromRequest(productRequest, meals);
         product.setName(productRequest.getName());
@@ -1736,7 +2049,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void productDelete(Integer id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductException("Product not found by Id"));
+                .orElseThrow(() -> new ProductException(PRODUCT_FAIL_MESSAGE));
 
         if (product.getMealList() != null) {
             product.getMealList().clear();
@@ -1771,6 +2084,7 @@ public class ProductServiceImpl implements ProductService {
         return meals;
     }
 }
+
 
 
 Файл UserServiceImpl.java
@@ -1926,7 +2240,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public UserResponse createUserWithGoalAndNoteNoTx(UserCompositeRequest userRequest) {
+    public UserResponse createUserWithoutGoalAndNoteNoTx(UserCompositeRequest userRequest) {
         return createCompositeInternal(userRequest);
     }
 
@@ -1937,9 +2251,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserResponse createCompositeInternal(UserCompositeRequest request) {
-        if (request.getDailyGoal() == null) {
-            throw new UserException("Daily goal is required");
-        }
         NutritionalValue dailyGoal = nutritionalValueMapper.fromRequest(request.getDailyGoal());
         User user = userMapper.fromRequest(request);
         user.setDailyGoal(dailyGoal);
@@ -1968,6 +2279,92 @@ public class UserServiceImpl implements UserService {
 }
 
 
+
+Файл WaterIntakeServiceImpl.java
+package com.uni.project.service.impl;
+
+import com.uni.project.exception.WaterIntakeException;
+import com.uni.project.mapper.WaterIntakeMapper;
+import com.uni.project.model.dto.request.WaterIntakeRequest;
+import com.uni.project.model.dto.response.WaterIntakeResponse;
+import com.uni.project.model.entity.WaterIntake;
+import com.uni.project.repository.WaterIntakeRepository;
+import com.uni.project.service.WaterIntakeService;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@AllArgsConstructor
+@Transactional(readOnly = true)
+public class WaterIntakeServiceImpl implements WaterIntakeService {
+    private static final String WATER_INTAKE_FAIL_MESSAGE = "Water intake not found by Id";
+    private final WaterIntakeRepository waterIntakeRepository;
+    private final WaterIntakeMapper waterIntakeMapper;
+
+    @Override
+    @Transactional
+    public WaterIntakeResponse waterIntakeCreate(WaterIntakeRequest waterIntakeRequest) {
+        WaterIntake waterIntake = waterIntakeRepository.save(waterIntakeMapper.fromRequest(waterIntakeRequest));
+        return waterIntakeMapper.toResponse(waterIntake);
+    }
+
+    @Override
+    public WaterIntakeResponse getWaterIntakeById(Integer id) {
+        WaterIntake waterIntake = waterIntakeRepository.findById(id)
+                .orElseThrow(() -> new WaterIntakeException(WATER_INTAKE_FAIL_MESSAGE));
+        return waterIntakeMapper.toResponse(waterIntake);
+    }
+
+    @Override
+    public List<WaterIntakeResponse> getAllWaterIntakes() {
+        return waterIntakeMapper.toResponses(waterIntakeRepository.findAll());
+    }
+
+    @Override
+    @Transactional
+    public WaterIntakeResponse waterIntakeUpdate(Integer id, WaterIntakeRequest waterIntakeRequest) {
+        WaterIntake waterIntake = waterIntakeRepository.findById(id)
+                .orElseThrow(() -> new WaterIntakeException(WATER_INTAKE_FAIL_MESSAGE));
+
+        waterIntake.setUserId(waterIntakeRequest.getUserId());
+        waterIntake.setDate(waterIntakeRequest.getDate());
+        waterIntake.setAmountMl(waterIntakeRequest.getAmountMl());
+        waterIntake.setDrinkType(waterIntakeRequest.getDrinkType());
+        waterIntake.setComment(waterIntakeRequest.getComment());
+        waterIntakeRepository.save(waterIntake);
+
+        return waterIntakeMapper.toResponse(waterIntake);
+    }
+
+    @Override
+    @Transactional
+    public void waterIntakeDelete(Integer id) {
+        WaterIntake waterIntake = waterIntakeRepository.findById(id)
+                .orElseThrow(() -> new WaterIntakeException(WATER_INTAKE_FAIL_MESSAGE));
+        waterIntakeRepository.delete(waterIntake);
+    }
+
+    @Override
+    public List<WaterIntakeResponse> getAllWaterIntakesByUserId(Integer userId) {
+        return waterIntakeMapper.toResponses(waterIntakeRepository.findAllByUserIdOrderByDateDesc(userId));
+    }
+
+    @Override
+    public List<WaterIntakeResponse> getAllWaterIntakesByUserIdAndDate(Integer userId, LocalDate date) {
+        return waterIntakeMapper.toResponses(waterIntakeRepository.findAllByUserIdAndDate(userId, date));
+    }
+
+    @Override
+    public Integer getDailyTotalByUserIdAndDate(Integer userId, LocalDate date) {
+        return waterIntakeRepository.getDailyTotalByUserIdAndDate(userId, date);
+    }
+}
+
+
+
 Файл ProjectApplicationTests.java
 package com.uni.project;
 
@@ -1986,6 +2383,7 @@ class ProjectApplicationTests {
 }
 
 
+
 Файл TestProjectApplication.java
 package com.uni.project;
 
@@ -1998,6 +2396,7 @@ public class TestProjectApplication {
 	}
 
 }
+
 
 
 Файл TestcontainersConfiguration.java
