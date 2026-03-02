@@ -4,8 +4,6 @@
 
 - [SonarCloud analysis](https://sonarcloud.io/summary/overall?id=aavelinka_Food_Dairy&branch=main)
 - [ER-Diagram](./docs/ER-Diagramm.png)
-- [Postman collection](./docs/FoodDairyApiDoc.json)
-- [Code listing](./docs/code_listing.txt)
 
 ## Overview
 
