@@ -1,7 +1,6 @@
 package com.uni.project.controller;
 
 import com.uni.project.model.dto.request.UserCompositeRequest;
-import com.uni.project.model.dto.request.UserMeasurementsRequest;
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.Sex;
