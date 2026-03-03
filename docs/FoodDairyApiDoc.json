@@ -1,8 +1,9 @@
 {
   "info": {
     "name": "Nutrition Tracker API",
-    "description": "Коллекция для управления питанием: пользователи, продукты, приемы пищи, заметки, вода и nutritional values",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "description": "Коллекция для управления питанием: пользователи, продукты, приемы пищи, заметки, вода и параметры тела",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "2.0.0"
   },
   "item": [
     {
@@ -110,7 +111,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Anna Petrova\",\n  \"password\": \"anna12345\",\n  \"email\": \"anna.petrova@example.com\",\n  \"measurements\": {\n    \"sex\": \"FEMALE\",\n    \"weight\": 62.5,\n    \"height\": 168.0,\n    \"age\": 24,\n    \"chest\": 88.0,\n    \"waist\": 67.0,\n    \"hips\": 94.0\n  },\n  \"dailyGoal\": {\n    \"calories\": 1850.0,\n    \"proteins\": 116.0,\n    \"fats\": 62.0,\n    \"carbohydrates\": 254.0\n  }\n}"
+              "raw": "{\n  \"name\": \"Anna Petrova\",\n  \"password\": \"anna12345\",\n  \"email\": \"anna.petrova@example.com\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/users",
@@ -131,87 +132,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Anna Petrova Updated\",\n  \"password\": \"newSecure123\",\n  \"email\": \"anna.petrova.updated@example.com\",\n  \"measurements\": {\n    \"sex\": \"FEMALE\",\n    \"weight\": 61.8,\n    \"height\": 168.0,\n    \"age\": 25,\n    \"chest\": 87.5,\n    \"waist\": 66.0,\n    \"hips\": 93.5\n  },\n  \"dailyGoal\": {\n    \"calories\": 1820.0,\n    \"proteins\": 114.0,\n    \"fats\": 61.0,\n    \"carbohydrates\": 251.0\n  }\n}"
+              "raw": "{\n  \"name\": \"Anna Petrova Updated\",\n  \"password\": \"newSecure123\",\n  \"email\": \"anna.petrova.updated@example.com\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/users/1",
               "host": ["{{baseUrl}}"],
               "path": ["api", "users", "1"]
-            }
-          }
-        },
-        {
-          "name": "Update user measurements",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"measurements\": {\n    \"sex\": \"FEMALE\",\n    \"weight\": 61.3,\n    \"height\": 168.0,\n    \"age\": 25,\n    \"chest\": 87.0,\n    \"waist\": 65.5,\n    \"hips\": 93.0\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/users/1/measurements",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "1", "measurements"]
-            }
-          }
-        },
-        {
-          "name": "Calculate nutritional value for user",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/users/1/nutritional",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "1", "nutritional"]
-            }
-          }
-        },
-        {
-          "name": "Create user with goal and note (no transaction)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"password\": \"password123\",\n  \"email\": \"jane.smith@example.com\",\n  \"measurements\": {\n    \"sex\": \"FEMALE\",\n    \"weight\": 65.0,\n    \"height\": 170.0,\n    \"age\": 28,\n    \"chest\": 90.0,\n    \"waist\": 70.0,\n    \"hips\": 96.0\n  },\n  \"dailyGoal\": {\n    \"calories\": 2000.0,\n    \"proteins\": 150.0,\n    \"fats\": 60.0,\n    \"carbohydrates\": 200.0\n  },\n  \"noteDate\": \"2026-03-23\",\n  \"noteTexts\": [\"First note\", \"Second note\"],\n  \"failAfterUser\": false\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/users/without_transaction",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "without_transaction"]
-            }
-          }
-        },
-        {
-          "name": "Create user with goal and note (with transaction)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Bob Johnson\",\n  \"password\": \"password123\",\n  \"email\": \"bob.johnson@example.com\",\n  \"measurements\": {\n    \"sex\": \"MALE\",\n    \"weight\": 90.0,\n    \"height\": 180.0,\n    \"age\": 35,\n    \"chest\": 105.0,\n    \"waist\": 90.0,\n    \"hips\": 100.0\n  },\n  \"dailyGoal\": {\n    \"calories\": 2200.0,\n    \"proteins\": 170.0,\n    \"fats\": 70.0,\n    \"carbohydrates\": 220.0\n  },\n  \"noteDate\": \"2026-03-23\",\n  \"noteTexts\": [\"Morning note\", \"Evening note\"],\n  \"failAfterUser\": false\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/users/with_transaction",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "with_transaction"]
             }
           }
         },
@@ -224,6 +150,183 @@
               "raw": "{{baseUrl}}/api/users/1",
               "host": ["{{baseUrl}}"],
               "path": ["api", "users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create user without transaction (with note)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"password\": \"password123\",\n  \"email\": \"jane.smith@example.com\",\n  \"dailyGoal\": {\n    \"calories\": 2000.0,\n    \"proteins\": 150.0,\n    \"fats\": 60.0,\n    \"carbohydrates\": 200.0\n  },\n  \"noteDate\": \"2026-03-23\",\n  \"noteTexts\": [\"First note\", \"Second note\"],\n  \"failAfterUser\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/without_transaction",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "without_transaction"]
+            }
+          }
+        },
+        {
+          "name": "Create user with transaction (with note)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bob Johnson\",\n  \"password\": \"password123\",\n  \"email\": \"bob.johnson@example.com\",\n  \"dailyGoal\": {\n    \"calories\": 2200.0,\n    \"proteins\": 170.0,\n    \"fats\": 70.0,\n    \"carbohydrates\": 220.0\n  },\n  \"noteDate\": \"2026-03-23\",\n  \"noteTexts\": [\"Morning note\", \"Evening note\"],\n  \"failAfterUser\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/with_transaction",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "with_transaction"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Body Parameters",
+      "item": [
+        {
+          "name": "Get all body parameters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "body-parameters"]
+            }
+          }
+        },
+        {
+          "name": "Get body parameters by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "body-parameters", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get body parameters by user",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters/user?userId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "body-parameters", "user"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get body parameters by user and date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters/date?userId=1&date=2026-03-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "body-parameters", "date"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "1"
+                },
+                {
+                  "key": "date",
+                  "value": "2026-03-01"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create body parameters",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"recordDate\": \"2026-03-01\",\n  \"sex\": \"FEMALE\",\n  \"weight\": 62.5,\n  \"height\": 168.0,\n  \"age\": 24,\n  \"chest\": 88.0,\n  \"waist\": 67.0,\n  \"hips\": 94.0,\n  \"dailyGoal\": {\n    \"calories\": 1850.0,\n    \"proteins\": 116.0,\n    \"fats\": 62.0,\n    \"carbohydrates\": 254.0\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "body-parameters"]
+            }
+          }
+        },
+        {
+          "name": "Update body parameters",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"recordDate\": \"2026-03-01\",\n  \"sex\": \"FEMALE\",\n  \"weight\": 61.8,\n  \"height\": 168.0,\n  \"age\": 25,\n  \"chest\": 87.5,\n  \"waist\": 66.0,\n  \"hips\": 93.5,\n  \"dailyGoal\": {\n    \"calories\": 1820.0,\n    \"proteins\": 114.0,\n    \"fats\": 61.0,\n    \"carbohydrates\": 251.0\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "body-parameters", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete body parameters",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "body-parameters", "1"]
+            }
+          }
+        },
+        {
+          "name": "Calculate nutritional value for user",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters/user/1/nutritional",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "body-parameters", "user", "1", "nutritional"]
             }
           }
         }

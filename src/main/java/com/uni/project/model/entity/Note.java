@@ -1,15 +1,14 @@
 package com.uni.project.model.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import com.uni.project.model.entity.converter.StringListConverter;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -35,11 +34,7 @@ public class Note {
     @OneToOne(mappedBy = "recipe")
     private Meal meal;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "note_notes",
-            joinColumns = @JoinColumn(name = "note_id")
-    )
-    @Column(name = "note_text", nullable = false)
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "notes", nullable = false, columnDefinition = "TEXT")
     private List<String> notes;
 }

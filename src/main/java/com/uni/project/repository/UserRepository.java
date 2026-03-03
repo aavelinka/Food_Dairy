@@ -14,17 +14,17 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findAllByName(String name);
 
-    @Query("select u from User u where u.measurements.sex = :sex")
+    @Query("select distinct u from User u join u.bodyParametersHistory bp where bp.sex = :sex")
     List<User> findAllBySex(@Param("sex") Sex sex);
 
-    @Query("select u from User u where u.measurements.age = :age")
+    @Query("select distinct u from User u join u.bodyParametersHistory bp where bp.age = :age")
     List<User> findAllByAge(@Param("age") Integer age);
 
     @Query("SELECT DISTINCT users FROM User users LEFT JOIN FETCH users.mealsPlan")
     List<User> findAllWithMeals();
 
     @Override
-    @EntityGraph(attributePaths = {"mealsPlan", "mealsPlan.recipe"})
+    @EntityGraph(attributePaths = {"mealsPlan", "mealsPlan.recipe", "bodyParametersHistory"})
     @NullMarked
     List<User> findAll();
 }

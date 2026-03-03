@@ -2,8 +2,6 @@ package com.uni.project.service;
 
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.request.UserCompositeRequest;
-import com.uni.project.model.dto.request.UserMeasurementsRequest;
-import com.uni.project.model.dto.response.NutritionalValueResponse;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.Sex;
 
@@ -20,15 +18,11 @@ public interface UserService {
 
     void userDelete(Integer id);
 
-    UserResponse measurementsUpdate(Integer id, UserMeasurementsRequest userRequest);
-
     List<UserResponse> getAllUsersByName(String nameSearch);
 
     List<UserResponse> getAllUsersBySex(Sex sexSearch);
 
     List<UserResponse> getAllUsersByAge(Integer ageSearch);
-
-    NutritionalValueResponse calculateNutritionalValueForUser(Integer id);
 
     List<UserResponse> findAllWithMeals();
 

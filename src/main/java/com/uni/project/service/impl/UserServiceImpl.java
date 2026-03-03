@@ -6,7 +6,6 @@ import com.uni.project.mapper.UserMapper;
 import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.request.UserMeasurementsRequest;
 import com.uni.project.model.dto.request.UserRequest;
-import com.uni.project.model.dto.response.NutritionalValueResponse;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.BodyParameters;
 import com.uni.project.model.entity.Meal;
@@ -17,10 +16,10 @@ import com.uni.project.model.entity.User;
 import com.uni.project.repository.MealRepository;
 import com.uni.project.repository.UserRepository;
 import com.uni.project.service.UserService;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +39,15 @@ public class UserServiceImpl implements UserService {
     public UserResponse userCreate(UserRequest userRequest) {
         User user = userMapper.fromRequest(userRequest);
         user.setMealsPlan(new ArrayList<>());
+        user.setBodyParametersHistory(new ArrayList<>());
+        BodyParameters bodyParameters = buildBodyParametersRecord(
+                user,
+                userRequest.getMeasurements(),
+                toGoalFromRequest(userRequest)
+        );
+        if (bodyParameters != null) {
+            user.getBodyParametersHistory().add(bodyParameters);
+        }
         user = userRepository.save(user);
         return userMapper.toResponse(user);
     }
@@ -64,9 +72,17 @@ public class UserServiceImpl implements UserService {
         user.setName(userRequest.getName());
         user.setPassword(userRequest.getPassword());
         user.setEmail(userRequest.getEmail());
-        user.setMeasurements(userRequest.getMeasurements());
-        if (userRequest.getDailyGoal() != null) {
-            user.setDailyGoal(nutritionalValueMapper.fromRequest(userRequest.getDailyGoal()));
+
+        BodyParameters bodyParameters = buildBodyParametersRecord(
+                user,
+                userRequest.getMeasurements(),
+                toGoalFromRequest(userRequest)
+        );
+        if (bodyParameters != null) {
+            if (user.getBodyParametersHistory() == null) {
+                user.setBodyParametersHistory(new ArrayList<>());
+            }
+            user.getBodyParametersHistory().add(bodyParameters);
         }
 
         userRepository.save(user);
@@ -82,16 +98,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public UserResponse measurementsUpdate(Integer id, UserMeasurementsRequest userRequest) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
-        user.setMeasurements(userRequest.getMeasurements());
-        userRepository.save(user);
-        return userMapper.toResponse(user);
-    }
-
-    @Override
     public List<UserResponse> getAllUsersByName(String nameSearch) {
         return userMapper.toResponses(userRepository.findAllByName(nameSearch));
     }
@@ -104,42 +110,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponse> getAllUsersByAge(Integer ageSearch) {
         return userMapper.toResponses(userRepository.findAllByAge(ageSearch));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public NutritionalValueResponse calculateNutritionalValueForUser(Integer idUser) {
-        User user = userRepository.findById(idUser).
-                orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
-        BodyParameters measurements = user.getMeasurements();
-        if (measurements == null
-                || measurements.getWeight() == null
-                || measurements.getHeight() == null
-                || measurements.getAge() == null
-                || measurements.getSex() == null) {
-            throw new UserException("User measurements are incomplete for nutritional value calculation");
-        }
-        NutritionalValue goalNutritionalValue = getNutritionalValue(measurements);
-        user.setDailyGoal(goalNutritionalValue);
-        userRepository.save(user);
-
-        return nutritionalValueMapper.toResponse(goalNutritionalValue);
-    }
-
-    @NonNull
-    private static NutritionalValue getNutritionalValue(BodyParameters measurements) {
-        NutritionalValue goalNutritionalValue = new NutritionalValue();
-        double baseValues = (measurements.getWeight() * 10
-                + measurements.getHeight() * 6.25
-                - measurements.getAge() * 5);
-        baseValues = (measurements.getSex() == Sex.FEMALE)
-                ? (baseValues - 161)
-                : (baseValues + 5);
-        goalNutritionalValue.setCalories(baseValues);
-        goalNutritionalValue.setProteins(baseValues * 0.25);
-        goalNutritionalValue.setFats(baseValues * 0.2);
-        goalNutritionalValue.setCarbohydrates(baseValues * 0.55);
-        return goalNutritionalValue;
     }
 
     @Override
@@ -161,10 +131,17 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserResponse createCompositeInternal(UserCompositeRequest request) {
-        NutritionalValue dailyGoal = nutritionalValueMapper.fromRequest(request.getDailyGoal());
         User user = userMapper.fromRequest(request);
-        user.setDailyGoal(dailyGoal);
         user.setMealsPlan(new ArrayList<>());
+        user.setBodyParametersHistory(new ArrayList<>());
+        BodyParameters bodyParameters = buildBodyParametersRecord(
+                user,
+                request.getMeasurements(),
+                toGoalFromRequest(request)
+        );
+        if (bodyParameters != null) {
+            user.getBodyParametersHistory().add(bodyParameters);
+        }
         user = userRepository.save(user);
 
         if (request.isFailAfterUser()) {
@@ -186,4 +163,33 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toResponse(user);
     }
+
+    private NutritionalValue toGoalFromRequest(UserRequest userRequest) {
+        if (userRequest.getDailyGoal() == null) {
+            return null;
+        }
+        return nutritionalValueMapper.fromRequest(userRequest.getDailyGoal());
+    }
+
+    private BodyParameters buildBodyParametersRecord(User user,
+                                                     BodyParameters source,
+                                                     NutritionalValue goalOverride) {
+        if (source == null) {
+            return null;
+        }
+
+        BodyParameters bodyParameters = new BodyParameters();
+        bodyParameters.setRecordDate(source.getRecordDate() == null ? LocalDate.now() : source.getRecordDate());
+        bodyParameters.setSex(source.getSex());
+        bodyParameters.setWeight(source.getWeight());
+        bodyParameters.setHeight(source.getHeight());
+        bodyParameters.setAge(source.getAge());
+        bodyParameters.setChest(source.getChest());
+        bodyParameters.setWaist(source.getWaist());
+        bodyParameters.setHips(source.getHips());
+        bodyParameters.setGoalNutritional(goalOverride == null ? source.getGoalNutritional() : goalOverride);
+        bodyParameters.setOwner(user);
+        return bodyParameters;
+    }
+
 }

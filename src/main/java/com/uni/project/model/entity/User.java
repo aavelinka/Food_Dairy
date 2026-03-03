@@ -1,9 +1,7 @@
 package com.uni.project.model.entity;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -36,22 +34,15 @@ public class User {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "password", nullable = false, length = 50)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Embedded
-    private BodyParameters measurements;
-
-    @Embedded
-    @AttributeOverride(name = "calories", column = @Column(name = "daily_goal_calories"))
-    @AttributeOverride(name = "proteins", column = @Column(name = "daily_goal_proteins"))
-    @AttributeOverride(name = "fats", column = @Column(name = "daily_goal_fats"))
-    @AttributeOverride(name = "carbohydrates", column = @Column(name = "daily_goal_carbohydrates"))
-    private NutritionalValue dailyGoal;
-
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<Meal> mealsPlan;
+
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BodyParameters> bodyParametersHistory;
 }

@@ -1,6 +1,4 @@
 package com.uni.project.model.dto.response;
-
-import com.uni.project.model.entity.BodyParameters;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,9 +17,7 @@ public class UserResponse {
 
     private String email;
 
-    private BodyParameters measurements;
-
-    private NutritionalValueResponse dailyGoal;
-
     private List<Integer> mealIds;
+
+    private List<Integer> bodyParametersIds;
 }

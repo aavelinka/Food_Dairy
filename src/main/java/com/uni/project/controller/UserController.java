@@ -3,7 +3,6 @@ package com.uni.project.controller;
 import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.request.UserMeasurementsRequest;
 import com.uni.project.model.dto.request.UserRequest;
-import com.uni.project.model.dto.response.NutritionalValueResponse;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.Sex;
 import com.uni.project.service.UserService;
@@ -57,12 +56,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}/measurements")
-    public ResponseEntity<UserResponse> measurementsUpdate(@PathVariable Integer id,
-                                                           @Valid @RequestBody UserMeasurementsRequest userRequest){
-        return ResponseEntity.ok(userService.measurementsUpdate(id, userRequest));
-    }
-
     @GetMapping("/name")
     public ResponseEntity<List<UserResponse>> getAllUsersByName(@RequestParam String nameSearch) {
         return ResponseEntity.ok(userService.getAllUsersByName(nameSearch));
@@ -76,11 +69,6 @@ public class UserController {
     @GetMapping("/age")
     public ResponseEntity<List<UserResponse>>  getAllUsersByAge(@RequestParam Integer ageSearch) {
         return ResponseEntity.ok(userService.getAllUsersByAge(ageSearch));
-    }
-
-    @PostMapping("/{id}/nutritional")
-    public ResponseEntity<NutritionalValueResponse> calculateNutritionalValueForUser(@PathVariable Integer id) {
-        return ResponseEntity.ok(userService.calculateNutritionalValueForUser(id));
     }
 
     @GetMapping("/with-meals")
