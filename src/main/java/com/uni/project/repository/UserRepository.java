@@ -20,8 +20,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("select distinct u from User u join u.bodyParametersHistory bp where bp.age = :age")
     List<User> findAllByAge(@Param("age") Integer age);
 
-    @Query("SELECT DISTINCT users FROM User users LEFT JOIN FETCH users.mealsPlan")
-    List<User> findAllWithMeals();
+    @Query("select distinct u from User u left join fetch u.mealsPlan mp " +
+            "left join fetch mp.recipe left join fetch u.bodyParametersHistory bph")
+    List<User> findAllWithMealsAndBodyParameters();
 
     @Override
     @EntityGraph(attributePaths = {"mealsPlan", "mealsPlan.recipe", "bodyParametersHistory"})

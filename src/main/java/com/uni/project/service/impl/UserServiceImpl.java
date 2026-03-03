@@ -4,7 +4,6 @@ import com.uni.project.exception.UserException;
 import com.uni.project.mapper.NutritionalValueMapper;
 import com.uni.project.mapper.UserMapper;
 import com.uni.project.model.dto.request.UserCompositeRequest;
-import com.uni.project.model.dto.request.UserMeasurementsRequest;
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.BodyParameters;
@@ -18,6 +17,7 @@ import com.uni.project.repository.UserRepository;
 import com.uni.project.service.UserService;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse userCreate(UserRequest userRequest) {
         User user = userMapper.fromRequest(userRequest);
         user.setMealsPlan(new ArrayList<>());
-        user.setBodyParametersHistory(new ArrayList<>());
+        user.setBodyParametersHistory(new LinkedHashSet<>());
         BodyParameters bodyParameters = buildBodyParametersRecord(
                 user,
                 userRequest.getMeasurements(),
@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
         );
         if (bodyParameters != null) {
             if (user.getBodyParametersHistory() == null) {
-                user.setBodyParametersHistory(new ArrayList<>());
+                user.setBodyParametersHistory(new LinkedHashSet<>());
             }
             user.getBodyParametersHistory().add(bodyParameters);
         }
@@ -113,8 +113,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> findAllWithMeals() {
-        List<User> userList = userRepository.findAllWithMeals();
+    public List<UserResponse> findAllWithMealsAndBodyParameters() {
+        List<User> userList = userRepository.findAllWithMealsAndBodyParameters();
         return userMapper.toResponses(userList);
     }
 
@@ -132,16 +132,24 @@ public class UserServiceImpl implements UserService {
 
     private UserResponse createCompositeInternal(UserCompositeRequest request) {
         User user = userMapper.fromRequest(request);
-        user.setMealsPlan(new ArrayList<>());
-        user.setBodyParametersHistory(new ArrayList<>());
+
+        if (user.getMealsPlan() == null) {
+            user.setMealsPlan(new ArrayList<>());
+        }
+        if (user.getBodyParametersHistory() == null) {
+            user.setBodyParametersHistory(new LinkedHashSet<>());
+        }
+
         BodyParameters bodyParameters = buildBodyParametersRecord(
                 user,
                 request.getMeasurements(),
                 toGoalFromRequest(request)
         );
+
         if (bodyParameters != null) {
             user.getBodyParametersHistory().add(bodyParameters);
         }
+
         user = userRepository.save(user);
 
         if (request.isFailAfterUser()) {
@@ -149,17 +157,19 @@ public class UserServiceImpl implements UserService {
         }
 
         Note note = new Note();
-        note.setNotes(request.getNoteTexts());
+        note.setNotes(new ArrayList<>(request.getNotes()));
 
         Meal meal = new Meal();
-        meal.setName("Meal note");
-        meal.setDate(request.getNoteDate());
+        meal.setName(request.getMealName());
+        meal.setDate(request.getMealDate());
         meal.setAuthor(user);
         meal.setRecipe(note);
-        mealRepository.save(meal);
-        if (user.getMealsPlan() != null) {
-            user.getMealsPlan().add(meal);
-        }
+
+        note.setMeal(meal);
+
+        meal = mealRepository.save(meal);
+
+        user.getMealsPlan().add(meal);
 
         return userMapper.toResponse(user);
     }

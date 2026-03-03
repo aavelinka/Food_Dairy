@@ -7,6 +7,8 @@ import com.uni.project.model.entity.Meal;
 import com.uni.project.model.entity.User;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -37,7 +39,7 @@ public interface UserMapper {
     }
 
     @Named("mapBodyParametersIds")
-    default List<Integer> mapBodyParametersIds(List<BodyParameters> bodyParametersHistory) {
+    default List<Integer> mapBodyParametersIds(Set<BodyParameters> bodyParametersHistory) {
         if (bodyParametersHistory == null || bodyParametersHistory.isEmpty()) {
             return List.of();
         }

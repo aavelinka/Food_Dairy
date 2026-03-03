@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name="users")
@@ -44,5 +45,5 @@ public class User {
     private List<Meal> mealsPlan;
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BodyParameters> bodyParametersHistory;
+    private Set<BodyParameters> bodyParametersHistory;
 }

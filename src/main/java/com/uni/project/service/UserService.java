@@ -24,7 +24,7 @@ public interface UserService {
 
     List<UserResponse> getAllUsersByAge(Integer ageSearch);
 
-    List<UserResponse> findAllWithMeals();
+    List<UserResponse> findAllWithMealsAndBodyParameters();
 
     UserResponse createUserWithoutGoalAndNoteNoTx(UserCompositeRequest userRequest);
 

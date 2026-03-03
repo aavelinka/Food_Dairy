@@ -1,6 +1,8 @@
 package com.uni.project.model.dto.request;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,11 +23,14 @@ public class UserCompositeRequest extends UserRequest {
         return super.getDailyGoal();
     }
 
-    @NotNull
-    private LocalDate noteDate;
+    @NotBlank
+    private String mealName;
 
     @NotNull
-    private List<String> noteTexts;
+    private LocalDate mealDate;
+
+    @NotEmpty
+    private List<@NotBlank String> notes;
 
     private boolean failAfterUser;
 }

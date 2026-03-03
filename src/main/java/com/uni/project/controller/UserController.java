@@ -71,8 +71,8 @@ public class UserController {
     }
 
     @GetMapping("/with-meals")
-    public ResponseEntity<List<UserResponse>> findAllWithMeals() {
-        return ResponseEntity.ok(userService.findAllWithMeals());
+    public ResponseEntity<List<UserResponse>> findAllWithMealsAndBodyParameters() {
+        return ResponseEntity.ok(userService.findAllWithMealsAndBodyParameters());
     }
 
     @PostMapping("/without_transaction")
