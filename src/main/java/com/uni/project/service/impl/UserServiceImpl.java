@@ -113,6 +113,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserResponse> getAllUsersByAgeNative(Integer ageSearch) {
+        return userMapper.toResponses(userRepository.findAllByAgeNative(ageSearch));
+    }
+
+    @Override
     public List<UserResponse> findAllWithMealsAndBodyParameters() {
         List<User> userList = userRepository.findAllWithMealsAndBodyParameters();
         return userMapper.toResponses(userList);

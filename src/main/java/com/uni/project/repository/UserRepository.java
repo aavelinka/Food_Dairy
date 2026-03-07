@@ -20,6 +20,15 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("select distinct u from User u join u.bodyParametersHistory bp where bp.age = :age")
     List<User> findAllByAge(@Param("age") Integer age);
 
+    @Query(
+        value = "select distinct u.* "
+                    + "from users u "
+                    + "join body_parameters bp on bp.user_id = u.id "
+                    + "where bp.age = :age",
+            nativeQuery = true
+    )
+    List<User> findAllByAgeNative(@Param("age") Integer age);
+
     @Query("select distinct u from User u left join fetch u.mealsPlan mp " +
             "left join fetch mp.recipe left join fetch u.bodyParametersHistory bph")
     List<User> findAllWithMealsAndBodyParameters();

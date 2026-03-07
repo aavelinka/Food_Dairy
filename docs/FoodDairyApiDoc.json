@@ -88,6 +88,24 @@
           }
         },
         {
+          "name": "Get users by age (native query)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/age/native?ageSearch=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "age", "native"],
+              "query": [
+                {
+                  "key": "ageSearch",
+                  "value": "25"
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "Get users with meals",
           "request": {
             "method": "GET",

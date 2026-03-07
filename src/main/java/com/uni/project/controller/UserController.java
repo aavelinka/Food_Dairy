@@ -70,6 +70,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsersByAge(ageSearch));
     }
 
+    @GetMapping("/age/native")
+    public ResponseEntity<List<UserResponse>> getAllUsersByAgeNative(@RequestParam Integer ageSearch) {
+        return ResponseEntity.ok(userService.getAllUsersByAgeNative(ageSearch));
+    }
+
     @GetMapping("/with-meals")
     public ResponseEntity<List<UserResponse>> findAllWithMealsAndBodyParameters() {
         return ResponseEntity.ok(userService.findAllWithMealsAndBodyParameters());
