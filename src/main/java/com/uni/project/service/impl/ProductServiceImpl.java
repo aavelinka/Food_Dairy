@@ -27,9 +27,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse productCreate(ProductRequest productRequest) {
-        List<Meal> meals = getMeals(productRequest.getMealIds());
         Product product = productRepository
-                .save(productMapper.fromRequest(productRequest, meals));
+                .save(productMapper.fromRequest(productRequest));
 
         return productMapper.toResponse(product);
     }
@@ -52,11 +51,9 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse productUpdate(Integer id, ProductRequest productRequest) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductException(PRODUCT_FAIL_MESSAGE));
-        List<Meal> meals = getMeals(productRequest.getMealIds());
-        Product mappedProduct = productMapper.fromRequest(productRequest, meals);
+        Product mappedProduct = productMapper.fromRequest(productRequest);
         product.setName(productRequest.getName());
         product.setNutritionalValue100g(mappedProduct.getNutritionalValue100g());
-        product.setMealList(meals);
         productRepository.save(product);
 
         return productMapper.toResponse(product);
@@ -68,15 +65,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductException(PRODUCT_FAIL_MESSAGE));
 
-        if (product.getMealList() != null) {
-            product.getMealList().clear();
+        List<Meal> mealsWithProduct = mealRepository.findAllByProductIds(List.of(id));
+        if (!mealsWithProduct.isEmpty()) {
+            mealRepository.deleteAll(mealsWithProduct);
         }
-
-        if (product.getNutritionalValue100g() != null) {
-            product.setNutritionalValue100g(null);
-        }
-
-        productRepository.save(product);
         productRepository.delete(product);
     }
 
@@ -88,16 +80,5 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductResponse> getAllProductsByMealId(Integer mealId) {
         return productMapper.toResponses(productRepository.findAllByMealId(mealId));
-    }
-
-    private List<Meal> getMeals(List<Integer> mealIds) {
-        if (mealIds == null || mealIds.isEmpty()) {
-            return List.of();
-        }
-        List<Meal> meals = mealRepository.findAllById(mealIds);
-        if (meals.size() != mealIds.size()) {
-            throw new ProductException("Some meals not found");
-        }
-        return meals;
     }
 }

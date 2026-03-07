@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,6 @@ public class MealRequest {
     private NutritionalValueRequest totalNutritional;
 
     private Integer authorId;
+
+    private List<Integer> productIds;
 }

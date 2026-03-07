@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,6 +19,4 @@ public class ProductRequest {
     @NotNull
     @Valid
     private NutritionalValueRequest nutritionalValue100g;
-
-    private List<Integer> mealIds;
 }

@@ -4,11 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -43,11 +42,6 @@ public class Product {
     @AttributeOverride(name = "carbohydrates", column = @Column(name = "nv100_carbohydrates"))
     private NutritionalValue nutritionalValue100g;
 
-    @ManyToMany
-    @JoinTable(
-            name = "meals_lists",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "meal_id")
-    )
+    @ManyToMany(mappedBy = "productList", fetch = FetchType.LAZY)
     private List<Meal> mealList;
 }

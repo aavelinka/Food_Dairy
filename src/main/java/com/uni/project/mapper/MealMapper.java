@@ -18,9 +18,9 @@ public interface MealMapper {
     @Mapping(target = "date", source = "mealRequest.date")
     @Mapping(target = "totalNutritional", source = "mealRequest.totalNutritional")
     @Mapping(target = "author", source = "author")
-    @Mapping(target = "productList", ignore = true)
+    @Mapping(target = "productList", source = "products")
     @Mapping(target = "recipe", ignore = true)
-    Meal fromRequest(MealRequest mealRequest, User author);
+    Meal fromRequest(MealRequest mealRequest, User author, List<Product> products);
 
     @Mapping(target = "authorId", source = "author.id")
     @Mapping(target = "productIds", source = "productList", qualifiedByName = "mapProductIds")

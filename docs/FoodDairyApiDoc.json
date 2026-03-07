@@ -407,7 +407,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Apple\",\n  \"nutritionalValue100g\": {\n    \"calories\": 52.0,\n    \"proteins\": 0.3,\n    \"fats\": 0.2,\n    \"carbohydrates\": 14.0\n  },\n  \"mealIds\": []\n}"
+              "raw": "{\n  \"name\": \"Apple\",\n  \"nutritionalValue100g\": {\n    \"calories\": 52.0,\n    \"proteins\": 0.3,\n    \"fats\": 0.2,\n    \"carbohydrates\": 14.0\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/products",
@@ -428,7 +428,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Green Apple\",\n  \"nutritionalValue100g\": {\n    \"calories\": 55.0,\n    \"proteins\": 0.4,\n    \"fats\": 0.2,\n    \"carbohydrates\": 15.0\n  },\n  \"mealIds\": [1, 2]\n}"
+              "raw": "{\n  \"name\": \"Green Apple\",\n  \"nutritionalValue100g\": {\n    \"calories\": 55.0,\n    \"proteins\": 0.4,\n    \"fats\": 0.2,\n    \"carbohydrates\": 15.0\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/1",
@@ -548,7 +548,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Healthy Breakfast\",\n  \"date\": \"2026-03-23\",\n  \"totalNutritional\": {\n    \"calories\": 480.0,\n    \"proteins\": 24.0,\n    \"fats\": 18.0,\n    \"carbohydrates\": 56.0\n  },\n  \"authorId\": 1\n}"
+              "raw": "{\n  \"name\": \"Healthy Breakfast\",\n  \"date\": \"2026-03-23\",\n  \"totalNutritional\": {\n    \"calories\": 480.0,\n    \"proteins\": 24.0,\n    \"fats\": 18.0,\n    \"carbohydrates\": 56.0\n  },\n  \"authorId\": 1,\n  \"productIds\": [1, 2]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/meal",
@@ -569,7 +569,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Healthy Breakfast Updated\",\n  \"date\": \"2026-03-24\",\n  \"totalNutritional\": {\n    \"calories\": 510.0,\n    \"proteins\": 26.0,\n    \"fats\": 19.0,\n    \"carbohydrates\": 60.0\n  },\n  \"authorId\": 1\n}"
+              "raw": "{\n  \"name\": \"Healthy Breakfast Updated\",\n  \"date\": \"2026-03-24\",\n  \"totalNutritional\": {\n    \"calories\": 510.0,\n    \"proteins\": 26.0,\n    \"fats\": 19.0,\n    \"carbohydrates\": 60.0\n  },\n  \"authorId\": 1,\n  \"productIds\": [1, 3]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/meal/1",
