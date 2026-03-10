@@ -15,9 +15,28 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users"]
+              "raw": "{{baseUrl}}/api/users?page=0&size=5&sort=id,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
+                }
+              ]
             }
           }
         },
@@ -28,8 +47,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "1"
+              ]
             }
           }
         },
@@ -40,8 +65,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/name?nameSearch=John",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "name"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "name"
+              ],
               "query": [
                 {
                   "key": "nameSearch",
@@ -58,8 +89,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/sex?sexSearch=MALE",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "sex"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "sex"
+              ],
               "query": [
                 {
                   "key": "sexSearch",
@@ -75,13 +112,31 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/users/age?ageSearch=25",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "age"],
+              "raw": "{{baseUrl}}/api/users/age?ageSearch=25&page=0&size=2&sort=id,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "age"
+              ],
               "query": [
                 {
                   "key": "ageSearch",
                   "value": "25"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "2"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
                 }
               ]
             }
@@ -93,13 +148,32 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/users/age/native?ageSearch=25",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "age", "native"],
+              "raw": "{{baseUrl}}/api/users/age/native?ageSearch=25&page=0&size=2&sort=id,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "age",
+                "native"
+              ],
               "query": [
                 {
                   "key": "ageSearch",
                   "value": "25"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "2"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,asc"
                 }
               ]
             }
@@ -112,8 +186,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/with-meals",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "with-meals"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "with-meals"
+              ]
             }
           }
         },
@@ -129,12 +209,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Anna Petrova\",\n  \"password\": \"anna12345\",\n  \"email\": \"anna.petrova@example.com\"\n}"
+              "raw": "{\n  \"name\": \"Anna Petrova\",\n  \"password\": \"anna12345\",\n  \"email\": \"anna.petrova@example.com\",\n  \"goalType\": \"MAINTENANCE\",\n  \"measurements\": {\n    \"recordDate\": \"2026-03-23\",\n    \"sex\": \"FEMALE\",\n    \"weight\": 62.5,\n    \"height\": 168.0,\n    \"age\": 24,\n    \"chest\": 88.0,\n    \"waist\": 67.0,\n    \"hips\": 94.0\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
             }
           }
         },
@@ -150,12 +235,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Anna Petrova Updated\",\n  \"password\": \"newSecure123\",\n  \"email\": \"anna.petrova.updated@example.com\"\n}"
+              "raw": "{\n  \"name\": \"Anna Petrova Updated\",\n  \"password\": \"newSecure123\",\n  \"email\": \"anna.petrova.updated@example.com\",\n  \"goalType\": \"WEIGHT_LOSS\",\n  \"measurements\": {\n    \"recordDate\": \"2026-04-01\",\n    \"sex\": \"FEMALE\",\n    \"weight\": 61.8,\n    \"height\": 168.0,\n    \"age\": 25,\n    \"chest\": 87.5,\n    \"waist\": 66.0,\n    \"hips\": 93.5\n  }\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/users/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "1"
+              ]
             }
           }
         },
@@ -166,8 +257,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/users/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "1"
+              ]
             }
           }
         },
@@ -183,12 +280,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"password\": \"password123\",\n  \"email\": \"jane.smith@example.com\",\n  \"dailyGoal\": {\n    \"calories\": 2000.0,\n    \"proteins\": 150.0,\n    \"fats\": 60.0,\n    \"carbohydrates\": 200.0\n  },\n  \"noteDate\": \"2026-03-23\",\n  \"noteTexts\": [\"First note\", \"Second note\"],\n  \"failAfterUser\": false\n}"
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"password\": \"password123\",\n  \"email\": \"jane.smith@example.com\",\n  \"goalType\": \"WEIGHT_GAIN\",\n  \"measurements\": {\n    \"recordDate\": \"2026-03-23\",\n    \"sex\": \"FEMALE\",\n    \"weight\": 57.0,\n    \"height\": 165.0,\n    \"age\": 23,\n    \"chest\": 86.0,\n    \"waist\": 65.0,\n    \"hips\": 92.0\n  },\n  \"mealName\": \"Lunch\",\n  \"mealDate\": \"2026-03-23\",\n  \"notes\": [\"First note\", \"Second note\"],\n  \"failAfterUser\": false\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/users/without_transaction",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "without_transaction"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "without_transaction"
+              ]
             }
           }
         },
@@ -204,12 +307,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Bob Johnson\",\n  \"password\": \"password123\",\n  \"email\": \"bob.johnson@example.com\",\n  \"dailyGoal\": {\n    \"calories\": 2200.0,\n    \"proteins\": 170.0,\n    \"fats\": 70.0,\n    \"carbohydrates\": 220.0\n  },\n  \"noteDate\": \"2026-03-23\",\n  \"noteTexts\": [\"Morning note\", \"Evening note\"],\n  \"failAfterUser\": false\n}"
+              "raw": "{\n  \"name\": \"Bob Johnson\",\n  \"password\": \"password123\",\n  \"email\": \"bob.johnson@example.com\",\n  \"goalType\": \"MAINTENANCE\",\n  \"measurements\": {\n    \"recordDate\": \"2026-03-23\",\n    \"sex\": \"MALE\",\n    \"weight\": 81.0,\n    \"height\": 182.0,\n    \"age\": 29,\n    \"chest\": 102.0,\n    \"waist\": 86.0,\n    \"hips\": 98.0\n  },\n  \"mealName\": \"Dinner\",\n  \"mealDate\": \"2026-03-23\",\n  \"notes\": [\"Morning note\", \"Evening note\"],\n  \"failAfterUser\": false\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/users/with_transaction",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "users", "with_transaction"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "with_transaction"
+              ]
             }
           }
         }
@@ -225,8 +334,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/body-parameters",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "body-parameters"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters"
+              ]
             }
           }
         },
@@ -237,8 +351,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/body-parameters/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "body-parameters", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters",
+                "1"
+              ]
             }
           }
         },
@@ -249,8 +369,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/body-parameters/user?userId=1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "body-parameters", "user"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters",
+                "user"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -267,8 +393,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/body-parameters/date?userId=1&date=2026-03-01",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "body-parameters", "date"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters",
+                "date"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -294,12 +426,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": 1,\n  \"recordDate\": \"2026-03-01\",\n  \"sex\": \"FEMALE\",\n  \"weight\": 62.5,\n  \"height\": 168.0,\n  \"age\": 24,\n  \"chest\": 88.0,\n  \"waist\": 67.0,\n  \"hips\": 94.0,\n  \"dailyGoal\": {\n    \"calories\": 1850.0,\n    \"proteins\": 116.0,\n    \"fats\": 62.0,\n    \"carbohydrates\": 254.0\n  }\n}"
+              "raw": "{\n  \"userId\": 1,\n  \"recordDate\": \"2026-03-01\",\n  \"sex\": \"FEMALE\",\n  \"weight\": 62.5,\n  \"height\": 168.0,\n  \"age\": 24,\n  \"chest\": 88.0,\n  \"waist\": 67.0,\n  \"hips\": 94.0\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/body-parameters",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "body-parameters"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters"
+              ]
             }
           }
         },
@@ -315,12 +452,18 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": 1,\n  \"recordDate\": \"2026-03-01\",\n  \"sex\": \"FEMALE\",\n  \"weight\": 61.8,\n  \"height\": 168.0,\n  \"age\": 25,\n  \"chest\": 87.5,\n  \"waist\": 66.0,\n  \"hips\": 93.5,\n  \"dailyGoal\": {\n    \"calories\": 1820.0,\n    \"proteins\": 114.0,\n    \"fats\": 61.0,\n    \"carbohydrates\": 251.0\n  }\n}"
+              "raw": "{\n  \"userId\": 1,\n  \"recordDate\": \"2026-03-01\",\n  \"sex\": \"FEMALE\",\n  \"weight\": 61.8,\n  \"height\": 168.0,\n  \"age\": 25,\n  \"chest\": 87.5,\n  \"waist\": 66.0,\n  \"hips\": 93.5\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/body-parameters/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "body-parameters", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters",
+                "1"
+              ]
             }
           }
         },
@@ -331,8 +474,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/body-parameters/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "body-parameters", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters",
+                "1"
+              ]
             }
           }
         },
@@ -343,8 +492,45 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/body-parameters/user/1/nutritional",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "body-parameters", "user", "1", "nutritional"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters",
+                "user",
+                "1",
+                "nutritional"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Set manual nutritional value for body parameters",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calories\": 2000.0,\n  \"proteins\": 125.0,\n  \"fats\": 66.0,\n  \"carbohydrates\": 250.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/body-parameters/1/nutritional/manual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "body-parameters",
+                "1",
+                "nutritional",
+                "manual"
+              ]
             }
           }
         }
@@ -360,8 +546,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
             }
           }
         },
@@ -372,8 +563,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
             }
           }
         },
@@ -384,8 +581,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/name?nameSearch=apple",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "name"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "name"
+              ],
               "query": [
                 {
                   "key": "nameSearch",
@@ -402,8 +605,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/meal_list?mealId=1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "meal_list"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "meal_list"
+              ],
               "query": [
                 {
                   "key": "mealId",
@@ -429,8 +638,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
             }
           }
         },
@@ -450,8 +664,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/products/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
             }
           }
         },
@@ -462,8 +682,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
             }
           }
         }
@@ -479,8 +705,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/meal",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "meal"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "meal"
+              ]
             }
           }
         },
@@ -491,8 +722,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/meal/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "meal", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "meal",
+                "1"
+              ]
             }
           }
         },
@@ -503,8 +740,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/meal/name?nameSearch=breakfast",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "meal", "name"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "meal",
+                "name"
+              ],
               "query": [
                 {
                   "key": "nameSearch",
@@ -521,8 +764,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/meal/author?authorId=1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "meal", "author"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "meal",
+                "author"
+              ],
               "query": [
                 {
                   "key": "authorId",
@@ -539,8 +788,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/meal/product_list?productIds=1&productIds=2",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "meal", "product_list"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "meal",
+                "product_list"
+              ],
               "query": [
                 {
                   "key": "productIds",
@@ -570,8 +825,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/meal",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "meal"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "meal"
+              ]
             }
           }
         },
@@ -591,8 +851,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/meal/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "meal", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "meal",
+                "1"
+              ]
             }
           }
         },
@@ -603,8 +869,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/meal/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "meal", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "meal",
+                "1"
+              ]
             }
           }
         }
@@ -620,8 +892,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/note",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "note"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "note"
+              ]
             }
           }
         },
@@ -632,8 +909,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/note/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "note", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "note",
+                "1"
+              ]
             }
           }
         },
@@ -644,8 +927,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/note/date?dateSearch=2026-03-23",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "note", "date"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "note",
+                "date"
+              ],
               "query": [
                 {
                   "key": "dateSearch",
@@ -662,8 +951,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/note/meal_note?mealId=1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "note", "meal_note"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "note",
+                "meal_note"
+              ],
               "query": [
                 {
                   "key": "mealId",
@@ -689,8 +984,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/note",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "note"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "note"
+              ]
             }
           }
         },
@@ -710,8 +1010,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/note/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "note", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "note",
+                "1"
+              ]
             }
           }
         },
@@ -722,8 +1028,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/note/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "note", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "note",
+                "1"
+              ]
             }
           }
         }
@@ -739,8 +1051,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/water-intakes",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "water-intakes"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "water-intakes"
+              ]
             }
           }
         },
@@ -751,8 +1068,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/water-intakes/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "water-intakes", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "water-intakes",
+                "1"
+              ]
             }
           }
         },
@@ -763,8 +1086,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/water-intakes/user?userId=1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "water-intakes", "user"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "water-intakes",
+                "user"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -781,8 +1110,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/water-intakes/date?userId=1&date=2026-03-01",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "water-intakes", "date"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "water-intakes",
+                "date"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -803,8 +1138,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/water-intakes/daily-total?userId=1&date=2026-03-01",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "water-intakes", "daily-total"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "water-intakes",
+                "daily-total"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -834,8 +1175,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/water-intakes",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "water-intakes"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "water-intakes"
+              ]
             }
           }
         },
@@ -855,8 +1201,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/api/water-intakes/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "water-intakes", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "water-intakes",
+                "1"
+              ]
             }
           }
         },
@@ -867,8 +1219,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/water-intakes/1",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "water-intakes", "1"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "water-intakes",
+                "1"
+              ]
             }
           }
         }

@@ -11,7 +11,8 @@ import org.mapstruct.Mapping;
 public interface BodyParametersMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "owner", ignore = true)
-    @Mapping(target = "goalNutritional", source = "dailyGoal")
+    @Mapping(target = "goalNutritional", ignore = true)
+    @Mapping(target = "autoCalculated", ignore = true)
     BodyParameters fromRequest(BodyParametersRequest bodyParametersRequest);
 
     @Mapping(target = "userId", source = "owner.id")

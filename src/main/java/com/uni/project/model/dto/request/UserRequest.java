@@ -1,6 +1,6 @@
 package com.uni.project.model.dto.request;
 
-import com.uni.project.model.entity.BodyParameters;
+import com.uni.project.model.entity.GoalType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -27,8 +27,8 @@ public class UserRequest {
 
     @NotNull
     @Valid
-    private BodyParameters measurements;
+    private UserBodyParametersRequest measurements;
 
-    @Valid
-    private NutritionalValueRequest dailyGoal;
+    @NotNull
+    private GoalType goalType;
 }

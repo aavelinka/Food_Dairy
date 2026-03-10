@@ -7,6 +7,9 @@ import com.uni.project.model.entity.Sex;
 import com.uni.project.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,8 +36,9 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers(){
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<Page<UserResponse>> getAllUsers(
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
 
     @PostMapping
@@ -66,13 +70,17 @@ public class UserController {
     }
 
     @GetMapping("/age")
-    public ResponseEntity<List<UserResponse>>  getAllUsersByAge(@RequestParam Integer ageSearch) {
-        return ResponseEntity.ok(userService.getAllUsersByAge(ageSearch));
+    public ResponseEntity<Page<UserResponse>> getAllUsersByAge(
+            @RequestParam Integer ageSearch,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(userService.getAllUsersByAge(ageSearch, pageable));
     }
 
     @GetMapping("/age/native")
-    public ResponseEntity<List<UserResponse>> getAllUsersByAgeNative(@RequestParam Integer ageSearch) {
-        return ResponseEntity.ok(userService.getAllUsersByAgeNative(ageSearch));
+    public ResponseEntity<Page<UserResponse>> getAllUsersByAgeNative(
+            @RequestParam Integer ageSearch,
+            @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(userService.getAllUsersByAgeNative(ageSearch, pageable));
     }
 
     @GetMapping("/with-meals")

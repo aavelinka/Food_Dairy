@@ -1,6 +1,7 @@
 package com.uni.project.service;
 
 import com.uni.project.model.dto.request.BodyParametersRequest;
+import com.uni.project.model.dto.request.NutritionalValueRequest;
 import com.uni.project.model.dto.response.BodyParametersResponse;
 import com.uni.project.model.dto.response.NutritionalValueResponse;
 import java.time.LocalDate;
@@ -22,4 +23,6 @@ public interface BodyParametersService {
     List<BodyParametersResponse> getAllBodyParametersByUserIdAndDate(Integer userId, LocalDate date);
 
     NutritionalValueResponse calculateNutritionalValueForUser(Integer id);
+
+    NutritionalValueResponse setManualNutritionalValue(Integer bodyParametersId, NutritionalValueRequest request);
 }

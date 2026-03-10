@@ -1,6 +1,7 @@
 package com.uni.project.controller;
 
 import com.uni.project.model.dto.request.BodyParametersRequest;
+import com.uni.project.model.dto.request.NutritionalValueRequest;
 import com.uni.project.model.dto.response.BodyParametersResponse;
 import com.uni.project.model.dto.response.NutritionalValueResponse;
 import com.uni.project.service.BodyParametersService;
@@ -73,5 +74,12 @@ public class BodyParametersController {
     @PostMapping("/user/{id}/nutritional")
     public ResponseEntity<NutritionalValueResponse> calculateNutritionalValueForUser(@PathVariable Integer id) {
         return ResponseEntity.ok(bodyParametersService.calculateNutritionalValueForUser(id));
+    }
+
+    @PutMapping("/{id}/nutritional/manual")
+    public ResponseEntity<NutritionalValueResponse> setManualNutritionalValue(
+            @PathVariable Integer id,
+            @Valid @RequestBody NutritionalValueRequest request) {
+        return ResponseEntity.ok(bodyParametersService.setManualNutritionalValue(id, request));
     }
 }

@@ -4,6 +4,8 @@ import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.Sex;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -12,7 +14,7 @@ public interface UserService {
 
     UserResponse getUserById(Integer id);
 
-    List<UserResponse> getAllUsers();
+    Page<UserResponse> getAllUsers(Pageable pageable);
 
     UserResponse userUpdate(Integer id, UserRequest userRequest);
 
@@ -22,9 +24,9 @@ public interface UserService {
 
     List<UserResponse> getAllUsersBySex(Sex sexSearch);
 
-    List<UserResponse> getAllUsersByAge(Integer ageSearch);
+    Page<UserResponse> getAllUsersByAge(Integer ageSearch, Pageable pageable);
 
-    List<UserResponse> getAllUsersByAgeNative(Integer ageSearch);
+    Page<UserResponse> getAllUsersByAgeNative(Integer ageSearch, Pageable pageable);
 
     List<UserResponse> findAllWithMealsAndBodyParameters();
 

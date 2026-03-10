@@ -80,6 +80,9 @@ public class BodyParameters {
     @AttributeOverride(name = "carbohydrates", column = @Column(name = "goal_carbohydrates"))
     private NutritionalValue goalNutritional;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private Boolean autoCalculated = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;

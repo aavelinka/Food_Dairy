@@ -1,5 +1,6 @@
 package com.uni.project.service.impl;
 
+import com.uni.project.cache.UserSearchCache;
 import com.uni.project.exception.MealException;
 import com.uni.project.mapper.MealMapper;
 import com.uni.project.model.dto.request.MealRequest;
@@ -25,6 +26,7 @@ public class MealServiceImpl implements MealService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final MealMapper mealMapper;
+    private final UserSearchCache userSearchCache;
     private static final String MEAL_FAIL_MESSAGE = "Meal is not found by Id";
 
     @Override
@@ -34,6 +36,7 @@ public class MealServiceImpl implements MealService {
         List<Product> products = getProducts(mealRequest.getProductIds());
         Meal meal = mealRepository
                 .save(mealMapper.fromRequest(mealRequest, author, products));
+        userSearchCache.clear();
 
         return mealMapper.toResponse(meal);
     }
@@ -65,6 +68,7 @@ public class MealServiceImpl implements MealService {
         meal.setTotalNutritional(mappedMeal.getTotalNutritional());
         meal.setProductList(mappedMeal.getProductList());
         mealRepository.save(meal);
+        userSearchCache.clear();
 
         return mealMapper.toResponse(meal);
     }
@@ -80,6 +84,7 @@ public class MealServiceImpl implements MealService {
         }
 
         mealRepository.delete(meal);
+        userSearchCache.clear();
     }
 
     @Override

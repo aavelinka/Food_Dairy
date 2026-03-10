@@ -1,5 +1,6 @@
 package com.uni.project.service.impl;
 
+import com.uni.project.cache.UserSearchCache;
 import com.uni.project.exception.ProductException;
 import com.uni.project.mapper.ProductMapper;
 import com.uni.project.model.dto.request.ProductRequest;
@@ -22,6 +23,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final MealRepository mealRepository;
     private final ProductMapper productMapper;
+    private final UserSearchCache userSearchCache;
     private static final String PRODUCT_FAIL_MESSAGE = "Product not found by Id";
 
     @Override
@@ -68,6 +70,7 @@ public class ProductServiceImpl implements ProductService {
         List<Meal> mealsWithProduct = mealRepository.findAllByProductIds(List.of(id));
         if (!mealsWithProduct.isEmpty()) {
             mealRepository.deleteAll(mealsWithProduct);
+            userSearchCache.clear();
         }
         productRepository.delete(product);
     }

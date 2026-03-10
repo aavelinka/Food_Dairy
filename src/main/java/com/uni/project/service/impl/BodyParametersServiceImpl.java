@@ -1,15 +1,16 @@
 package com.uni.project.service.impl;
 
+import com.uni.project.cache.UserSearchCache;
 import com.uni.project.exception.BodyParametersException;
 import com.uni.project.exception.UserException;
 import com.uni.project.mapper.BodyParametersMapper;
 import com.uni.project.mapper.NutritionalValueMapper;
 import com.uni.project.model.dto.request.BodyParametersRequest;
+import com.uni.project.model.dto.request.NutritionalValueRequest;
 import com.uni.project.model.dto.response.BodyParametersResponse;
 import com.uni.project.model.dto.response.NutritionalValueResponse;
 import com.uni.project.model.entity.BodyParameters;
 import com.uni.project.model.entity.NutritionalValue;
-import com.uni.project.model.entity.Sex;
 import com.uni.project.model.entity.User;
 import com.uni.project.repository.BodyParametersRepository;
 import com.uni.project.repository.UserRepository;
@@ -19,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +33,8 @@ public class BodyParametersServiceImpl implements BodyParametersService {
     private final UserRepository userRepository;
     private final BodyParametersMapper bodyParametersMapper;
     private final NutritionalValueMapper nutritionalValueMapper;
+    private final NutritionalGoalCalculator nutritionalGoalCalculator;
+    private final UserSearchCache userSearchCache;
 
     @Override
     @Transactional
@@ -41,7 +43,9 @@ public class BodyParametersServiceImpl implements BodyParametersService {
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
         BodyParameters bodyParameters = bodyParametersMapper.fromRequest(bodyParametersRequest);
         bodyParameters.setOwner(owner);
+        applyGoalOnCreate(owner, bodyParameters);
         BodyParameters savedBodyParameters = bodyParametersRepository.save(bodyParameters);
+        userSearchCache.clear();
         return bodyParametersMapper.toResponse(savedBodyParameters);
     }
 
@@ -74,10 +78,11 @@ public class BodyParametersServiceImpl implements BodyParametersService {
         bodyParameters.setChest(bodyParametersRequest.getChest());
         bodyParameters.setWaist(bodyParametersRequest.getWaist());
         bodyParameters.setHips(bodyParametersRequest.getHips());
-        bodyParameters.setGoalNutritional(bodyParametersMapper
-                .fromRequest(bodyParametersRequest)
-                .getGoalNutritional());
+        if (bodyParameters.getGoalNutritional() == null) {
+            applyGoalOnCreate(owner, bodyParameters);
+        }
         bodyParametersRepository.save(bodyParameters);
+        userSearchCache.clear();
 
         return bodyParametersMapper.toResponse(bodyParameters);
     }
@@ -88,6 +93,7 @@ public class BodyParametersServiceImpl implements BodyParametersService {
         BodyParameters bodyParameters = bodyParametersRepository.findById(id)
                 .orElseThrow(() -> new BodyParametersException(BODY_PARAMETERS_FAIL_MESSAGE));
         bodyParametersRepository.delete(bodyParameters);
+        userSearchCache.clear();
     }
 
     @Override
@@ -116,9 +122,26 @@ public class BodyParametersServiceImpl implements BodyParametersService {
 
         NutritionalValue goalNutritionalValue = getNutritionalValue(measurements);
         measurements.setGoalNutritional(goalNutritionalValue);
+        measurements.setAutoCalculated(true);
         bodyParametersRepository.save(measurements);
+        userSearchCache.clear();
 
         return nutritionalValueMapper.toResponse(goalNutritionalValue);
+    }
+
+    @Override
+    @Transactional
+    public NutritionalValueResponse setManualNutritionalValue(
+            Integer bodyParametersId,
+            NutritionalValueRequest request) {
+        BodyParameters bodyParameters = bodyParametersRepository.findById(bodyParametersId)
+                .orElseThrow(() -> new BodyParametersException(BODY_PARAMETERS_FAIL_MESSAGE));
+        NutritionalValue manualGoal = nutritionalValueMapper.fromRequest(request);
+        bodyParameters.setGoalNutritional(manualGoal);
+        bodyParameters.setAutoCalculated(false);
+        bodyParametersRepository.save(bodyParameters);
+        userSearchCache.clear();
+        return nutritionalValueMapper.toResponse(manualGoal);
     }
 
     private BodyParameters getLatestBodyParameters(User user) {
@@ -134,19 +157,28 @@ public class BodyParametersServiceImpl implements BodyParametersService {
                 .orElse(null);
     }
 
-    @NonNull
-    private static NutritionalValue getNutritionalValue(BodyParameters measurements) {
-        NutritionalValue goalNutritionalValue = new NutritionalValue();
-        double baseValues = (measurements.getWeight() * 10
-                + measurements.getHeight() * 6.25
-                - measurements.getAge() * 5);
-        baseValues = (measurements.getSex() == Sex.FEMALE)
-                ? (baseValues - 161)
-                : (baseValues + 5);
-        goalNutritionalValue.setCalories(baseValues);
-        goalNutritionalValue.setProteins(baseValues * 0.25);
-        goalNutritionalValue.setFats(baseValues * 0.2);
-        goalNutritionalValue.setCarbohydrates(baseValues * 0.55);
-        return goalNutritionalValue;
+    private NutritionalValue getNutritionalValue(BodyParameters measurements) {
+        return nutritionalGoalCalculator.calculate(measurements, measurements.getOwner().getGoalType());
+    }
+
+    private void applyGoalOnCreate(User owner, BodyParameters bodyParameters) {
+        BodyParameters latestBodyParameters = getLatestBodyParameters(owner);
+        if (latestBodyParameters == null || latestBodyParameters.getGoalNutritional() == null) {
+            bodyParameters.setGoalNutritional(getNutritionalValue(bodyParameters));
+            bodyParameters.setAutoCalculated(true);
+            return;
+        }
+
+        bodyParameters.setGoalNutritional(copyNutritionalValue(latestBodyParameters.getGoalNutritional()));
+        bodyParameters.setAutoCalculated(Boolean.TRUE.equals(latestBodyParameters.getAutoCalculated()));
+    }
+
+    private NutritionalValue copyNutritionalValue(NutritionalValue source) {
+        return new NutritionalValue(
+                source.getCalories(),
+                source.getProteins(),
+                source.getFats(),
+                source.getCarbohydrates()
+        );
     }
 }

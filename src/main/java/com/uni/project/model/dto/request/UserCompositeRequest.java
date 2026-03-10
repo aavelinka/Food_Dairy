@@ -1,6 +1,5 @@
 package com.uni.project.model.dto.request;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -16,13 +15,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCompositeRequest extends UserRequest {
-    @Override
-    @NotNull
-    @Valid
-    public NutritionalValueRequest getDailyGoal() {
-        return super.getDailyGoal();
-    }
-
     @NotBlank
     private String mealName;
 

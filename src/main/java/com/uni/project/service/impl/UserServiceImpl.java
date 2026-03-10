@@ -1,8 +1,10 @@
 package com.uni.project.service.impl;
 
+import com.uni.project.cache.UserQueryKey;
+import com.uni.project.cache.UserSearchCache;
 import com.uni.project.exception.UserException;
-import com.uni.project.mapper.NutritionalValueMapper;
 import com.uni.project.mapper.UserMapper;
+import com.uni.project.model.dto.request.UserBodyParametersRequest;
 import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.response.UserResponse;
@@ -16,10 +18,16 @@ import com.uni.project.repository.MealRepository;
 import com.uni.project.repository.UserRepository;
 import com.uni.project.service.UserService;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,28 +36,24 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
+    private static final String USER_FAIL_MESSAGE = "User not found by Id";
+
     private final UserRepository userRepository;
     private final MealRepository mealRepository;
     private final UserMapper userMapper;
-    private final NutritionalValueMapper nutritionalValueMapper;
-    private static final String USER_FAIL_MESSAGE = "User not found by Id";
+    private final NutritionalGoalCalculator nutritionalGoalCalculator;
+    private final UserSearchCache userSearchCache;
 
     @Override
     @Transactional
     public UserResponse userCreate(UserRequest userRequest) {
         User user = userMapper.fromRequest(userRequest);
-        user.setMealsPlan(new ArrayList<>());
-        user.setBodyParametersHistory(new LinkedHashSet<>());
-        BodyParameters bodyParameters = buildBodyParametersRecord(
-                user,
-                userRequest.getMeasurements(),
-                toGoalFromRequest(userRequest)
-        );
-        if (bodyParameters != null) {
-            user.getBodyParametersHistory().add(bodyParameters);
-        }
-        user = userRepository.save(user);
-        return userMapper.toResponse(user);
+        BodyParameters initialBodyParameters = createInitialBodyParameters(userRequest.getMeasurements(), user);
+        user.setBodyParametersHistory(new HashSet<>(Set.of(initialBodyParameters)));
+
+        User savedUser = userRepository.save(user);
+        userSearchCache.clear();
+        return userMapper.toResponse(savedUser);
     }
 
     @Override
@@ -60,8 +64,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllUsers() {
-        return userMapper.toResponses(userRepository.findAll());
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
+        UserQueryKey key = UserQueryKey.forAllUsers(pageable);
+        Optional<Page<UserResponse>> cached = userSearchCache.get(key);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
+        Page<UserResponse> mappedPage = toResponsePage(userRepository.findAll(pageable), pageable);
+        userSearchCache.put(key, mappedPage);
+        return mappedPage;
     }
 
     @Override
@@ -69,24 +81,21 @@ public class UserServiceImpl implements UserService {
     public UserResponse userUpdate(Integer id, UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+
         user.setName(userRequest.getName());
         user.setPassword(userRequest.getPassword());
         user.setEmail(userRequest.getEmail());
+        user.setGoalType(userRequest.getGoalType());
 
-        BodyParameters bodyParameters = buildBodyParametersRecord(
-                user,
-                userRequest.getMeasurements(),
-                toGoalFromRequest(userRequest)
-        );
-        if (bodyParameters != null) {
-            if (user.getBodyParametersHistory() == null) {
-                user.setBodyParametersHistory(new LinkedHashSet<>());
-            }
-            user.getBodyParametersHistory().add(bodyParameters);
+        BodyParameters newBodyParameters = createHistoryBodyParameters(userRequest.getMeasurements(), user);
+        if (user.getBodyParametersHistory() == null) {
+            user.setBodyParametersHistory(new HashSet<>());
         }
+        user.getBodyParametersHistory().add(newBodyParameters);
 
-        userRepository.save(user);
-        return userMapper.toResponse(user);
+        User savedUser = userRepository.save(user);
+        userSearchCache.clear();
+        return userMapper.toResponse(savedUser);
     }
 
     @Override
@@ -95,6 +104,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
         userRepository.delete(user);
+        userSearchCache.clear();
     }
 
     @Override
@@ -108,103 +118,157 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> getAllUsersByAge(Integer ageSearch) {
-        return userMapper.toResponses(userRepository.findAllByAge(ageSearch));
+    public Page<UserResponse> getAllUsersByAge(Integer ageSearch, Pageable pageable) {
+        UserQueryKey key = UserQueryKey.forAgeJpql(ageSearch, pageable);
+        Optional<Page<UserResponse>> cached = userSearchCache.get(key);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
+        Page<UserResponse> mappedPage = toResponsePage(userRepository.findAllByAge(ageSearch, pageable), pageable);
+        userSearchCache.put(key, mappedPage);
+        return mappedPage;
     }
 
     @Override
-    public List<UserResponse> getAllUsersByAgeNative(Integer ageSearch) {
-        return userMapper.toResponses(userRepository.findAllByAgeNative(ageSearch));
+    public Page<UserResponse> getAllUsersByAgeNative(Integer ageSearch, Pageable pageable) {
+        UserQueryKey key = UserQueryKey.forAgeNative(ageSearch, pageable);
+        Optional<Page<UserResponse>> cached = userSearchCache.get(key);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
+        Page<UserResponse> mappedPage = toResponsePage(
+                userRepository.findAllByAgeNative(ageSearch, pageable),
+                pageable
+        );
+        userSearchCache.put(key, mappedPage);
+        return mappedPage;
     }
 
     @Override
     public List<UserResponse> findAllWithMealsAndBodyParameters() {
-        List<User> userList = userRepository.findAllWithMealsAndBodyParameters();
-        return userMapper.toResponses(userList);
+        return userMapper.toResponses(userRepository.findAllWithMealsAndBodyParameters());
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public UserResponse createUserWithoutGoalAndNoteNoTx(UserCompositeRequest userRequest) {
-        return createCompositeInternal(userRequest);
+        User savedUser = saveUserWithInitialBodyParameters(userRequest);
+
+        if (userRequest.isFailAfterUser()) {
+            throw new UserException("Forced failure after user creation");
+        }
+
+        saveMealWithNote(userRequest, savedUser);
+        userSearchCache.clear();
+        return userMapper.toResponse(savedUser);
     }
 
     @Override
     @Transactional
     public UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest) {
-        return createCompositeInternal(userRequest);
+        User savedUser = saveUserWithInitialBodyParameters(userRequest);
+
+        if (userRequest.isFailAfterUser()) {
+            throw new UserException("Forced failure after user creation");
+        }
+
+        saveMealWithNote(userRequest, savedUser);
+        userSearchCache.clear();
+        return userMapper.toResponse(savedUser);
     }
 
-    private UserResponse createCompositeInternal(UserCompositeRequest request) {
-        User user = userMapper.fromRequest(request);
+    private Page<UserResponse> toResponsePage(Page<User> usersPage, Pageable pageable) {
+        List<UserResponse> content = usersPage.getContent().stream()
+                .map(userMapper::toResponse)
+                .toList();
+        return new PageImpl<>(content, pageable, usersPage.getTotalElements());
+    }
 
-        if (user.getMealsPlan() == null) {
-            user.setMealsPlan(new ArrayList<>());
-        }
-        if (user.getBodyParametersHistory() == null) {
-            user.setBodyParametersHistory(new LinkedHashSet<>());
-        }
+    private User saveUserWithInitialBodyParameters(UserRequest userRequest) {
+        User user = userMapper.fromRequest(userRequest);
+        BodyParameters initialBodyParameters = createInitialBodyParameters(userRequest.getMeasurements(), user);
+        user.setBodyParametersHistory(new HashSet<>(Set.of(initialBodyParameters)));
+        return userRepository.save(user);
+    }
 
-        BodyParameters bodyParameters = buildBodyParametersRecord(
-                user,
-                request.getMeasurements(),
-                toGoalFromRequest(request)
-        );
-
-        if (bodyParameters != null) {
-            user.getBodyParametersHistory().add(bodyParameters);
-        }
-
-        user = userRepository.save(user);
-
-        if (request.isFailAfterUser()) {
-            throw new UserException("Forced error after saving user and daily goal");
-        }
+    private void saveMealWithNote(UserCompositeRequest userRequest, User author) {
+        Meal meal = new Meal();
+        meal.setName(userRequest.getMealName());
+        meal.setDate(resolveMealDate(userRequest));
+        meal.setAuthor(author);
+        meal.setProductList(List.of());
 
         Note note = new Note();
-        note.setNotes(new ArrayList<>(request.getNotes()));
-
-        Meal meal = new Meal();
-        meal.setName(request.getMealName());
-        meal.setDate(request.getMealDate());
-        meal.setAuthor(user);
+        note.setNotes(userRequest.getNotes());
+        note.setMeal(meal);
         meal.setRecipe(note);
 
-        note.setMeal(meal);
-
-        meal = mealRepository.save(meal);
-
-        user.getMealsPlan().add(meal);
-
-        return userMapper.toResponse(user);
+        mealRepository.save(meal);
     }
 
-    private NutritionalValue toGoalFromRequest(UserRequest userRequest) {
-        if (userRequest.getDailyGoal() == null) {
-            return null;
-        }
-        return nutritionalValueMapper.fromRequest(userRequest.getDailyGoal());
+    private LocalDate resolveMealDate(UserCompositeRequest userRequest) {
+        return userRequest.getMealDate() == null
+                ? userRequest.getMeasurements().getRecordDate()
+                : userRequest.getMealDate();
     }
 
-    private BodyParameters buildBodyParametersRecord(User user,
-                                                     BodyParameters source,
-                                                     NutritionalValue goalOverride) {
-        if (source == null) {
-            return null;
-        }
-
-        BodyParameters bodyParameters = new BodyParameters();
-        bodyParameters.setRecordDate(source.getRecordDate() == null ? LocalDate.now() : source.getRecordDate());
-        bodyParameters.setSex(source.getSex());
-        bodyParameters.setWeight(source.getWeight());
-        bodyParameters.setHeight(source.getHeight());
-        bodyParameters.setAge(source.getAge());
-        bodyParameters.setChest(source.getChest());
-        bodyParameters.setWaist(source.getWaist());
-        bodyParameters.setHips(source.getHips());
-        bodyParameters.setGoalNutritional(goalOverride == null ? source.getGoalNutritional() : goalOverride);
-        bodyParameters.setOwner(user);
+    private BodyParameters createInitialBodyParameters(UserBodyParametersRequest request, User owner) {
+        BodyParameters bodyParameters = toBodyParameters(request, owner);
+        bodyParameters.setGoalNutritional(nutritionalGoalCalculator.calculate(bodyParameters, owner.getGoalType()));
+        bodyParameters.setAutoCalculated(true);
         return bodyParameters;
     }
 
+    private BodyParameters createHistoryBodyParameters(UserBodyParametersRequest request, User owner) {
+        BodyParameters bodyParameters = toBodyParameters(request, owner);
+        BodyParameters latest = getLatestBodyParameters(owner);
+
+        if (latest == null || latest.getGoalNutritional() == null) {
+            bodyParameters.setGoalNutritional(nutritionalGoalCalculator.calculate(bodyParameters, owner.getGoalType()));
+            bodyParameters.setAutoCalculated(true);
+            return bodyParameters;
+        }
+
+        bodyParameters.setGoalNutritional(copyNutritionalValue(latest.getGoalNutritional()));
+        bodyParameters.setAutoCalculated(Boolean.TRUE.equals(latest.getAutoCalculated()));
+        return bodyParameters;
+    }
+
+    private BodyParameters toBodyParameters(UserBodyParametersRequest request, User owner) {
+        BodyParameters bodyParameters = new BodyParameters();
+        bodyParameters.setRecordDate(request.getRecordDate());
+        bodyParameters.setSex(request.getSex());
+        bodyParameters.setWeight(request.getWeight());
+        bodyParameters.setHeight(request.getHeight());
+        bodyParameters.setAge(request.getAge());
+        bodyParameters.setChest(request.getChest());
+        bodyParameters.setWaist(request.getWaist());
+        bodyParameters.setHips(request.getHips());
+        bodyParameters.setOwner(owner);
+        return bodyParameters;
+    }
+
+    private BodyParameters getLatestBodyParameters(User user) {
+        if (user.getBodyParametersHistory() == null || user.getBodyParametersHistory().isEmpty()) {
+            return null;
+        }
+
+        return user.getBodyParametersHistory().stream()
+                .filter(Objects::nonNull)
+                .max(Comparator
+                        .comparing(BodyParameters::getRecordDate, Comparator.nullsLast(LocalDate::compareTo))
+                        .thenComparing(BodyParameters::getId, Comparator.nullsFirst(Integer::compareTo)))
+                .orElse(null);
+    }
+
+    private NutritionalValue copyNutritionalValue(NutritionalValue source) {
+        return new NutritionalValue(
+                source.getCalories(),
+                source.getProteins(),
+                source.getFats(),
+                source.getCarbohydrates()
+        );
+    }
 }
