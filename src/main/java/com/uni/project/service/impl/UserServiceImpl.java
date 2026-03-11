@@ -65,15 +65,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserResponse> getAllUsers(Pageable pageable) {
-        UserQueryKey key = UserQueryKey.forAllUsers(pageable);
-        Optional<Page<UserResponse>> cached = userSearchCache.get(key);
-        if (cached.isPresent()) {
-            return cached.get();
-        }
-
-        Page<UserResponse> mappedPage = toResponsePage(userRepository.findAll(pageable), pageable);
-        userSearchCache.put(key, mappedPage);
-        return mappedPage;
+        return getCachedUsersPage(
+                UserQueryKey.forAllUsers(pageable),
+                () -> userRepository.findAll(pageable),
+                pageable
+        );
     }
 
     @Override
@@ -119,31 +115,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserResponse> getAllUsersByAge(Integer ageSearch, Pageable pageable) {
-        UserQueryKey key = UserQueryKey.forAgeJpql(ageSearch, pageable);
-        Optional<Page<UserResponse>> cached = userSearchCache.get(key);
-        if (cached.isPresent()) {
-            return cached.get();
-        }
-
-        Page<UserResponse> mappedPage = toResponsePage(userRepository.findAllByAge(ageSearch, pageable), pageable);
-        userSearchCache.put(key, mappedPage);
-        return mappedPage;
+        return getCachedUsersPage(
+                UserQueryKey.forAgeJpql(ageSearch, pageable),
+                () -> userRepository.findAllByAge(ageSearch, pageable),
+                pageable
+        );
     }
 
     @Override
     public Page<UserResponse> getAllUsersByAgeNative(Integer ageSearch, Pageable pageable) {
-        UserQueryKey key = UserQueryKey.forAgeNative(ageSearch, pageable);
-        Optional<Page<UserResponse>> cached = userSearchCache.get(key);
-        if (cached.isPresent()) {
-            return cached.get();
-        }
-
-        Page<UserResponse> mappedPage = toResponsePage(
-                userRepository.findAllByAgeNative(ageSearch, pageable),
+        return getCachedUsersPage(
+                UserQueryKey.forAgeNative(ageSearch, pageable),
+                () -> userRepository.findAllByAgeNative(ageSearch, pageable),
                 pageable
         );
-        userSearchCache.put(key, mappedPage);
-        return mappedPage;
     }
 
     @Override
@@ -154,29 +139,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public UserResponse createUserWithoutGoalAndNoteNoTx(UserCompositeRequest userRequest) {
-        User savedUser = saveUserWithInitialBodyParameters(userRequest);
-
-        if (userRequest.isFailAfterUser()) {
-            throw new UserException("Forced failure after user creation");
-        }
-
-        saveMealWithNote(userRequest, savedUser);
-        userSearchCache.clear();
-        return userMapper.toResponse(savedUser);
+        return createUserWithMealAndNote(userRequest);
     }
 
     @Override
     @Transactional
     public UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest) {
-        User savedUser = saveUserWithInitialBodyParameters(userRequest);
-
-        if (userRequest.isFailAfterUser()) {
-            throw new UserException("Forced failure after user creation");
-        }
-
-        saveMealWithNote(userRequest, savedUser);
-        userSearchCache.clear();
-        return userMapper.toResponse(savedUser);
+        return createUserWithMealAndNote(userRequest);
     }
 
     private Page<UserResponse> toResponsePage(Page<User> usersPage, Pageable pageable) {
@@ -184,6 +153,33 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::toResponse)
                 .toList();
         return new PageImpl<>(content, pageable, usersPage.getTotalElements());
+    }
+
+    private Page<UserResponse> getCachedUsersPage(
+            UserQueryKey key,
+            java.util.function.Supplier<Page<User>> pageSupplier,
+            Pageable pageable
+    ) {
+        Optional<Page<UserResponse>> cached = userSearchCache.get(key);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
+        Page<UserResponse> mappedPage = toResponsePage(pageSupplier.get(), pageable);
+        userSearchCache.put(key, mappedPage);
+        return mappedPage;
+    }
+
+    private UserResponse createUserWithMealAndNote(UserCompositeRequest userRequest) {
+        User savedUser = saveUserWithInitialBodyParameters(userRequest);
+
+        if (userRequest.isFailAfterUser()) {
+            throw new UserException("Forced failure after user creation");
+        }
+
+        saveMealWithNote(userRequest, savedUser);
+        userSearchCache.clear();
+        return userMapper.toResponse(savedUser);
     }
 
     private User saveUserWithInitialBodyParameters(UserRequest userRequest) {
