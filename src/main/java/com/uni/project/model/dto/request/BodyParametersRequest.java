@@ -16,10 +16,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BodyParametersRequest {
     @NotNull
-    @Positive
-    private Integer userId;
-
-    @NotNull
     private LocalDate recordDate;
 
     @NotNull
@@ -45,4 +41,7 @@ public class BodyParametersRequest {
 
     @PositiveOrZero
     private Double hips;
+
+    @Positive
+    private Integer userId;
 }

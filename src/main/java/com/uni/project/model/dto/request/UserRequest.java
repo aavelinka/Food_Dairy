@@ -27,7 +27,7 @@ public class UserRequest {
 
     @NotNull
     @Valid
-    private UserBodyParametersRequest measurements;
+    private BodyParametersRequest measurements;
 
     @NotNull
     private GoalType goalType;

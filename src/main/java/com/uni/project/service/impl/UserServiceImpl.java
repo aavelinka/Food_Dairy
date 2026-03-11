@@ -4,7 +4,7 @@ import com.uni.project.cache.UserQueryKey;
 import com.uni.project.cache.UserSearchCache;
 import com.uni.project.exception.UserException;
 import com.uni.project.mapper.UserMapper;
-import com.uni.project.model.dto.request.UserBodyParametersRequest;
+import com.uni.project.model.dto.request.BodyParametersRequest;
 import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.response.UserResponse;
@@ -210,14 +210,14 @@ public class UserServiceImpl implements UserService {
                 : userRequest.getMealDate();
     }
 
-    private BodyParameters createInitialBodyParameters(UserBodyParametersRequest request, User owner) {
+    private BodyParameters createInitialBodyParameters(BodyParametersRequest request, User owner) {
         BodyParameters bodyParameters = toBodyParameters(request, owner);
         bodyParameters.setGoalNutritional(nutritionalGoalCalculator.calculate(bodyParameters, owner.getGoalType()));
         bodyParameters.setAutoCalculated(true);
         return bodyParameters;
     }
 
-    private BodyParameters createHistoryBodyParameters(UserBodyParametersRequest request, User owner) {
+    private BodyParameters createHistoryBodyParameters(BodyParametersRequest request, User owner) {
         BodyParameters bodyParameters = toBodyParameters(request, owner);
         BodyParameters latest = getLatestBodyParameters(owner);
 
@@ -232,7 +232,7 @@ public class UserServiceImpl implements UserService {
         return bodyParameters;
     }
 
-    private BodyParameters toBodyParameters(UserBodyParametersRequest request, User owner) {
+    private BodyParameters toBodyParameters(BodyParametersRequest request, User owner) {
         BodyParameters bodyParameters = new BodyParameters();
         bodyParameters.setRecordDate(request.getRecordDate());
         bodyParameters.setSex(request.getSex());

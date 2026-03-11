@@ -39,7 +39,8 @@ public class BodyParametersServiceImpl implements BodyParametersService {
     @Override
     @Transactional
     public BodyParametersResponse bodyParametersCreate(BodyParametersRequest bodyParametersRequest) {
-        User owner = userRepository.findById(bodyParametersRequest.getUserId())
+        Integer userId = getRequiredUserId(bodyParametersRequest);
+        User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
         BodyParameters bodyParameters = bodyParametersMapper.fromRequest(bodyParametersRequest);
         bodyParameters.setOwner(owner);
@@ -66,7 +67,8 @@ public class BodyParametersServiceImpl implements BodyParametersService {
     public BodyParametersResponse bodyParametersUpdate(Integer id, BodyParametersRequest bodyParametersRequest) {
         BodyParameters bodyParameters = bodyParametersRepository.findById(id)
                 .orElseThrow(() -> new BodyParametersException(BODY_PARAMETERS_FAIL_MESSAGE));
-        User owner = userRepository.findById(bodyParametersRequest.getUserId())
+        Integer userId = getRequiredUserId(bodyParametersRequest);
+        User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
 
         bodyParameters.setOwner(owner);
@@ -180,5 +182,13 @@ public class BodyParametersServiceImpl implements BodyParametersService {
                 source.getFats(),
                 source.getCarbohydrates()
         );
+    }
+
+    private Integer getRequiredUserId(BodyParametersRequest bodyParametersRequest) {
+        Integer userId = bodyParametersRequest.getUserId();
+        if (userId == null) {
+            throw new BodyParametersException("User id is required");
+        }
+        return userId;
     }
 }
