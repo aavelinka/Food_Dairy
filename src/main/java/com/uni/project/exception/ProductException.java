@@ -1,7 +1,13 @@
 package com.uni.project.exception;
 
-public class ProductException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class ProductException extends ApiException {
     public ProductException(String message) {
-        super(message);
+        this(HttpStatus.NOT_FOUND, message);
+    }
+
+    public ProductException(HttpStatus status, String message) {
+        super(status, message);
     }
 }

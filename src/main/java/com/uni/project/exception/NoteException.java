@@ -1,7 +1,13 @@
 package com.uni.project.exception;
 
-public class NoteException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class NoteException extends ApiException {
     public NoteException(String message) {
-        super(message);
+        this(HttpStatus.NOT_FOUND, message);
+    }
+
+    public NoteException(HttpStatus status, String message) {
+        super(status, message);
     }
 }

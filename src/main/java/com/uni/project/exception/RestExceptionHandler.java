@@ -1,0 +1,155 @@
+package com.uni.project.exception;
+
+import com.uni.project.model.dto.response.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+@Slf4j
+@RestControllerAdvice
+public class RestExceptionHandler {
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApiException(
+            ApiException ex,
+            HttpServletRequest request
+    ) {
+        logByStatus(ex.getStatus(), request.getRequestURI(), ex.getMessage());
+        return buildError(ex.getStatus(), ex.getMessage(), request.getRequestURI(), ex.getFieldErrors());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage());
+        }
+        log.debug("Validation failed for path {}: {}", request.getRequestURI(), fieldErrors);
+        return buildError(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI(), fieldErrors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException ex,
+            HttpServletRequest request
+    ) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        ex.getConstraintViolations().forEach(violation -> fieldErrors.put(
+                violation.getPropertyPath().toString(),
+                violation.getMessage()
+        ));
+        log.debug("Constraint violation for path {}: {}", request.getRequestURI(), fieldErrors);
+        return buildError(HttpStatus.BAD_REQUEST, "Validation failed", request.getRequestURI(), fieldErrors);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request
+    ) {
+        String message = "Invalid value for parameter '%s'".formatted(ex.getName());
+        Map<String, String> fieldErrors = Map.of(ex.getName(), message);
+        log.debug("Parameter type mismatch for path {}: {}", request.getRequestURI(), message);
+        return buildError(HttpStatus.BAD_REQUEST, message, request.getRequestURI(), fieldErrors);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingParameter(
+            MissingServletRequestParameterException ex,
+            HttpServletRequest request
+    ) {
+        String message = "Required parameter '%s' is missing".formatted(ex.getParameterName());
+        Map<String, String> fieldErrors = Map.of(ex.getParameterName(), message);
+        log.debug("Missing request parameter for path {}: {}", request.getRequestURI(), message);
+        return buildError(HttpStatus.BAD_REQUEST, message, request.getRequestURI(), fieldErrors);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request
+    ) {
+        log.debug("Malformed request body for path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, "Malformed request body", request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex,
+            HttpServletRequest request
+    ) {
+        String message = "HTTP method '%s' is not supported for this endpoint".formatted(ex.getMethod());
+        log.debug("Method not supported for path {}: {}", request.getRequestURI(), message);
+        return buildError(HttpStatus.METHOD_NOT_ALLOWED, message, request.getRequestURI(), Map.of());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Data integrity violation for path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildError(
+                HttpStatus.CONFLICT,
+                "Request conflicts with current data state",
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
+        log.error("Unexpected error for path {}", request.getRequestURI(), ex);
+        return buildError(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unexpected error",
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    private void logByStatus(HttpStatus status, String path, String message) {
+        if (status.is5xxServerError()) {
+            log.error("API error for path {}: {}", path, message);
+            return;
+        }
+        if (status == HttpStatus.CONFLICT) {
+            log.warn("API conflict for path {}: {}", path, message);
+            return;
+        }
+        log.debug("API error for path {}: {}", path, message);
+    }
+
+    private ResponseEntity<ErrorResponse> buildError(
+            HttpStatus status,
+            String message,
+            String path,
+            Map<String, String> fieldErrors
+    ) {
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(Instant.now())
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(message)
+                .path(path)
+                .fieldErrors(fieldErrors)
+                .build();
+        return ResponseEntity.status(status).body(response);
+    }
+}

@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: food-dairy
+
   config:
     import: optional:file:.env[.properties]
 
@@ -11,9 +14,16 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 
   data:
     web:
       pageable:
         max-page-size: 10
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs

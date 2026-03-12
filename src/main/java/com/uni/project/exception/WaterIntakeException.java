@@ -1,7 +1,13 @@
 package com.uni.project.exception;
 
-public class WaterIntakeException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class WaterIntakeException extends ApiException {
     public WaterIntakeException(String message) {
-        super(message);
+        this(HttpStatus.NOT_FOUND, message);
+    }
+
+    public WaterIntakeException(HttpStatus status, String message) {
+        super(status, message);
     }
 }

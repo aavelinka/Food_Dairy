@@ -14,6 +14,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
+    boolean existsByEmailIgnoreCase(String email);
+
     List<User> findAllByName(String name);
 
     @Query("select distinct u from User u join u.bodyParametersHistory bp where bp.sex = :sex")

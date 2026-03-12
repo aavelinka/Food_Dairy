@@ -1,7 +1,13 @@
 package com.uni.project.exception;
 
-public class MealException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class MealException extends ApiException {
     public MealException(String message) {
-        super(message);
+        this(HttpStatus.NOT_FOUND, message);
+    }
+
+    public MealException(HttpStatus status, String message) {
+        super(status, message);
     }
 }

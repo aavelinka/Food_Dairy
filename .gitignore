@@ -35,3 +35,4 @@ build/
 ### Local env / OS files ###
 .env
 .DS_Store
+logs/

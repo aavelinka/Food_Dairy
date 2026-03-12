@@ -1,7 +1,13 @@
 package com.uni.project.exception;
 
-public class BodyParametersException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class BodyParametersException extends ApiException {
     public BodyParametersException(String message) {
-        super(message);
+        this(HttpStatus.NOT_FOUND, message);
+    }
+
+    public BodyParametersException(HttpStatus status, String message) {
+        super(status, message);
     }
 }
