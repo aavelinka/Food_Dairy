@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -22,13 +21,58 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @Slf4j
 @RestControllerAdvice
 public class RestExceptionHandler {
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ErrorResponse> handleApiException(
-            ApiException ex,
+    @ExceptionHandler({
+            BodyParametersException.class,
+            MealException.class,
+            NoteException.class,
+            ProductException.class,
+            UserException.class,
+            WaterIntakeException.class
+    })
+    public ResponseEntity<ErrorResponse> handleNotFound(
+            RuntimeException ex,
             HttpServletRequest request
     ) {
-        logByStatus(ex.getStatus(), request.getRequestURI(), ex.getMessage());
-        return buildError(ex.getStatus(), ex.getMessage(), request.getRequestURI(), ex.getFieldErrors());
+        log.debug("Resource not found for path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(FailAfterUserException.class)
+    public ResponseEntity<ErrorResponse> handleFailAfterUser(
+            FailAfterUserException ex,
+            HttpServletRequest request
+    ) {
+        log.error("Business error for path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(
+            EmailAlreadyExistsException ex,
+            HttpServletRequest request
+    ) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        fieldErrors.put("email", ex.getMessage());
+        log.debug("Email conflict for path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildError(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI(), fieldErrors);
+    }
+
+    @ExceptionHandler(NoteConflictException.class)
+    public ResponseEntity<ErrorResponse> handleNoteConflict(
+            NoteConflictException ex,
+            HttpServletRequest request
+    ) {
+        log.debug("Conflict for path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildError(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI(), null);
+    }
+
+    @ExceptionHandler(BodyParametersBadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBodyParametersBadRequest(
+            BodyParametersBadRequestException ex,
+            HttpServletRequest request
+    ) {
+        log.debug("Bad request for path {}: {}", request.getRequestURI(), ex.getMessage());
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI(), null);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -99,20 +143,6 @@ public class RestExceptionHandler {
         return buildError(HttpStatus.METHOD_NOT_ALLOWED, message, request.getRequestURI(), Map.of());
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
-            DataIntegrityViolationException ex,
-            HttpServletRequest request
-    ) {
-        log.warn("Data integrity violation for path {}: {}", request.getRequestURI(), ex.getMessage());
-        return buildError(
-                HttpStatus.CONFLICT,
-                "Request conflicts with current data state",
-                request.getRequestURI(),
-                Map.of()
-        );
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error for path {}", request.getRequestURI(), ex);
@@ -122,18 +152,6 @@ public class RestExceptionHandler {
                 request.getRequestURI(),
                 Map.of()
         );
-    }
-
-    private void logByStatus(HttpStatus status, String path, String message) {
-        if (status.is5xxServerError()) {
-            log.error("API error for path {}: {}", path, message);
-            return;
-        }
-        if (status == HttpStatus.CONFLICT) {
-            log.warn("API conflict for path {}: {}", path, message);
-            return;
-        }
-        log.debug("API error for path {}: {}", path, message);
     }
 
     private ResponseEntity<ErrorResponse> buildError(
@@ -148,7 +166,7 @@ public class RestExceptionHandler {
                 .error(status.getReasonPhrase())
                 .message(message)
                 .path(path)
-                .fieldErrors(fieldErrors)
+                .fieldErrors(fieldErrors == null ? new LinkedHashMap<>() : fieldErrors)
                 .build();
         return ResponseEntity.status(status).body(response);
     }

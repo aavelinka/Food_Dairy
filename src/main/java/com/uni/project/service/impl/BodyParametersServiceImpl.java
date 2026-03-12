@@ -1,6 +1,7 @@
 package com.uni.project.service.impl;
 
 import com.uni.project.cache.UserSearchCache;
+import com.uni.project.exception.BodyParametersBadRequestException;
 import com.uni.project.exception.BodyParametersException;
 import com.uni.project.exception.UserException;
 import com.uni.project.mapper.BodyParametersMapper;
@@ -20,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,8 +120,7 @@ public class BodyParametersServiceImpl implements BodyParametersService {
                 || measurements.getHeight() == null
                 || measurements.getAge() == null
                 || measurements.getSex() == null) {
-            throw new BodyParametersException(
-                    HttpStatus.BAD_REQUEST,
+            throw new BodyParametersBadRequestException(
                     "User measurements are incomplete for nutritional value calculation"
             );
         }
@@ -191,7 +190,7 @@ public class BodyParametersServiceImpl implements BodyParametersService {
     private Integer getRequiredUserId(BodyParametersRequest bodyParametersRequest) {
         Integer userId = bodyParametersRequest.getUserId();
         if (userId == null) {
-            throw new BodyParametersException(HttpStatus.BAD_REQUEST, "User id is required");
+            throw new BodyParametersBadRequestException("User id is required");
         }
         return userId;
     }
