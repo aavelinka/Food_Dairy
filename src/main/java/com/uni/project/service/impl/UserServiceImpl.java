@@ -2,6 +2,8 @@ package com.uni.project.service.impl;
 
 import com.uni.project.cache.UserQueryKey;
 import com.uni.project.cache.UserSearchCache;
+import com.uni.project.exception.EmailAlreadyExistsException;
+import com.uni.project.exception.FailAfterUserException;
 import com.uni.project.exception.UserException;
 import com.uni.project.mapper.UserMapper;
 import com.uni.project.model.dto.request.BodyParametersRequest;
@@ -47,6 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse userCreate(UserRequest userRequest) {
+        validateEmailAvailability(userRequest.getEmail(), null);
         User user = userMapper.fromRequest(userRequest);
         BodyParameters initialBodyParameters = createInitialBodyParameters(userRequest.getMeasurements(), user);
         user.setBodyParametersHistory(new HashSet<>(Set.of(initialBodyParameters)));
@@ -77,6 +80,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse userUpdate(Integer id, UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+        validateEmailAvailability(userRequest.getEmail(), id);
 
         user.setName(userRequest.getName());
         user.setPassword(userRequest.getPassword());
@@ -174,7 +178,7 @@ public class UserServiceImpl implements UserService {
         User savedUser = saveUserWithInitialBodyParameters(userRequest);
 
         if (userRequest.isFailAfterUser()) {
-            throw new UserException("Forced failure after user creation");
+            throw new FailAfterUserException("Forced failure after user creation");
         }
 
         saveMealWithNote(userRequest, savedUser);
@@ -183,10 +187,27 @@ public class UserServiceImpl implements UserService {
     }
 
     private User saveUserWithInitialBodyParameters(UserRequest userRequest) {
+        validateEmailAvailability(userRequest.getEmail(), null);
         User user = userMapper.fromRequest(userRequest);
         BodyParameters initialBodyParameters = createInitialBodyParameters(userRequest.getMeasurements(), user);
         user.setBodyParametersHistory(new HashSet<>(Set.of(initialBodyParameters)));
         return userRepository.save(user);
+    }
+
+    private void validateEmailAvailability(String email, Integer currentUserId) {
+        if (email == null || !userRepository.existsByEmailIgnoreCase(email)) {
+            return;
+        }
+
+        if (currentUserId != null) {
+            User existingUser = userRepository.findById(currentUserId)
+                    .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+            if (email.equalsIgnoreCase(existingUser.getEmail())) {
+                return;
+            }
+        }
+
+        throw new EmailAlreadyExistsException("Email already exists");
     }
 
     private void saveMealWithNote(UserCompositeRequest userRequest, User author) {

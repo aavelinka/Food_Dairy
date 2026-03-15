@@ -1,16 +1,20 @@
 package com.uni.project.controller;
 
+import com.uni.project.controller.api.BodyParametersControllerApi;
 import com.uni.project.model.dto.request.BodyParametersRequest;
 import com.uni.project.model.dto.request.NutritionalValueRequest;
 import com.uni.project.model.dto.response.BodyParametersResponse;
 import com.uni.project.model.dto.response.NutritionalValueResponse;
 import com.uni.project.service.BodyParametersService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/body-parameters")
 @AllArgsConstructor
-public class BodyParametersController {
+@Validated
+public class BodyParametersController implements BodyParametersControllerApi {
     private final BodyParametersService bodyParametersService;
 
     @PostMapping
@@ -36,7 +41,7 @@ public class BodyParametersController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BodyParametersResponse> getBodyParametersById(@PathVariable Integer id) {
+    public ResponseEntity<BodyParametersResponse> getBodyParametersById(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(bodyParametersService.getBodyParametersById(id));
     }
 
@@ -47,38 +52,42 @@ public class BodyParametersController {
 
     @PutMapping("/{id}")
     public ResponseEntity<BodyParametersResponse> bodyParametersUpdate(
-            @PathVariable Integer id,
+            @PathVariable @Positive Integer id,
             @Valid @RequestBody BodyParametersRequest bodyParametersRequest) {
         return ResponseEntity.ok(bodyParametersService.bodyParametersUpdate(id, bodyParametersRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> bodyParametersDelete(@PathVariable Integer id) {
+    public ResponseEntity<Void> bodyParametersDelete(@PathVariable @Positive Integer id) {
         bodyParametersService.bodyParametersDelete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/user")
     public ResponseEntity<List<BodyParametersResponse>> getAllBodyParametersByUserId(
-            @RequestParam("userId") Integer userId) {
+            @RequestParam("userId") @Positive Integer userId
+    ) {
         return ResponseEntity.ok(bodyParametersService.getAllBodyParametersByUserId(userId));
     }
 
     @GetMapping("/date")
     public ResponseEntity<List<BodyParametersResponse>> getAllBodyParametersByUserIdAndDate(
-            @RequestParam("userId") Integer userId,
-            @RequestParam("date") LocalDate date) {
+            @RequestParam("userId") @Positive Integer userId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
         return ResponseEntity.ok(bodyParametersService.getAllBodyParametersByUserIdAndDate(userId, date));
     }
 
     @PostMapping("/user/{id}/nutritional")
-    public ResponseEntity<NutritionalValueResponse> calculateNutritionalValueForUser(@PathVariable Integer id) {
+    public ResponseEntity<NutritionalValueResponse> calculateNutritionalValueForUser(
+            @PathVariable @Positive Integer id
+    ) {
         return ResponseEntity.ok(bodyParametersService.calculateNutritionalValueForUser(id));
     }
 
     @PutMapping("/{id}/nutritional/manual")
     public ResponseEntity<NutritionalValueResponse> setManualNutritionalValue(
-            @PathVariable Integer id,
+            @PathVariable @Positive Integer id,
             @Valid @RequestBody NutritionalValueRequest request) {
         return ResponseEntity.ok(bodyParametersService.setManualNutritionalValue(id, request));
     }

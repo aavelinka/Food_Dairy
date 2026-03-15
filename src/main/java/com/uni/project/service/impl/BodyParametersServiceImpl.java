@@ -1,6 +1,7 @@
 package com.uni.project.service.impl;
 
 import com.uni.project.cache.UserSearchCache;
+import com.uni.project.exception.BodyParametersBadRequestException;
 import com.uni.project.exception.BodyParametersException;
 import com.uni.project.exception.UserException;
 import com.uni.project.mapper.BodyParametersMapper;
@@ -119,7 +120,9 @@ public class BodyParametersServiceImpl implements BodyParametersService {
                 || measurements.getHeight() == null
                 || measurements.getAge() == null
                 || measurements.getSex() == null) {
-            throw new BodyParametersException("User measurements are incomplete for nutritional value calculation");
+            throw new BodyParametersBadRequestException(
+                    "User measurements are incomplete for nutritional value calculation"
+            );
         }
 
         NutritionalValue goalNutritionalValue = getNutritionalValue(measurements);
@@ -187,7 +190,7 @@ public class BodyParametersServiceImpl implements BodyParametersService {
     private Integer getRequiredUserId(BodyParametersRequest bodyParametersRequest) {
         Integer userId = bodyParametersRequest.getUserId();
         if (userId == null) {
-            throw new BodyParametersException("User id is required");
+            throw new BodyParametersBadRequestException("User id is required");
         }
         return userId;
     }
