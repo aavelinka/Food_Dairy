@@ -1,7 +1,6 @@
 package com.uni.project.controller;
 
 import com.uni.project.controller.api.UserControllerApi;
-import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.Sex;
@@ -93,19 +92,5 @@ public class UserController implements UserControllerApi {
     @GetMapping("/with-meals")
     public ResponseEntity<List<UserResponse>> findAllWithMealsAndBodyParameters() {
         return ResponseEntity.ok(userService.findAllWithMealsAndBodyParameters());
-    }
-
-    @PostMapping("/without_transaction")
-    public ResponseEntity<UserResponse> createUserWithoutGoalAndNoteNoTx(
-            @Valid @RequestBody UserCompositeRequest userRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.createUserWithoutGoalAndNoteNoTx(userRequest));
-    }
-
-    @PostMapping("/with_transaction")
-    public ResponseEntity<UserResponse> createUserWithGoalAndNoteTx(
-            @Valid @RequestBody UserCompositeRequest userRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.createUserWithGoalAndNoteTx(userRequest));
     }
 }

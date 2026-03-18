@@ -1,6 +1,5 @@
 package com.uni.project.controller.api;
 
-import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.Sex;
@@ -16,7 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
-@Tag(name = "Users", description = "Operations with users and their composite creation scenarios")
+@Tag(name = "Users", description = "Operations with users")
 public interface UserControllerApi {
     @Operation(summary = "Get user by id")
     @ApiResponse(responseCode = "200", description = "User found")
@@ -93,18 +92,4 @@ public interface UserControllerApi {
     @ApiResponse(responseCode = "200", description = "Users returned")
     @InternalServerErrorApiResponse
     ResponseEntity<List<UserResponse>> findAllWithMealsAndBodyParameters();
-
-    @Operation(summary = "Create user, meal and note without transaction")
-    @ApiResponse(responseCode = "201", description = "Composite data created")
-    @BadRequestApiResponse
-    @ConflictApiResponse
-    @InternalServerErrorApiResponse
-    ResponseEntity<UserResponse> createUserWithoutGoalAndNoteNoTx(@Valid UserCompositeRequest userRequest);
-
-    @Operation(summary = "Create user, meal and note with transaction")
-    @ApiResponse(responseCode = "201", description = "Composite data created")
-    @BadRequestApiResponse
-    @ConflictApiResponse
-    @InternalServerErrorApiResponse
-    ResponseEntity<UserResponse> createUserWithGoalAndNoteTx(@Valid UserCompositeRequest userRequest);
 }

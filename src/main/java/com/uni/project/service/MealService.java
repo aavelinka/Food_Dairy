@@ -8,6 +8,10 @@ import java.util.List;
 public interface MealService {
     MealResponse mealCreate(MealRequest mealRequest);
 
+    List<MealResponse> createBulkNoTx(List<MealRequest> mealRequests, Integer failAfterIndex);
+
+    List<MealResponse> createBulkTx(List<MealRequest> mealRequests, Integer failAfterIndex);
+
     MealResponse getMealById(Integer id);
 
     List<MealResponse> getAllMeals();

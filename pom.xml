@@ -35,7 +35,18 @@
 			<sonar.organization>aavelinka</sonar.organization>
 			<sonar.projectKey>aavelinka_java-labs</sonar.projectKey>
 			<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-			<sonar.coverage.exclusions>**/*</sonar.coverage.exclusions>
+			<sonar.coverage.exclusions>
+				src/main/java/com/uni/project/ProjectApplication.java,
+				src/main/java/com/uni/project/aspect/**,
+				src/main/java/com/uni/project/cache/**,
+				src/main/java/com/uni/project/config/**,
+				src/main/java/com/uni/project/controller/**,
+				src/main/java/com/uni/project/exception/**,
+				src/main/java/com/uni/project/mapper/**,
+				src/main/java/com/uni/project/model/**,
+				src/main/java/com/uni/project/repository/**,
+				src/main/java/com/uni/project/service/*.java
+			</sonar.coverage.exclusions>
 		</properties>
 	<dependencies>
 		<dependency>
@@ -86,16 +97,21 @@
 			<artifactId>spring-boot-starter-validation-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-testcontainers</artifactId>
-			<scope>test</scope>
-		</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-webmvc-test</artifactId>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-testcontainers</artifactId>
+				<scope>test</scope>
+			</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers-junit-jupiter</artifactId>

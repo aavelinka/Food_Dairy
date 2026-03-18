@@ -7,6 +7,7 @@ import com.uni.project.service.MealService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +44,24 @@ public class MealController implements MealControllerApi {
     @PostMapping
     public ResponseEntity<MealResponse> mealCreate(@Valid @RequestBody MealRequest mealRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(mealService.mealCreate(mealRequest));
+    }
+
+    @PostMapping("/bulk/no-tx")
+    public ResponseEntity<List<MealResponse>> createBulkNoTx(
+            @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @RequestParam(name = "failAfterIndex", required = false) @Positive Integer failAfterIndex
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(mealService.createBulkNoTx(mealRequests, failAfterIndex));
+    }
+
+    @PostMapping("/bulk/tx")
+    public ResponseEntity<List<MealResponse>> createBulkTx(
+            @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @RequestParam(name = "failAfterIndex", required = false) @Positive Integer failAfterIndex
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(mealService.createBulkTx(mealRequests, failAfterIndex));
     }
 
     @PutMapping("/{id}")

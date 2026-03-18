@@ -37,9 +37,9 @@ public class RestExceptionHandler {
         return buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI(), null);
     }
 
-    @ExceptionHandler(FailAfterUserException.class)
-    public ResponseEntity<ErrorResponse> handleFailAfterUser(
-            FailAfterUserException ex,
+    @ExceptionHandler(BulkMealCreationException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessFailure(
+            RuntimeException ex,
             HttpServletRequest request
     ) {
         log.error("Business error for path {}: {}", request.getRequestURI(), ex.getMessage());

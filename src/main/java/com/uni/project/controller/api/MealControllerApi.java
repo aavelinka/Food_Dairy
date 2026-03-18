@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 
@@ -32,6 +33,26 @@ public interface MealControllerApi {
     @NotFoundApiResponse
     @InternalServerErrorApiResponse
     ResponseEntity<MealResponse> mealCreate(@Valid MealRequest mealRequest);
+
+    @Operation(summary = "Create several meals without a shared transaction")
+    @ApiResponse(responseCode = "201", description = "Meals created")
+    @BadRequestApiResponse
+    @NotFoundApiResponse
+    @InternalServerErrorApiResponse
+    ResponseEntity<List<MealResponse>> createBulkNoTx(
+            @Valid @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @Parameter(description = "Force failure after saving N meals") @Positive Integer failAfterIndex
+    );
+
+    @Operation(summary = "Create several meals within a single transaction")
+    @ApiResponse(responseCode = "201", description = "Meals created")
+    @BadRequestApiResponse
+    @NotFoundApiResponse
+    @InternalServerErrorApiResponse
+    ResponseEntity<List<MealResponse>> createBulkTx(
+            @Valid @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @Parameter(description = "Force failure after saving N meals") @Positive Integer failAfterIndex
+    );
 
     @Operation(summary = "Update meal")
     @ApiResponse(responseCode = "200", description = "Meal updated")
