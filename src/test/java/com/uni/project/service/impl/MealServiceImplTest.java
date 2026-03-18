@@ -157,6 +157,19 @@ class MealServiceImplTest {
     }
 
     @Test
+    void mealDeleteShouldDeleteMealWhenProductListIsNull() {
+        Meal meal = new Meal();
+        meal.setId(4);
+
+        when(mealRepository.findById(4)).thenReturn(Optional.of(meal));
+
+        mealService.mealDelete(4);
+
+        verify(mealRepository).delete(meal);
+        verify(userSearchCache).clear();
+    }
+
+    @Test
     void createBulkNoTxShouldSaveAllMealsAndReturnResponses() {
         MealRequest firstRequest = buildMealRequest(null, null);
         MealRequest secondRequest = buildMealRequest(null, List.of());
@@ -181,10 +194,35 @@ class MealServiceImplTest {
     }
 
     @Test
+    void createBulkTxShouldSaveAllMealsAndReturnResponses() {
+        MealRequest firstRequest = buildMealRequest(null, null);
+        MealRequest secondRequest = buildMealRequest(null, List.of());
+        Meal firstMappedMeal = new Meal();
+        Meal secondMappedMeal = new Meal();
+        Meal firstSavedMeal = new Meal();
+        Meal secondSavedMeal = new Meal();
+        MealResponse firstResponse = new MealResponse();
+        MealResponse secondResponse = new MealResponse();
+
+        when(mealMapper.fromRequest(eq(firstRequest), isNull(), eq(List.of()))).thenReturn(firstMappedMeal);
+        when(mealMapper.fromRequest(eq(secondRequest), isNull(), eq(List.of()))).thenReturn(secondMappedMeal);
+        when(mealRepository.save(same(firstMappedMeal))).thenReturn(firstSavedMeal);
+        when(mealRepository.save(same(secondMappedMeal))).thenReturn(secondSavedMeal);
+        when(mealMapper.toResponse(same(firstSavedMeal))).thenReturn(firstResponse);
+        when(mealMapper.toResponse(same(secondSavedMeal))).thenReturn(secondResponse);
+
+        List<MealResponse> actualResponses = mealService.createBulkTx(List.of(firstRequest, secondRequest), null);
+
+        assertEquals(List.of(firstResponse, secondResponse), actualResponses);
+        verify(userSearchCache).clear();
+    }
+
+    @Test
     void createBulkTxShouldThrowAfterRequestedIndexAndClearCache() {
         MealRequest firstRequest = buildMealRequest(null, null);
         MealRequest secondRequest = buildMealRequest(null, null);
         MealRequest thirdRequest = buildMealRequest(null, null);
+        List<MealRequest> requests = List.of(firstRequest, secondRequest, thirdRequest);
         Meal firstMappedMeal = new Meal();
         Meal secondMappedMeal = new Meal();
         Meal firstSavedMeal = new Meal();
@@ -199,7 +237,7 @@ class MealServiceImplTest {
 
         BulkMealCreationException exception = assertThrows(
                 BulkMealCreationException.class,
-                () -> mealService.createBulkTx(List.of(firstRequest, secondRequest, thirdRequest), 2)
+                () -> mealService.createBulkTx(requests, 2)
         );
 
         assertEquals("Forced error after saving 2 bulk meals", exception.getMessage());

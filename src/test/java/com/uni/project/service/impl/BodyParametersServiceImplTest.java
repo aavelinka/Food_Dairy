@@ -113,6 +113,31 @@ class BodyParametersServiceImplTest {
     }
 
     @Test
+    void bodyParametersCreateShouldCalculateGoalWhenLatestMeasurementHasNoGoal() {
+        BodyParametersRequest request = buildRequest(3, LocalDate.of(2026, 3, 19));
+        User owner = buildUser(3, GoalType.WEIGHT_LOSS);
+        BodyParameters latest = buildBodyParameters(8, LocalDate.of(2026, 3, 11), owner);
+        BodyParameters mappedBodyParameters = buildBodyParameters(null, request.getRecordDate(), null);
+        BodyParameters savedBodyParameters = buildBodyParameters(12, request.getRecordDate(), owner);
+        BodyParametersResponse expectedResponse = new BodyParametersResponse();
+        NutritionalValue recalculatedGoal = buildGoal(1800.0);
+        owner.setBodyParametersHistory(Set.of(latest));
+
+        when(userRepository.findById(3)).thenReturn(Optional.of(owner));
+        when(bodyParametersMapper.fromRequest(request)).thenReturn(mappedBodyParameters);
+        when(nutritionalGoalCalculator.calculate(same(mappedBodyParameters), eq(GoalType.WEIGHT_LOSS)))
+                .thenReturn(recalculatedGoal);
+        when(bodyParametersRepository.save(same(mappedBodyParameters))).thenReturn(savedBodyParameters);
+        when(bodyParametersMapper.toResponse(savedBodyParameters)).thenReturn(expectedResponse);
+
+        BodyParametersResponse actualResponse = bodyParametersService.bodyParametersCreate(request);
+
+        assertSame(expectedResponse, actualResponse);
+        assertSame(recalculatedGoal, mappedBodyParameters.getGoalNutritional());
+        assertEquals(Boolean.TRUE, mappedBodyParameters.getAutoCalculated());
+    }
+
+    @Test
     void bodyParametersCreateShouldThrowWhenUserIdIsMissing() {
         BodyParametersRequest request = buildRequest(null, LocalDate.of(2026, 3, 18));
 
@@ -244,6 +269,22 @@ class BodyParametersServiceImplTest {
                 BodyParametersBadRequestException.class,
                 () -> bodyParametersService.calculateNutritionalValueForUser(8)
         );
+    }
+
+    @Test
+    void calculateNutritionalValueForUserShouldThrowWhenHistoryIsMissing() {
+        User user = buildUser(10, GoalType.MAINTENANCE);
+        user.setBodyParametersHistory(null);
+
+        when(userRepository.findById(10)).thenReturn(Optional.of(user));
+
+        assertThrows(
+                BodyParametersBadRequestException.class,
+                () -> bodyParametersService.calculateNutritionalValueForUser(10)
+        );
+        verify(bodyParametersRepository, never()).save(any());
+        verify(nutritionalGoalCalculator, never()).calculate(any(), any());
+        verify(userSearchCache, never()).clear();
     }
 
     @Test

@@ -199,6 +199,60 @@ class UserServiceImplTest {
     }
 
     @Test
+    void userUpdateShouldInitializeHistoryWhenMissingAndAllowNullEmail() {
+        LocalDate newDate = LocalDate.of(2026, 3, 22);
+        UserRequest request = buildRequest(null, newDate, GoalType.WEIGHT_GAIN);
+        User user = buildUser(7, "old@example.com", GoalType.MAINTENANCE);
+        UserResponse expectedResponse = new UserResponse();
+        NutritionalValue recalculatedGoal = buildGoal(2400.0);
+        user.setBodyParametersHistory(null);
+
+        when(userRepository.findById(7)).thenReturn(Optional.of(user));
+        when(nutritionalGoalCalculator.calculate(any(BodyParameters.class), eq(GoalType.WEIGHT_GAIN)))
+                .thenReturn(recalculatedGoal);
+        when(userRepository.save(same(user))).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(expectedResponse);
+
+        UserResponse actualResponse = userService.userUpdate(7, request);
+
+        assertSame(expectedResponse, actualResponse);
+        assertEquals(request.getEmail(), user.getEmail());
+        assertEquals(1, user.getBodyParametersHistory().size());
+        BodyParameters newBodyParameters = user.getBodyParametersHistory().iterator().next();
+        assertSame(user, newBodyParameters.getOwner());
+        assertSame(recalculatedGoal, newBodyParameters.getGoalNutritional());
+        assertEquals(Boolean.TRUE, newBodyParameters.getAutoCalculated());
+        verify(userRepository, never()).existsByEmailIgnoreCase(any());
+        verify(userSearchCache).clear();
+    }
+
+    @Test
+    void userUpdateShouldCalculateGoalWhenHistoryIsEmpty() {
+        LocalDate newDate = LocalDate.of(2026, 3, 23);
+        UserRequest request = buildRequest("empty@example.com", newDate, GoalType.WEIGHT_GAIN);
+        User user = buildUser(8, "old-empty@example.com", GoalType.MAINTENANCE);
+        UserResponse expectedResponse = new UserResponse();
+        NutritionalValue recalculatedGoal = buildGoal(2150.0);
+        user.setBodyParametersHistory(new HashSet<>());
+
+        when(userRepository.findById(8)).thenReturn(Optional.of(user));
+        when(userRepository.existsByEmailIgnoreCase("empty@example.com")).thenReturn(false);
+        when(nutritionalGoalCalculator.calculate(any(BodyParameters.class), eq(GoalType.WEIGHT_GAIN)))
+                .thenReturn(recalculatedGoal);
+        when(userRepository.save(same(user))).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(expectedResponse);
+
+        UserResponse actualResponse = userService.userUpdate(8, request);
+
+        assertSame(expectedResponse, actualResponse);
+        assertEquals(1, user.getBodyParametersHistory().size());
+        BodyParameters newBodyParameters = user.getBodyParametersHistory().iterator().next();
+        assertSame(recalculatedGoal, newBodyParameters.getGoalNutritional());
+        assertEquals(Boolean.TRUE, newBodyParameters.getAutoCalculated());
+        verify(userSearchCache).clear();
+    }
+
+    @Test
     void userUpdateShouldThrowWhenEmailBelongsToAnotherUser() {
         UserRequest request = buildRequest("duplicate@example.com", LocalDate.of(2026, 3, 20), GoalType.MAINTENANCE);
         User user = buildUser(5, "old@example.com", GoalType.MAINTENANCE);
@@ -274,6 +328,23 @@ class UserServiceImplTest {
 
         assertSame(cachedPage, actualPage);
         verify(userRepository, never()).findAllByAgeNative(30, pageable);
+    }
+
+    @Test
+    void getAllUsersByAgeNativeShouldLoadAndCachePage() {
+        Pageable pageable = PageRequest.of(0, 5);
+        User user = buildUser(9, "native-age@example.com", GoalType.MAINTENANCE);
+        UserResponse response = new UserResponse();
+        Page<User> usersPage = new PageImpl<>(List.of(user), pageable, 1);
+
+        when(userSearchCache.get(any(UserQueryKey.class))).thenReturn(Optional.empty());
+        when(userRepository.findAllByAgeNative(30, pageable)).thenReturn(usersPage);
+        when(userMapper.toResponse(user)).thenReturn(response);
+
+        Page<UserResponse> actualPage = userService.getAllUsersByAgeNative(30, pageable);
+
+        assertEquals(List.of(response), actualPage.getContent());
+        verify(userSearchCache).put(any(UserQueryKey.class), org.mockito.ArgumentMatchers.<Page<UserResponse>>any());
     }
 
     @Test
