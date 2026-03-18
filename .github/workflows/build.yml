@@ -1,6 +1,7 @@
 name: Build and SonarCloud
 on:
   push:
+  pull_request:
 jobs:
   build-and-analyze:
     runs-on: ubuntu-latest
