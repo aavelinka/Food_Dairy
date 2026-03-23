@@ -48,7 +48,7 @@ public class MealController implements MealControllerApi {
 
     @PostMapping("/bulk/no-tx")
     public ResponseEntity<List<MealResponse>> createBulkNoTx(
-            @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @Valid @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
             @RequestParam(name = "failAfterIndex", required = false) @Positive Integer failAfterIndex
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -57,7 +57,7 @@ public class MealController implements MealControllerApi {
 
     @PostMapping("/bulk/tx")
     public ResponseEntity<List<MealResponse>> createBulkTx(
-            @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @Valid @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
             @RequestParam(name = "failAfterIndex", required = false) @Positive Integer failAfterIndex
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)

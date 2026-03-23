@@ -1,0 +1,369 @@
+ЛИСТИНГ КОДА
+
+Ниже приведены только фрагменты проекта, относящиеся к лабораторной работе № 5:
+- bulk-операция для массового создания приемов пищи;
+- использование Optional и Stream API (IntStream) в сервисном слое;
+- транзакционная и нетранзакционная версии bulk-операции;
+- unit-тесты сервисного слоя с Mockito.
+
+
+Фрагмент файла MealController.java
+
+package com.uni.project.controller;
+
+import com.uni.project.controller.api.MealControllerApi;
+import com.uni.project.model.dto.request.MealRequest;
+import com.uni.project.model.dto.response.MealResponse;
+import com.uni.project.service.MealService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/meal")
+@AllArgsConstructor
+@Validated
+public class MealController implements MealControllerApi {
+    private final MealService mealService;
+
+    @PostMapping("/bulk/no-tx")
+    public ResponseEntity<List<MealResponse>> createBulkNoTx(
+            @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @RequestParam(name = "failAfterIndex", required = false) @Positive Integer failAfterIndex
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(mealService.createBulkNoTx(mealRequests, failAfterIndex));
+    }
+
+    @PostMapping("/bulk/tx")
+    public ResponseEntity<List<MealResponse>> createBulkTx(
+            @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @RequestParam(name = "failAfterIndex", required = false) @Positive Integer failAfterIndex
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(mealService.createBulkTx(mealRequests, failAfterIndex));
+    }
+}
+
+
+Фрагмент файла MealService.java
+
+package com.uni.project.service;
+
+import com.uni.project.model.dto.request.MealRequest;
+import com.uni.project.model.dto.response.MealResponse;
+import java.util.List;
+
+public interface MealService {
+    List<MealResponse> createBulkNoTx(List<MealRequest> mealRequests, Integer failAfterIndex);
+
+    List<MealResponse> createBulkTx(List<MealRequest> mealRequests, Integer failAfterIndex);
+}
+
+
+Фрагмент файла MealServiceImpl.java
+
+package com.uni.project.service.impl;
+
+import com.uni.project.cache.UserSearchCache;
+import com.uni.project.exception.BulkMealCreationException;
+import com.uni.project.exception.MealException;
+import com.uni.project.mapper.MealMapper;
+import com.uni.project.model.dto.request.MealRequest;
+import com.uni.project.model.dto.response.MealResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.Product;
+import com.uni.project.model.entity.User;
+import com.uni.project.repository.MealRepository;
+import com.uni.project.repository.ProductRepository;
+import com.uni.project.repository.UserRepository;
+import com.uni.project.service.MealService;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@AllArgsConstructor
+@Transactional(readOnly = true)
+public class MealServiceImpl implements MealService {
+    private final MealRepository mealRepository;
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final MealMapper mealMapper;
+    private final UserSearchCache userSearchCache;
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<MealResponse> createBulkNoTx(List<MealRequest> mealRequests, Integer failAfterIndex) {
+        return createBulkInternal(mealRequests, failAfterIndex);
+    }
+
+    @Override
+    @Transactional
+    public List<MealResponse> createBulkTx(List<MealRequest> mealRequests, Integer failAfterIndex) {
+        return createBulkInternal(mealRequests, failAfterIndex);
+    }
+
+    private List<MealResponse> createBulkInternal(List<MealRequest> mealRequests, Integer failAfterIndex) {
+        try {
+            return IntStream.range(0, mealRequests.size())
+                    .mapToObj(index -> saveBulkMeal(
+                            mealRequests.get(index),
+                            index + 1,
+                            failAfterIndex
+                    ))
+                    .toList();
+        } finally {
+            userSearchCache.clear();
+        }
+    }
+
+    private MealResponse saveBulkMeal(
+            MealRequest mealRequest,
+            int processedMealsCount,
+            Integer failAfterIndex
+    ) {
+        Meal savedMeal = mealRepository.save(toMeal(mealRequest));
+        if (shouldFailAfter(processedMealsCount, failAfterIndex)) {
+            throw new BulkMealCreationException(
+                    "Forced error after saving %d bulk meals".formatted(processedMealsCount)
+            );
+        }
+        return mealMapper.toResponse(savedMeal);
+    }
+
+    private Meal toMeal(MealRequest mealRequest) {
+        User author = Optional.ofNullable(mealRequest.getAuthorId())
+                .map(authorId -> userRepository.findById(authorId)
+                        .orElseThrow(() -> new MealException("Author not found by Id")))
+                .orElse(null);
+
+        List<Product> products = Optional.ofNullable(mealRequest.getProductIds())
+                .filter(productIds -> !productIds.isEmpty())
+                .map(productIds -> {
+                    List<Product> foundProducts = productRepository.findAllById(productIds);
+                    if (foundProducts.size() != productIds.size()) {
+                        throw new MealException("Some products not found");
+                    }
+                    return foundProducts;
+                })
+                .orElseGet(List::of);
+
+        return mealMapper.fromRequest(mealRequest, author, products);
+    }
+
+    private boolean shouldFailAfter(int processedMealsCount, Integer failAfterIndex) {
+        return Optional.ofNullable(failAfterIndex)
+                .filter(index -> index == processedMealsCount)
+                .isPresent();
+    }
+}
+
+
+Фрагмент файла BulkMealCreationException.java
+
+package com.uni.project.exception;
+
+public class BulkMealCreationException extends RuntimeException {
+    public BulkMealCreationException(String message) {
+        super(message);
+    }
+}
+
+
+Фрагмент файла MealServiceImplTest.java
+
+package com.uni.project.service.impl;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.uni.project.cache.UserSearchCache;
+import com.uni.project.exception.BulkMealCreationException;
+import com.uni.project.exception.MealException;
+import com.uni.project.mapper.MealMapper;
+import com.uni.project.model.dto.request.MealRequest;
+import com.uni.project.model.dto.request.NutritionalValueRequest;
+import com.uni.project.model.dto.response.MealResponse;
+import com.uni.project.model.entity.Meal;
+import com.uni.project.model.entity.Product;
+import com.uni.project.repository.MealRepository;
+import com.uni.project.repository.ProductRepository;
+import com.uni.project.repository.UserRepository;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class MealServiceImplTest {
+    @Mock
+    private MealRepository mealRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @Mock
+    private MealMapper mealMapper;
+
+    @Mock
+    private UserSearchCache userSearchCache;
+
+    @InjectMocks
+    private MealServiceImpl mealService;
+
+    @Test
+    void mealCreateShouldUseNullAuthorAndEmptyProductsWhenIdsMissing() {
+        MealRequest request = buildMealRequest(null, null);
+        Meal mappedMeal = new Meal();
+        Meal savedMeal = new Meal();
+        MealResponse expectedResponse = new MealResponse();
+
+        when(mealMapper.fromRequest(eq(request), isNull(), eq(List.of()))).thenReturn(mappedMeal);
+        when(mealRepository.save(mappedMeal)).thenReturn(savedMeal);
+        when(mealMapper.toResponse(savedMeal)).thenReturn(expectedResponse);
+
+        MealResponse actualResponse = mealService.mealCreate(request);
+
+        assertSame(expectedResponse, actualResponse);
+        verify(userRepository, never()).findById(any());
+        verify(productRepository, never()).findAllById(any());
+        verify(userSearchCache).clear();
+    }
+
+    @Test
+    void mealCreateShouldThrowWhenAuthorDoesNotExist() {
+        MealRequest request = buildMealRequest(42, List.of());
+        when(userRepository.findById(42)).thenReturn(Optional.empty());
+
+        MealException exception = assertThrows(MealException.class, () -> mealService.mealCreate(request));
+
+        assertEquals("Author not found by Id", exception.getMessage());
+        verify(productRepository, never()).findAllById(any());
+        verify(mealRepository, never()).save(any());
+    }
+
+    @Test
+    void createBulkNoTxShouldSaveAllMealsAndReturnResponses() {
+        MealRequest firstRequest = buildMealRequest(null, null);
+        MealRequest secondRequest = buildMealRequest(null, List.of());
+        Meal firstMappedMeal = new Meal();
+        Meal secondMappedMeal = new Meal();
+        Meal firstSavedMeal = new Meal();
+        Meal secondSavedMeal = new Meal();
+        MealResponse firstResponse = new MealResponse();
+        MealResponse secondResponse = new MealResponse();
+
+        when(mealMapper.fromRequest(eq(firstRequest), isNull(), eq(List.of()))).thenReturn(firstMappedMeal);
+        when(mealMapper.fromRequest(eq(secondRequest), isNull(), eq(List.of()))).thenReturn(secondMappedMeal);
+        when(mealRepository.save(same(firstMappedMeal))).thenReturn(firstSavedMeal);
+        when(mealRepository.save(same(secondMappedMeal))).thenReturn(secondSavedMeal);
+        when(mealMapper.toResponse(same(firstSavedMeal))).thenReturn(firstResponse);
+        when(mealMapper.toResponse(same(secondSavedMeal))).thenReturn(secondResponse);
+
+        List<MealResponse> actualResponses = mealService.createBulkNoTx(List.of(firstRequest, secondRequest), null);
+
+        assertEquals(List.of(firstResponse, secondResponse), actualResponses);
+        verify(userSearchCache).clear();
+    }
+
+    @Test
+    void createBulkTxShouldSaveAllMealsAndReturnResponses() {
+        MealRequest firstRequest = buildMealRequest(null, null);
+        MealRequest secondRequest = buildMealRequest(null, List.of());
+        Meal firstMappedMeal = new Meal();
+        Meal secondMappedMeal = new Meal();
+        Meal firstSavedMeal = new Meal();
+        Meal secondSavedMeal = new Meal();
+        MealResponse firstResponse = new MealResponse();
+        MealResponse secondResponse = new MealResponse();
+
+        when(mealMapper.fromRequest(eq(firstRequest), isNull(), eq(List.of()))).thenReturn(firstMappedMeal);
+        when(mealMapper.fromRequest(eq(secondRequest), isNull(), eq(List.of()))).thenReturn(secondMappedMeal);
+        when(mealRepository.save(same(firstMappedMeal))).thenReturn(firstSavedMeal);
+        when(mealRepository.save(same(secondMappedMeal))).thenReturn(secondSavedMeal);
+        when(mealMapper.toResponse(same(firstSavedMeal))).thenReturn(firstResponse);
+        when(mealMapper.toResponse(same(secondSavedMeal))).thenReturn(secondResponse);
+
+        List<MealResponse> actualResponses = mealService.createBulkTx(List.of(firstRequest, secondRequest), null);
+
+        assertEquals(List.of(firstResponse, secondResponse), actualResponses);
+        verify(userSearchCache).clear();
+    }
+
+    @Test
+    void createBulkTxShouldThrowAfterRequestedIndexAndClearCache() {
+        MealRequest firstRequest = buildMealRequest(null, null);
+        MealRequest secondRequest = buildMealRequest(null, null);
+        MealRequest thirdRequest = buildMealRequest(null, null);
+        List<MealRequest> requests = List.of(firstRequest, secondRequest, thirdRequest);
+        Meal firstMappedMeal = new Meal();
+        Meal secondMappedMeal = new Meal();
+        Meal firstSavedMeal = new Meal();
+        Meal secondSavedMeal = new Meal();
+        MealResponse firstResponse = new MealResponse();
+
+        when(mealMapper.fromRequest(eq(firstRequest), isNull(), eq(List.of()))).thenReturn(firstMappedMeal);
+        when(mealMapper.fromRequest(eq(secondRequest), isNull(), eq(List.of()))).thenReturn(secondMappedMeal);
+        when(mealRepository.save(same(firstMappedMeal))).thenReturn(firstSavedMeal);
+        when(mealRepository.save(same(secondMappedMeal))).thenReturn(secondSavedMeal);
+        when(mealMapper.toResponse(same(firstSavedMeal))).thenReturn(firstResponse);
+
+        BulkMealCreationException exception = assertThrows(
+                BulkMealCreationException.class,
+                () -> mealService.createBulkTx(requests, 2)
+        );
+
+        assertEquals("Forced error after saving 2 bulk meals", exception.getMessage());
+        verify(mealRepository).save(same(firstMappedMeal));
+        verify(mealRepository).save(same(secondMappedMeal));
+        verify(mealMapper, never()).fromRequest(eq(thirdRequest), isNull(), eq(List.of()));
+        verify(mealMapper, never()).toResponse(same(secondSavedMeal));
+        verify(userSearchCache).clear();
+    }
+
+    private MealRequest buildMealRequest(Integer authorId, List<Integer> productIds) {
+        return new MealRequest(
+                "Lunch",
+                LocalDate.of(2026, 3, 18),
+                new NutritionalValueRequest(500.0, 30.0, 15.0, 55.0),
+                authorId,
+                productIds
+        );
+    }
+
+    private Product buildProduct(Integer id) {
+        Product product = new Product();
+        product.setId(id);
+        return product;
+    }
+}
