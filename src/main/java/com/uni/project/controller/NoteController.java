@@ -1,12 +1,16 @@
 package com.uni.project.controller;
 
+import com.uni.project.controller.api.NoteControllerApi;
 import com.uni.project.model.dto.request.NoteRequest;
 import com.uni.project.model.dto.response.NoteResponse;
 import com.uni.project.service.NoteService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +27,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/note")
 @AllArgsConstructor
-public class NoteController {
+@Validated
+public class NoteController implements NoteControllerApi {
     private final NoteService noteService;
 
     @PostMapping
@@ -32,7 +37,7 @@ public class NoteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<NoteResponse> getNoteById(@PathVariable Integer id) {
+    public ResponseEntity<NoteResponse> getNoteById(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(noteService.getNoteById(id));
     }
 
@@ -42,24 +47,30 @@ public class NoteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<NoteResponse> noteUpdate(@PathVariable Integer id,
-                                                   @Valid @RequestBody NoteRequest noteRequest) {
+    public ResponseEntity<NoteResponse> noteUpdate(
+            @PathVariable @Positive Integer id,
+            @Valid @RequestBody NoteRequest noteRequest
+    ) {
         return ResponseEntity.ok(noteService.noteUpdate(id, noteRequest));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> noteDelete(@PathVariable Integer id) {
+    public ResponseEntity<Void> noteDelete(@PathVariable @Positive Integer id) {
         noteService.noteDelete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/date")
-    public ResponseEntity<List<NoteResponse>> getAllNotesByDate(@RequestParam LocalDate dateSearch) {
+    public ResponseEntity<List<NoteResponse>> getAllNotesByDate(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateSearch
+    ) {
         return ResponseEntity.ok(noteService.getAllNotesByDate(dateSearch));
     }
 
     @GetMapping("/meal_note")
-    public ResponseEntity<List<NoteResponse>> getAllNotesByMeal(@RequestParam("mealId") Integer mealId) {
+    public ResponseEntity<List<NoteResponse>> getAllNotesByMeal(
+            @RequestParam("mealId") @Positive Integer mealId
+    ) {
         return ResponseEntity.ok(noteService.getAllNotesByMealId(mealId));
     }
 }

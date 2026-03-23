@@ -1,6 +1,7 @@
 package com.uni.project.service.impl;
 
 import com.uni.project.cache.UserSearchCache;
+import com.uni.project.exception.BulkMealCreationException;
 import com.uni.project.exception.MealException;
 import com.uni.project.mapper.MealMapper;
 import com.uni.project.model.dto.request.MealRequest;
@@ -14,9 +15,12 @@ import com.uni.project.repository.UserRepository;
 import com.uni.project.service.MealService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Service
 @AllArgsConstructor
@@ -32,13 +36,22 @@ public class MealServiceImpl implements MealService {
     @Override
     @Transactional
     public MealResponse mealCreate(MealRequest mealRequest) {
-        User author = getAuthor(mealRequest.getAuthorId());
-        List<Product> products = getProducts(mealRequest.getProductIds());
-        Meal meal = mealRepository
-                .save(mealMapper.fromRequest(mealRequest, author, products));
+        Meal meal = mealRepository.save(toMeal(mealRequest));
         userSearchCache.clear();
 
         return mealMapper.toResponse(meal);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<MealResponse> createBulkNoTx(List<MealRequest> mealRequests, Integer failAfterIndex) {
+        return createBulkInternal(mealRequests, failAfterIndex);
+    }
+
+    @Override
+    @Transactional
+    public List<MealResponse> createBulkTx(List<MealRequest> mealRequests, Integer failAfterIndex) {
+        return createBulkInternal(mealRequests, failAfterIndex);
     }
 
     @Override
@@ -59,12 +72,10 @@ public class MealServiceImpl implements MealService {
     public MealResponse mealUpdate(Integer id, MealRequest mealRequest) {
         Meal meal = mealRepository.findById(id)
                 .orElseThrow(() -> new MealException(MEAL_FAIL_MESSAGE));
-        User author = getAuthor(mealRequest.getAuthorId());
-        List<Product> products = getProducts(mealRequest.getProductIds());
-        Meal mappedMeal = mealMapper.fromRequest(mealRequest, author, products);
+        Meal mappedMeal = toMeal(mealRequest);
         meal.setName(mealRequest.getName());
         meal.setDate(mealRequest.getDate());
-        meal.setAuthor(author);
+        meal.setAuthor(mappedMeal.getAuthor());
         meal.setTotalNutritional(mappedMeal.getTotalNutritional());
         meal.setProductList(mappedMeal.getProductList());
         mealRepository.save(meal);
@@ -102,22 +113,51 @@ public class MealServiceImpl implements MealService {
         return mealMapper.toResponses(mealRepository.findAllByProductIds(productIds));
     }
 
-    private List<Product> getProducts(List<Integer> productIds) {
-        if (productIds == null || productIds.isEmpty()) {
-            return List.of();
+    private List<MealResponse> createBulkInternal(List<MealRequest> mealRequests, Integer failAfterIndex) {
+        try {
+            return IntStream.range(0, mealRequests.size())
+                    .mapToObj(index -> saveBulkMeal(
+                            mealRequests.get(index),
+                            index + 1,
+                            failAfterIndex
+                    ))
+                    .toList();
+        } finally {
+            userSearchCache.clear();
         }
-        List<Product> products = productRepository.findAllById(productIds);
-        if (products.size() != productIds.size()) {
-            throw new MealException("Some products not found");
-        }
-        return products;
     }
 
-    private User getAuthor(Integer authorId) {
-        if (authorId == null) {
-            return null;
+    private MealResponse saveBulkMeal(MealRequest mealRequest, int processedMealsCount, Integer failAfterIndex) {
+        Meal savedMeal = mealRepository.save(toMeal(mealRequest));
+        if (shouldFailAfter(processedMealsCount, failAfterIndex)) {
+            throw new BulkMealCreationException(
+                    "Forced error after saving %d bulk meals".formatted(processedMealsCount)
+            );
         }
-        return userRepository.findById(authorId)
-                .orElseThrow(() -> new MealException("Author not found by Id"));
+        return mealMapper.toResponse(savedMeal);
+    }
+
+    private Meal toMeal(MealRequest mealRequest) {
+        User author = Optional.ofNullable(mealRequest.getAuthorId())
+                .map(authorId -> userRepository.findById(authorId)
+                        .orElseThrow(() -> new MealException("Author not found by Id")))
+                .orElse(null);
+        List<Product> products = Optional.ofNullable(mealRequest.getProductIds())
+                .filter(productIds -> !productIds.isEmpty())
+                .map(productIds -> {
+                    List<Product> foundProducts = productRepository.findAllById(productIds);
+                    if (foundProducts.size() != productIds.size()) {
+                        throw new MealException("Some products not found");
+                    }
+                    return foundProducts;
+                })
+                .orElseGet(List::of);
+        return mealMapper.fromRequest(mealRequest, author, products);
+    }
+
+    private boolean shouldFailAfter(int processedMealsCount, Integer failAfterIndex) {
+        return Optional.ofNullable(failAfterIndex)
+                .filter(index -> index == processedMealsCount)
+                .isPresent();
     }
 }

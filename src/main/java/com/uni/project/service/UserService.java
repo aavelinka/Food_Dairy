@@ -1,7 +1,6 @@
 package com.uni.project.service;
 
 import com.uni.project.model.dto.request.UserRequest;
-import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.Sex;
 import org.springframework.data.domain.Page;
@@ -29,8 +28,4 @@ public interface UserService {
     Page<UserResponse> getAllUsersByAgeNative(Integer ageSearch, Pageable pageable);
 
     List<UserResponse> findAllWithMealsAndBodyParameters();
-
-    UserResponse createUserWithoutGoalAndNoteNoTx(UserCompositeRequest userRequest);
-
-    UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest);
 }

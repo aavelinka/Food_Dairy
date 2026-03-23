@@ -1,6 +1,7 @@
 package com.uni.project.service.impl;
 
 import com.uni.project.exception.NoteException;
+import com.uni.project.exception.NoteConflictException;
 import com.uni.project.mapper.NoteMapper;
 import com.uni.project.model.dto.request.NoteRequest;
 import com.uni.project.model.dto.response.NoteResponse;
@@ -9,12 +10,11 @@ import com.uni.project.model.entity.Note;
 import com.uni.project.repository.MealRepository;
 import com.uni.project.repository.NoteRepository;
 import com.uni.project.service.NoteService;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -30,7 +30,7 @@ public class NoteServiceImpl implements NoteService {
     public NoteResponse noteCreate(NoteRequest noteRequest) {
         Meal meal = getMeal(noteRequest.getMealId());
         if (meal.getRecipe() != null) {
-            throw new NoteException("Meal already has a note");
+            throw new NoteConflictException("Meal already has a note");
         }
 
         Note note = noteMapper.fromRequest(noteRequest, meal);
@@ -63,7 +63,7 @@ public class NoteServiceImpl implements NoteService {
         note.setNotes(noteRequest.getNotes());
 
         if (targetMeal.getRecipe() != null && !targetMeal.getRecipe().getId().equals(note.getId())) {
-            throw new NoteException("Target meal already has another note");
+            throw new NoteConflictException("Target meal already has another note");
         }
 
         if (currentMeal != null && !currentMeal.getId().equals(targetMeal.getId())) {

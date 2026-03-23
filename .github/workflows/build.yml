@@ -1,11 +1,20 @@
 name: Build and SonarCloud
 on:
   push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
 jobs:
   build-and-analyze:
+    name: Build and analyze
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,12 +38,16 @@ jobs:
       - name: Make Maven wrapper executable
         run: chmod +x ./mvnw
 
-      - name: Build and analyze (skip tests, no DB/Docker)
+      - name: Build and test
+        run: ./mvnw -B verify
+
+      - name: SonarCloud analyze
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
-          ./mvnw -B -DskipTests verify
+          ./mvnw -B -DskipTests
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Dsonar.token=${SONAR_TOKEN}
           -Dsonar.qualitygate.wait=true

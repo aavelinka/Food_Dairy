@@ -2,19 +2,16 @@ package com.uni.project.service.impl;
 
 import com.uni.project.cache.UserQueryKey;
 import com.uni.project.cache.UserSearchCache;
+import com.uni.project.exception.EmailAlreadyExistsException;
 import com.uni.project.exception.UserException;
 import com.uni.project.mapper.UserMapper;
 import com.uni.project.model.dto.request.BodyParametersRequest;
-import com.uni.project.model.dto.request.UserCompositeRequest;
 import com.uni.project.model.dto.request.UserRequest;
 import com.uni.project.model.dto.response.UserResponse;
 import com.uni.project.model.entity.BodyParameters;
-import com.uni.project.model.entity.Meal;
-import com.uni.project.model.entity.Note;
 import com.uni.project.model.entity.NutritionalValue;
 import com.uni.project.model.entity.Sex;
 import com.uni.project.model.entity.User;
-import com.uni.project.repository.MealRepository;
 import com.uni.project.repository.UserRepository;
 import com.uni.project.service.UserService;
 import java.time.LocalDate;
@@ -29,7 +26,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -39,7 +35,6 @@ public class UserServiceImpl implements UserService {
     private static final String USER_FAIL_MESSAGE = "User not found by Id";
 
     private final UserRepository userRepository;
-    private final MealRepository mealRepository;
     private final UserMapper userMapper;
     private final NutritionalGoalCalculator nutritionalGoalCalculator;
     private final UserSearchCache userSearchCache;
@@ -47,11 +42,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponse userCreate(UserRequest userRequest) {
-        User user = userMapper.fromRequest(userRequest);
-        BodyParameters initialBodyParameters = createInitialBodyParameters(userRequest.getMeasurements(), user);
-        user.setBodyParametersHistory(new HashSet<>(Set.of(initialBodyParameters)));
-
-        User savedUser = userRepository.save(user);
+        User savedUser = saveUserWithInitialBodyParameters(userRequest);
         userSearchCache.clear();
         return userMapper.toResponse(savedUser);
     }
@@ -77,6 +68,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse userUpdate(Integer id, UserRequest userRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+        validateEmailAvailability(userRequest.getEmail(), id);
 
         user.setName(userRequest.getName());
         user.setPassword(userRequest.getPassword());
@@ -136,18 +128,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponses(userRepository.findAllWithMealsAndBodyParameters());
     }
 
-    @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public UserResponse createUserWithoutGoalAndNoteNoTx(UserCompositeRequest userRequest) {
-        return createUserWithMealAndNote(userRequest);
-    }
-
-    @Override
-    @Transactional
-    public UserResponse createUserWithGoalAndNoteTx(UserCompositeRequest userRequest) {
-        return createUserWithMealAndNote(userRequest);
-    }
-
     private Page<UserResponse> toResponsePage(Page<User> usersPage, Pageable pageable) {
         List<UserResponse> content = usersPage.getContent().stream()
                 .map(userMapper::toResponse)
@@ -170,44 +150,28 @@ public class UserServiceImpl implements UserService {
         return mappedPage;
     }
 
-    private UserResponse createUserWithMealAndNote(UserCompositeRequest userRequest) {
-        User savedUser = saveUserWithInitialBodyParameters(userRequest);
-
-        if (userRequest.isFailAfterUser()) {
-            throw new UserException("Forced failure after user creation");
-        }
-
-        saveMealWithNote(userRequest, savedUser);
-        userSearchCache.clear();
-        return userMapper.toResponse(savedUser);
-    }
-
     private User saveUserWithInitialBodyParameters(UserRequest userRequest) {
+        validateEmailAvailability(userRequest.getEmail(), null);
         User user = userMapper.fromRequest(userRequest);
         BodyParameters initialBodyParameters = createInitialBodyParameters(userRequest.getMeasurements(), user);
         user.setBodyParametersHistory(new HashSet<>(Set.of(initialBodyParameters)));
         return userRepository.save(user);
     }
 
-    private void saveMealWithNote(UserCompositeRequest userRequest, User author) {
-        Meal meal = new Meal();
-        meal.setName(userRequest.getMealName());
-        meal.setDate(resolveMealDate(userRequest));
-        meal.setAuthor(author);
-        meal.setProductList(List.of());
+    private void validateEmailAvailability(String email, Integer currentUserId) {
+        if (email == null || !userRepository.existsByEmailIgnoreCase(email)) {
+            return;
+        }
 
-        Note note = new Note();
-        note.setNotes(userRequest.getNotes());
-        note.setMeal(meal);
-        meal.setRecipe(note);
+        if (currentUserId != null) {
+            User existingUser = userRepository.findById(currentUserId)
+                    .orElseThrow(() -> new UserException(USER_FAIL_MESSAGE));
+            if (email.equalsIgnoreCase(existingUser.getEmail())) {
+                return;
+            }
+        }
 
-        mealRepository.save(meal);
-    }
-
-    private LocalDate resolveMealDate(UserCompositeRequest userRequest) {
-        return userRequest.getMealDate() == null
-                ? userRequest.getMeasurements().getRecordDate()
-                : userRequest.getMealDate();
+        throw new EmailAlreadyExistsException("Email already exists");
     }
 
     private BodyParameters createInitialBodyParameters(BodyParametersRequest request, User owner) {
