@@ -12,6 +12,7 @@ import com.uni.project.exception.BulkMealCreationException;
 import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.request.NutritionalValueRequest;
 import com.uni.project.service.MealService;
+import com.uni.project.service.MealTaskStatisticsService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +31,9 @@ class MealTaskAsyncExecutorTest {
     @Mock
     private MealTaskRegistry mealTaskRegistry;
 
+    @Mock
+    private MealTaskStatisticsService mealTaskStatisticsService;
+
     @InjectMocks
     private MealTaskAsyncExecutor mealTaskAsyncExecutor;
 
@@ -43,9 +47,12 @@ class MealTaskAsyncExecutorTest {
         result.join();
 
         verify(mealTaskRegistry).markRunning(taskId);
+        verify(mealTaskStatisticsService).onTaskStarted();
         verify(mealService).createBulkTx(requests, null);
         verify(mealTaskRegistry).markCompleted(taskId);
+        verify(mealTaskStatisticsService).onTaskCompleted();
         verify(mealTaskRegistry, never()).markFailed(any(), any());
+        verify(mealTaskStatisticsService, never()).onTaskFailed();
         assertTrue(result.isDone());
     }
 
@@ -61,9 +68,12 @@ class MealTaskAsyncExecutorTest {
         result.join();
 
         verify(mealTaskRegistry).markRunning(taskId);
+        verify(mealTaskStatisticsService).onTaskStarted();
         verify(mealService).createBulkTx(requests, 1);
         verify(mealTaskRegistry, never()).markCompleted(taskId);
+        verify(mealTaskStatisticsService, never()).onTaskCompleted();
         verify(mealTaskRegistry).markFailed(eq(taskId), eq("Forced error after saving 1 bulk meals"));
+        verify(mealTaskStatisticsService).onTaskFailed();
         assertTrue(result.isDone());
     }
 

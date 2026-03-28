@@ -5,8 +5,10 @@ import com.uni.project.exception.TaskNotFoundException;
 import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.response.MealTaskCreatedResponse;
 import com.uni.project.model.dto.response.MealTaskStatusResponse;
+import com.uni.project.model.dto.response.MealTaskStatisticsResponse;
 import com.uni.project.model.task.MealTaskState;
 import com.uni.project.service.MealTaskService;
+import com.uni.project.service.MealTaskStatisticsService;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -19,12 +21,14 @@ public class MealTaskServiceImpl implements MealTaskService {
 
     private final MealTaskRegistry mealTaskRegistry;
     private final MealTaskAsyncExecutor mealTaskAsyncExecutor;
+    private final MealTaskStatisticsService mealTaskStatisticsService;
 
     @Override
     public MealTaskCreatedResponse startBulkTxTask(List<MealRequest> mealRequests, Integer failAfterIndex) {
         UUID taskId = UUID.randomUUID();
         List<MealRequest> requestSnapshot = List.copyOf(mealRequests);
         MealTaskState taskState = mealTaskRegistry.create(taskId, requestSnapshot.size());
+        mealTaskStatisticsService.onTaskSubmitted(requestSnapshot.size());
         mealTaskAsyncExecutor.createBulkTx(taskId, requestSnapshot, failAfterIndex);
         return new MealTaskCreatedResponse(taskState.getTaskId(), taskState.getStatus());
     }
@@ -34,5 +38,10 @@ public class MealTaskServiceImpl implements MealTaskService {
         return mealTaskRegistry.findById(taskId)
                 .map(MealTaskState::toResponse)
                 .orElseThrow(() -> new TaskNotFoundException(TASK_NOT_FOUND_MESSAGE));
+    }
+
+    @Override
+    public MealTaskStatisticsResponse getTaskStatistics() {
+        return mealTaskStatisticsService.getStatistics();
     }
 }

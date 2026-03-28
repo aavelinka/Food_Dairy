@@ -14,8 +14,10 @@ import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.request.NutritionalValueRequest;
 import com.uni.project.model.dto.response.MealTaskCreatedResponse;
 import com.uni.project.model.dto.response.MealTaskStatusResponse;
+import com.uni.project.model.dto.response.MealTaskStatisticsResponse;
 import com.uni.project.model.task.MealTaskState;
 import com.uni.project.model.task.MealTaskStatus;
+import com.uni.project.service.MealTaskStatisticsService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +37,9 @@ class MealTaskServiceImplTest {
     @Mock
     private MealTaskAsyncExecutor mealTaskAsyncExecutor;
 
+    @Mock
+    private MealTaskStatisticsService mealTaskStatisticsService;
+
     @InjectMocks
     private MealTaskServiceImpl mealTaskService;
 
@@ -51,6 +56,7 @@ class MealTaskServiceImplTest {
 
         ArgumentCaptor<UUID> taskIdCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(mealTaskRegistry).create(taskIdCaptor.capture(), eq(1));
+        verify(mealTaskStatisticsService).onTaskSubmitted(1);
         verify(mealTaskAsyncExecutor).createBulkTx(eq(taskIdCaptor.getValue()), eq(List.of(request)), isNull());
         assertEquals(taskIdCaptor.getValue(), response.getTaskId());
         assertEquals(MealTaskStatus.PENDING, response.getStatus());
@@ -81,6 +87,16 @@ class MealTaskServiceImplTest {
         );
 
         assertEquals("Task not found by Id", exception.getMessage());
+    }
+
+    @Test
+    void getTaskStatisticsShouldReturnStatisticsSnapshot() {
+        MealTaskStatisticsResponse expectedResponse = new MealTaskStatisticsResponse(2, 1, 1, 0, 5L);
+        when(mealTaskStatisticsService.getStatistics()).thenReturn(expectedResponse);
+
+        MealTaskStatisticsResponse actualResponse = mealTaskService.getTaskStatistics();
+
+        assertEquals(expectedResponse, actualResponse);
     }
 
     private MealRequest buildMealRequest() {

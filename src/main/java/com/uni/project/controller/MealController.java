@@ -4,6 +4,7 @@ import com.uni.project.controller.api.MealControllerApi;
 import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.response.MealResponse;
 import com.uni.project.model.dto.response.MealTaskCreatedResponse;
+import com.uni.project.model.dto.response.MealTaskStatisticsResponse;
 import com.uni.project.model.dto.response.MealTaskStatusResponse;
 import com.uni.project.service.MealService;
 import com.uni.project.service.MealTaskService;
@@ -80,6 +81,11 @@ public class MealController implements MealControllerApi {
     @GetMapping("/tasks/{taskId}")
     public ResponseEntity<MealTaskStatusResponse> getTaskStatus(@PathVariable UUID taskId) {
         return ResponseEntity.ok(mealTaskService.getTaskStatus(taskId));
+    }
+
+    @GetMapping("/tasks/statistics")
+    public ResponseEntity<MealTaskStatisticsResponse> getTaskStatistics() {
+        return ResponseEntity.ok(mealTaskService.getTaskStatistics());
     }
 
     @PutMapping("/{id}")

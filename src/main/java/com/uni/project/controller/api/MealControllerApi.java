@@ -3,6 +3,7 @@ package com.uni.project.controller.api;
 import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.response.MealResponse;
 import com.uni.project.model.dto.response.MealTaskCreatedResponse;
+import com.uni.project.model.dto.response.MealTaskStatisticsResponse;
 import com.uni.project.model.dto.response.MealTaskStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -75,6 +76,11 @@ public interface MealControllerApi {
     ResponseEntity<MealTaskStatusResponse> getTaskStatus(
             @Parameter(description = "Task id") UUID taskId
     );
+
+    @Operation(summary = "Get aggregated asynchronous meal task statistics")
+    @ApiResponse(responseCode = "200", description = "Task statistics returned")
+    @InternalServerErrorApiResponse
+    ResponseEntity<MealTaskStatisticsResponse> getTaskStatistics();
 
     @Operation(summary = "Update meal")
     @ApiResponse(responseCode = "200", description = "Meal updated")
