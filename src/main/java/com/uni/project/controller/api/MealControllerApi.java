@@ -2,6 +2,8 @@ package com.uni.project.controller.api;
 
 import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.response.MealResponse;
+import com.uni.project.model.dto.response.MealTaskCreatedResponse;
+import com.uni.project.model.dto.response.MealTaskStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +13,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Meals", description = "Operations with meals")
@@ -52,6 +55,25 @@ public interface MealControllerApi {
     ResponseEntity<List<MealResponse>> createBulkTx(
             @Valid @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
             @Parameter(description = "Force failure after saving N meals") @Positive Integer failAfterIndex
+    );
+
+    @Operation(summary = "Start asynchronous bulk meal creation task with a shared transaction")
+    @ApiResponse(responseCode = "202", description = "Task accepted")
+    @BadRequestApiResponse
+    @NotFoundApiResponse
+    @InternalServerErrorApiResponse
+    ResponseEntity<MealTaskCreatedResponse> createBulkTxAsync(
+            @Valid @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @Parameter(description = "Force failure after saving N meals") @Positive Integer failAfterIndex
+    );
+
+    @Operation(summary = "Get asynchronous bulk meal task status")
+    @ApiResponse(responseCode = "200", description = "Task status returned")
+    @BadRequestApiResponse
+    @NotFoundApiResponse
+    @InternalServerErrorApiResponse
+    ResponseEntity<MealTaskStatusResponse> getTaskStatus(
+            @Parameter(description = "Task id") UUID taskId
     );
 
     @Operation(summary = "Update meal")

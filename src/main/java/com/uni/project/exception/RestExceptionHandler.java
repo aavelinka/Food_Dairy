@@ -26,6 +26,7 @@ public class RestExceptionHandler {
             MealException.class,
             NoteException.class,
             ProductException.class,
+            TaskNotFoundException.class,
             UserException.class,
             WaterIntakeException.class
     })
