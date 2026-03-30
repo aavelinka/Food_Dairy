@@ -11,6 +11,7 @@ import com.uni.project.service.MealTaskService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
@@ -72,10 +73,12 @@ public class MealController implements MealControllerApi {
     @PostMapping("/bulk/tx/async")
     public ResponseEntity<MealTaskCreatedResponse> createBulkTxAsync(
             @Valid @RequestBody @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
-            @RequestParam(name = "failAfterIndex", required = false) @Positive Integer failAfterIndex
+            @RequestParam(name = "failAfterIndex", required = false) @Positive Integer failAfterIndex,
+            @RequestParam(name = "simulateDelayMillis", required = false, defaultValue = "0")
+            @PositiveOrZero Long simulateDelayMillis
     ) {
         return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(mealTaskService.startBulkTxTask(mealRequests, failAfterIndex));
+                .body(mealTaskService.startBulkTxTask(mealRequests, failAfterIndex, simulateDelayMillis));
     }
 
     @GetMapping("/tasks/{taskId}")

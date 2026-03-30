@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MealTaskService {
-    MealTaskCreatedResponse startBulkTxTask(List<MealRequest> mealRequests, Integer failAfterIndex);
+    MealTaskCreatedResponse startBulkTxTask(
+            List<MealRequest> mealRequests,
+            Integer failAfterIndex,
+            Long simulateDelayMillis
+    );
 
     MealTaskStatusResponse getTaskStatus(UUID taskId);
 

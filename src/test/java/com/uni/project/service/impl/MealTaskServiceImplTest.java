@@ -52,12 +52,13 @@ class MealTaskServiceImplTest {
                         invocation.getArgument(1)
                 ));
 
-        MealTaskCreatedResponse response = mealTaskService.startBulkTxTask(List.of(request), null);
+        MealTaskCreatedResponse response = mealTaskService.startBulkTxTask(List.of(request), null, null);
 
         ArgumentCaptor<UUID> taskIdCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(mealTaskRegistry).create(taskIdCaptor.capture(), eq(1));
         verify(mealTaskStatisticsService).onTaskSubmitted(1);
-        verify(mealTaskAsyncExecutor).createBulkTx(eq(taskIdCaptor.getValue()), eq(List.of(request)), isNull());
+        verify(mealTaskAsyncExecutor)
+                .createBulkTx(eq(taskIdCaptor.getValue()), eq(List.of(request)), isNull(), isNull());
         assertEquals(taskIdCaptor.getValue(), response.getTaskId());
         assertEquals(MealTaskStatus.PENDING, response.getStatus());
     }

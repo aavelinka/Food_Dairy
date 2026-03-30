@@ -24,11 +24,13 @@ public class MealTaskAsyncExecutor {
     public CompletableFuture<Void> createBulkTx(
             UUID taskId,
             List<MealRequest> mealRequests,
-            Integer failAfterIndex
+            Integer failAfterIndex,
+            Long simulateDelayMillis
     ) {
         mealTaskRegistry.markRunning(taskId);
         mealTaskStatisticsService.onTaskStarted();
         try {
+            simulateDelay(simulateDelayMillis);
             mealService.createBulkTx(mealRequests, failAfterIndex);
             mealTaskRegistry.markCompleted(taskId);
             mealTaskStatisticsService.onTaskCompleted();
@@ -38,5 +40,18 @@ public class MealTaskAsyncExecutor {
             mealTaskStatisticsService.onTaskFailed();
         }
         return CompletableFuture.completedFuture(null);
+    }
+
+    private void simulateDelay(Long simulateDelayMillis) {
+        if (simulateDelayMillis == null || simulateDelayMillis <= 0) {
+            return;
+        }
+
+        try {
+            Thread.sleep(simulateDelayMillis);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Async meal task was interrupted during delay simulation", ex);
+        }
     }
 }

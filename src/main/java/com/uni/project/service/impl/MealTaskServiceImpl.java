@@ -24,12 +24,16 @@ public class MealTaskServiceImpl implements MealTaskService {
     private final MealTaskStatisticsService mealTaskStatisticsService;
 
     @Override
-    public MealTaskCreatedResponse startBulkTxTask(List<MealRequest> mealRequests, Integer failAfterIndex) {
+    public MealTaskCreatedResponse startBulkTxTask(
+            List<MealRequest> mealRequests,
+            Integer failAfterIndex,
+            Long simulateDelayMillis
+    ) {
         UUID taskId = UUID.randomUUID();
         List<MealRequest> requestSnapshot = List.copyOf(mealRequests);
         MealTaskState taskState = mealTaskRegistry.create(taskId, requestSnapshot.size());
         mealTaskStatisticsService.onTaskSubmitted(requestSnapshot.size());
-        mealTaskAsyncExecutor.createBulkTx(taskId, requestSnapshot, failAfterIndex);
+        mealTaskAsyncExecutor.createBulkTx(taskId, requestSnapshot, failAfterIndex, simulateDelayMillis);
         return new MealTaskCreatedResponse(taskState.getTaskId(), taskState.getStatus());
     }
 

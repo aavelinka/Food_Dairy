@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
@@ -65,7 +66,9 @@ public interface MealControllerApi {
     @InternalServerErrorApiResponse
     ResponseEntity<MealTaskCreatedResponse> createBulkTxAsync(
             @Valid @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
-            @Parameter(description = "Force failure after saving N meals") @Positive Integer failAfterIndex
+            @Parameter(description = "Force failure after saving N meals") @Positive Integer failAfterIndex,
+            @Parameter(description = "Artificial delay in milliseconds to keep the task in RUNNING state")
+            @PositiveOrZero Long simulateDelayMillis
     );
 
     @Operation(summary = "Get asynchronous bulk meal task status")
