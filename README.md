@@ -34,3 +34,44 @@ This project is a Java Spring Boot REST API for managing a food diary.
 - `Products`: `/api/products`
 - `Notes`: `/api/note`
 - `Water intake`: `/api/water-intakes`
+
+## Local run with Docker Compose
+
+1. Copy `.env.example` to `.env`
+2. Fill in database credentials if needed
+3. Run:
+
+```bash
+docker compose up --build
+```
+
+Services:
+
+- Frontend: `http://localhost:4173`
+- Backend API: `http://localhost:8080/api`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Healthcheck: `http://localhost:8080/actuator/health`
+
+## Environment variables
+
+Backend:
+
+- `PORT`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- `APP_CORS_ALLOWED_ORIGINS`
+
+Frontend:
+
+- `VITE_API_BASE_URL`
+
+## GitHub Actions secrets for deployment
+
+To use the deployment workflow, add these repository secrets:
+
+- `RENDER_BACKEND_DEPLOY_HOOK_URL`
+- `RENDER_FRONTEND_DEPLOY_HOOK_URL`
+- `APP_HEALTHCHECK_URL`

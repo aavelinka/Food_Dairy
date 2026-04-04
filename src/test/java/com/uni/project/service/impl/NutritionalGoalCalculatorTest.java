@@ -20,9 +20,9 @@ class NutritionalGoalCalculatorTest {
         NutritionalValue result = calculator.calculate(measurements, null);
 
         assertEquals(1705.0, result.getCalories(), DELTA);
-        assertEquals(426.25, result.getProteins(), DELTA);
-        assertEquals(341.0, result.getFats(), DELTA);
-        assertEquals(937.75, result.getCarbohydrates(), DELTA);
+        assertEquals(106.5625, result.getProteins(), DELTA);
+        assertEquals(37.8888888889, result.getFats(), DELTA);
+        assertEquals(234.4375, result.getCarbohydrates(), DELTA);
     }
 
     @Test
@@ -32,9 +32,22 @@ class NutritionalGoalCalculatorTest {
         NutritionalValue result = calculator.calculate(measurements, GoalType.WEIGHT_LOSS);
 
         assertEquals(1122.2125, result.getCalories(), DELTA);
-        assertEquals(280.553125, result.getProteins(), DELTA);
-        assertEquals(224.4425, result.getFats(), DELTA);
-        assertEquals(617.216875, result.getCarbohydrates(), DELTA);
+        assertEquals(70.13828125, result.getProteins(), DELTA);
+        assertEquals(24.9380555556, result.getFats(), DELTA);
+        assertEquals(154.30421875, result.getCarbohydrates(), DELTA);
+    }
+
+    @Test
+    void calculateShouldKeepCaloriesBalancedAcrossMacros() {
+        BodyParameters measurements = buildMeasurements(82.0, 176.0, 31, Sex.MALE);
+
+        NutritionalValue result = calculator.calculate(measurements, GoalType.WEIGHT_GAIN);
+
+        double caloriesFromMacros = result.getProteins() * 4
+                + result.getFats() * 9
+                + result.getCarbohydrates() * 4;
+
+        assertEquals(result.getCalories(), caloriesFromMacros, DELTA);
     }
 
     private BodyParameters buildMeasurements(Double weight, Double height, Integer age, Sex sex) {
