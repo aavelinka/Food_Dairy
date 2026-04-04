@@ -62,12 +62,12 @@ jobs:
         run: docker build -t food-diary-frontend ./frontend
 
       - name: SonarCloud analyze
-        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           ./mvnw -B -DskipTests
-          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar
           -Dsonar.token=${SONAR_TOKEN}
           -Dsonar.qualitygate.wait=true
