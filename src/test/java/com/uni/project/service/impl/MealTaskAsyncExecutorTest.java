@@ -1,9 +1,9 @@
 package com.uni.project.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,13 +75,13 @@ class MealTaskAsyncExecutorTest {
         verify(mealService).createBulkTx(requests, 1);
         verify(mealTaskRegistry, never()).markCompleted(taskId);
         verify(mealTaskStatisticsService, never()).onTaskCompleted();
-        verify(mealTaskRegistry).markFailed(eq(taskId), eq("Forced error after saving 1 bulk meals"));
+        verify(mealTaskRegistry).markFailed(taskId, "Forced error after saving 1 bulk meals");
         verify(mealTaskStatisticsService).onTaskFailed();
         assertTrue(result.isDone());
     }
 
     @Test
-    void createBulkTxShouldKeepTaskRunningDuringArtificialDelay() throws InterruptedException {
+    void createBulkTxShouldKeepTaskRunningDuringArtificialDelay() {
         MealTaskRegistry registry = new MealTaskRegistry();
         MealTaskAsyncExecutor executor = new MealTaskAsyncExecutor(mealService, registry, mealTaskStatisticsService);
         UUID taskId = UUID.randomUUID();
@@ -92,12 +92,7 @@ class MealTaskAsyncExecutorTest {
                 () -> executor.createBulkTx(taskId, requests, null, 200L).join()
         );
 
-        MealTaskStatus currentStatus = registry.findById(taskId).orElseThrow().getStatus();
-        long deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(1);
-        while (currentStatus == MealTaskStatus.PENDING && System.nanoTime() < deadlineNanos) {
-            Thread.sleep(10);
-            currentStatus = registry.findById(taskId).orElseThrow().getStatus();
-        }
+        MealTaskStatus currentStatus = awaitTaskStatusChange(registry, taskId, MealTaskStatus.PENDING, 1);
 
         assertEquals(MealTaskStatus.RUNNING, currentStatus);
 
@@ -105,6 +100,26 @@ class MealTaskAsyncExecutorTest {
 
         assertEquals(MealTaskStatus.COMPLETED, registry.findById(taskId).orElseThrow().getStatus());
         verify(mealService).createBulkTx(requests, null);
+    }
+
+    private MealTaskStatus awaitTaskStatusChange(
+            MealTaskRegistry registry,
+            UUID taskId,
+            MealTaskStatus initialStatus,
+            long timeoutSeconds
+    ) {
+        long deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);
+        MealTaskStatus currentStatus = registry.findById(taskId).orElseThrow().getStatus();
+        while (currentStatus == initialStatus && System.nanoTime() < deadlineNanos) {
+            Thread.onSpinWait();
+            currentStatus = registry.findById(taskId).orElseThrow().getStatus();
+        }
+
+        if (currentStatus == initialStatus) {
+            fail("Task status did not change within " + timeoutSeconds + " second(s)");
+        }
+
+        return currentStatus;
     }
 
     private MealRequest buildMealRequest() {
