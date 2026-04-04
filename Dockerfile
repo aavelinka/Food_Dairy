@@ -1,4 +1,4 @@
-FROM maven:3.9.9-eclipse-temurin-21-alpine AS build
+FROM maven:3.9.13-eclipse-temurin-25-alpine AS build
 
 WORKDIR /app
 
@@ -11,15 +11,19 @@ COPY src src
 COPY checkstyle.xml ./
 RUN ./mvnw -q -DskipTests clean package
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-alpine
 
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN addgroup -S spring \
+    && adduser -S spring -G spring \
+    && mkdir -p /app/logs/archive \
+    && chown -R spring:spring /app
 
 COPY --from=build /app/target/project-0.0.1-SNAPSHOT.jar app.jar
 
 ENV PORT=8080
+ENV LOG_DIR=/app/logs
 
 EXPOSE 8080
 
