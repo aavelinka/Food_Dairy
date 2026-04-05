@@ -9,30 +9,52 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to PaaS and verify health
+    name: Deploy to Railway and verify health
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
-      RENDER_BACKEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK_URL }}
-      RENDER_FRONTEND_DEPLOY_HOOK_URL: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK_URL }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      RAILWAY_ENVIRONMENT: production
+      RAILWAY_BACKEND_SERVICE: Food_Dairy
+      RAILWAY_FRONTEND_SERVICE: frontend
       APP_HEALTHCHECK_URL: ${{ secrets.APP_HEALTHCHECK_URL }}
     if: >
       (github.event_name == 'workflow_dispatch') ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main')
     steps:
-      - name: Trigger backend deploy
-        if: ${{ env.RENDER_BACKEND_DEPLOY_HOOK_URL != '' }}
-        run: curl -fsS -X POST "$RENDER_BACKEND_DEPLOY_HOOK_URL"
+      - name: Checkout target revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Trigger frontend deploy
-        if: ${{ env.RENDER_FRONTEND_DEPLOY_HOOK_URL != '' }}
-        run: curl -fsS -X POST "$RENDER_FRONTEND_DEPLOY_HOOK_URL"
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Railway CLI
+        run: npm install --global @railway/cli
+
+      - name: Validate deployment configuration
+        run: |
+          test -n "$RAILWAY_TOKEN"
+          test -n "$RAILWAY_PROJECT_ID"
+          test -n "$APP_HEALTHCHECK_URL"
+
+      - name: Deploy backend
+        run: >
+          railway up
+          --project "$RAILWAY_PROJECT_ID"
+          --environment "$RAILWAY_ENVIRONMENT"
+          --service "$RAILWAY_BACKEND_SERVICE"
 
       - name: Wait for backend healthcheck
-        if: ${{ env.APP_HEALTHCHECK_URL != '' }}
         run: |
           for attempt in $(seq 1 30); do
-            status_code=$(curl -s -o /tmp/health.txt -w "%{http_code}" "${APP_HEALTHCHECK_URL}")
+            status_code=$(curl -sS -o /tmp/health.txt -w "%{http_code}" "${APP_HEALTHCHECK_URL}" || true)
             if [ "${status_code}" = "200" ]; then
               echo "Healthcheck passed"
               cat /tmp/health.txt
@@ -46,3 +68,10 @@ jobs:
           echo "Healthcheck did not become healthy in time"
           cat /tmp/health.txt || true
           exit 1
+
+      - name: Deploy frontend
+        run: >
+          railway up
+          --project "$RAILWAY_PROJECT_ID"
+          --environment "$RAILWAY_ENVIRONMENT"
+          --service "$RAILWAY_FRONTEND_SERVICE"

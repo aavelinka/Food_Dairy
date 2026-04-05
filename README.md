@@ -70,8 +70,16 @@ Frontend:
 
 ## GitHub Actions secrets for deployment
 
+This project deploys to Railway from GitHub Actions.
+
 To use the deployment workflow, add these repository secrets:
 
-- `RENDER_BACKEND_DEPLOY_HOOK_URL`
-- `RENDER_FRONTEND_DEPLOY_HOOK_URL`
+- `RAILWAY_TOKEN`
+- `RAILWAY_PROJECT_ID`
 - `APP_HEALTHCHECK_URL`
+
+Notes:
+
+- The workflow deploys Railway services `Food_Dairy` and `frontend` in the `production` environment.
+- If you rename the services in Railway, update `.github/workflows/deploy.yml`.
+- If Railway GitHub autodeploy is enabled in the UI, disable it to avoid duplicate deployments.
