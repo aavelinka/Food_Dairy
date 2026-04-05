@@ -2,6 +2,9 @@ package com.uni.project.controller.api;
 
 import com.uni.project.model.dto.request.MealRequest;
 import com.uni.project.model.dto.response.MealResponse;
+import com.uni.project.model.dto.response.MealTaskCreatedResponse;
+import com.uni.project.model.dto.response.MealTaskStatisticsResponse;
+import com.uni.project.model.dto.response.MealTaskStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,8 +12,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Meals", description = "Operations with meals")
@@ -53,6 +58,32 @@ public interface MealControllerApi {
             @Valid @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
             @Parameter(description = "Force failure after saving N meals") @Positive Integer failAfterIndex
     );
+
+    @Operation(summary = "Start asynchronous bulk meal creation task with a shared transaction")
+    @ApiResponse(responseCode = "202", description = "Task accepted")
+    @BadRequestApiResponse
+    @NotFoundApiResponse
+    @InternalServerErrorApiResponse
+    ResponseEntity<MealTaskCreatedResponse> createBulkTxAsync(
+            @Valid @Size(min = 1, max = 100) List<@Valid MealRequest> mealRequests,
+            @Parameter(description = "Force failure after saving N meals") @Positive Integer failAfterIndex,
+            @Parameter(description = "Artificial delay in milliseconds to keep the task in RUNNING state")
+            @PositiveOrZero Long simulateDelayMillis
+    );
+
+    @Operation(summary = "Get asynchronous bulk meal task status")
+    @ApiResponse(responseCode = "200", description = "Task status returned")
+    @BadRequestApiResponse
+    @NotFoundApiResponse
+    @InternalServerErrorApiResponse
+    ResponseEntity<MealTaskStatusResponse> getTaskStatus(
+            @Parameter(description = "Task id") UUID taskId
+    );
+
+    @Operation(summary = "Get aggregated asynchronous meal task statistics")
+    @ApiResponse(responseCode = "200", description = "Task statistics returned")
+    @InternalServerErrorApiResponse
+    ResponseEntity<MealTaskStatisticsResponse> getTaskStatistics();
 
     @Operation(summary = "Update meal")
     @ApiResponse(responseCode = "200", description = "Meal updated")

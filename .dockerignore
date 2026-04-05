@@ -1,0 +1,15 @@
+.git
+.github
+.idea
+.vscode
+.env
+target
+frontend
+logs
+docs
+*.iml
+*.iws
+*.ipr
+.DS_Store
+HELP.md
+jmeter.log
