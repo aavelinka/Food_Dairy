@@ -134,7 +134,7 @@ jobs:
           fi
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: npm install -g @railway/cli --ignore-scripts
 
       - name: Deploy backend service
         run: >
