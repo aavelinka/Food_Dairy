@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { getErrorMessage } from '../api/client';
 import { mealsApi, productsApi, usersApi } from '../api/services';
+import { ActionIconButton, ActionIconLink } from '../components/ActionIconButton';
 import { DataTable } from '../components/DataTable';
 import { Panel } from '../components/Panel';
 import { ProductSelector } from '../components/ProductSelector';
@@ -259,15 +259,9 @@ export function MealsPage() {
             emptyMessage="Приемы пищи по текущему фильтру не найдены."
             actions={(meal) => (
               <>
-                <Link className="button-secondary" to={`/meals/${meal.id}`}>
-                  Посмотреть
-                </Link>
-                <button type="button" className="button-ghost" onClick={() => handleEdit(meal.id)}>
-                  Редактировать
-                </button>
-                <button type="button" className="button-danger" onClick={() => handleDelete(meal.id)}>
-                  Удалить
-                </button>
+                <ActionIconLink to={`/meals/${meal.id}`} icon="view" label={`Открыть прием пищи ${meal.name}`} />
+                <ActionIconButton icon="edit" label={`Редактировать прием пищи ${meal.name}`} onClick={() => handleEdit(meal.id)} />
+                <ActionIconButton icon="delete" tone="danger" label={`Удалить прием пищи ${meal.name}`} onClick={() => handleDelete(meal.id)} />
               </>
             )}
           />

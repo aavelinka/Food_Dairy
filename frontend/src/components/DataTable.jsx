@@ -7,7 +7,7 @@ export function DataTable({ columns, rows, getRowKey, emptyMessage = 'Nothing to
             {columns.map((column) => (
               <th key={column.header}>{column.header}</th>
             ))}
-            {actions ? <th>Actions</th> : null}
+            {actions ? <th>Действия</th> : null}
           </tr>
         </thead>
         <tbody>

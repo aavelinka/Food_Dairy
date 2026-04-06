@@ -876,6 +876,18 @@ button {
   background: var(--danger-soft);
 }
 
+.action-icon-button {
+  width: var(--control-height);
+  min-width: var(--control-height);
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.action-icon-button svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
 .form-actions {
   width: 100%;
 }

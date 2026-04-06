@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getErrorMessage } from '../api/client';
 import { mealsApi, productsApi } from '../api/services';
+import { ActionIconButton } from '../components/ActionIconButton';
 import { DataTable } from '../components/DataTable';
 import { Panel } from '../components/Panel';
 import { StatusBanner } from '../components/StatusBanner';
@@ -215,12 +216,8 @@ export function ProductsPage() {
             emptyMessage="По текущему фильтру продукты не найдены."
             actions={(product) => (
               <>
-                <button type="button" className="button-ghost" onClick={() => handleEdit(product.id)}>
-                  Редактировать
-                </button>
-                <button type="button" className="button-danger" onClick={() => handleDelete(product.id)}>
-                  Удалить
-                </button>
+                <ActionIconButton icon="edit" label={`Редактировать продукт ${product.name}`} onClick={() => handleEdit(product.id)} />
+                <ActionIconButton icon="delete" tone="danger" label={`Удалить продукт ${product.name}`} onClick={() => handleDelete(product.id)} />
               </>
             )}
           />

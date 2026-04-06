@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getErrorMessage } from '../api/client';
 import { bodyParametersApi, mealsApi, productsApi, usersApi, waterApi } from '../api/services';
+import { ActionIconButton, ActionIconLink } from '../components/ActionIconButton';
 import { BackLink } from '../components/BackLink';
 import { BodyMetricsChart } from '../components/BodyMetricsChart';
 import { Panel } from '../components/Panel';
@@ -890,15 +891,9 @@ export function UserDashboardPage() {
                       <p>{formatDate(meal.date)}</p>
                     </div>
                     <div className="inline-actions">
-                      <Link className="button-secondary" to={`/meals/${meal.id}`}>
-                        Посмотреть
-                      </Link>
-                      <button type="button" className="button-ghost" onClick={() => handleMealEdit(meal.id)}>
-                        Редактировать
-                      </button>
-                      <button type="button" className="button-danger" onClick={() => handleMealDelete(meal.id)}>
-                        Удалить
-                      </button>
+                      <ActionIconLink to={`/meals/${meal.id}`} icon="view" label={`Открыть прием пищи ${meal.name}`} />
+                      <ActionIconButton icon="edit" label={`Редактировать прием пищи ${meal.name}`} onClick={() => handleMealEdit(meal.id)} />
+                      <ActionIconButton icon="delete" tone="danger" label={`Удалить прием пищи ${meal.name}`} onClick={() => handleMealDelete(meal.id)} />
                     </div>
                   </article>
                 ))
@@ -1065,12 +1060,8 @@ export function UserDashboardPage() {
                       </p>
                     </div>
                     <div className="inline-actions">
-                      <button type="button" className="button-ghost" onClick={() => handleWaterEdit(entry.id)}>
-                        Редактировать
-                      </button>
-                      <button type="button" className="button-danger" onClick={() => handleWaterDelete(entry.id)}>
-                        Удалить
-                      </button>
+                      <ActionIconButton icon="edit" label={`Редактировать запись о жидкости за ${entry.date}`} onClick={() => handleWaterEdit(entry.id)} />
+                      <ActionIconButton icon="delete" tone="danger" label={`Удалить запись о жидкости за ${entry.date}`} onClick={() => handleWaterDelete(entry.id)} />
                     </div>
                   </article>
                 ))

@@ -68,10 +68,34 @@ Frontend:
 
 - `VITE_API_BASE_URL`
 
-## GitHub Actions secrets for deployment
+## GitHub CI/CD
 
-To use the deployment workflow, add these repository secrets:
+The repository includes a GitHub Actions workflow named `CI/CD` with the following jobs:
 
-- `RENDER_BACKEND_DEPLOY_HOOK_URL`
-- `RENDER_FRONTEND_DEPLOY_HOOK_URL`
-- `APP_HEALTHCHECK_URL`
+- `Backend Build and Test`
+- `Frontend Build`
+- `Deploy to Railway`
+- `Post-deploy Healthcheck`
+
+To make the deployment and healthcheck jobs work, configure these GitHub repository settings.
+
+Secrets:
+
+- `RAILWAY_TOKEN`
+
+Variables:
+
+- `RAILWAY_PROJECT_ID`
+- `RAILWAY_ENVIRONMENT_NAME`
+- `RAILWAY_BACKEND_SERVICE`
+- `RAILWAY_FRONTEND_SERVICE`
+- `BACKEND_HEALTHCHECK_URL`
+- `FRONTEND_HEALTHCHECK_URL`
+
+Example values:
+
+- `RAILWAY_ENVIRONMENT_NAME=production`
+- `RAILWAY_BACKEND_SERVICE=Food_Dairy`
+- `RAILWAY_FRONTEND_SERVICE=frontend`
+- `BACKEND_HEALTHCHECK_URL=https://fooddairy-production.up.railway.app/actuator/health`
+- `FRONTEND_HEALTHCHECK_URL=https://frontend-production-d674.up.railway.app/`

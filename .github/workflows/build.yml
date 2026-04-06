@@ -1,21 +1,32 @@
-name: Build and SonarCloud
+name: CI/CD
+
 on:
   push:
     branches:
       - main
       - feature/**
   pull_request:
+    branches:
+      - main
     types:
       - opened
       - synchronize
       - reopened
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
-  build-and-analyze:
-    name: Build and analyze
+  backend-build-and-test:
+    name: Backend Build and Test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,13 +40,6 @@ jobs:
           java-version: '25'
           cache: maven
 
-      - name: Set up Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:
@@ -46,23 +50,14 @@ jobs:
       - name: Make Maven wrapper executable
         run: chmod +x ./mvnw
 
-      - name: Build and test
+      - name: Build and test backend
         run: ./mvnw -B clean verify
-
-      - name: Build frontend
-        working-directory: frontend
-        run: |
-          npm ci --ignore-scripts
-          npm run build
 
       - name: Build backend Docker image
         run: docker build -t food-diary-backend .
 
-      - name: Build frontend Docker image
-        run: docker build -t food-diary-frontend ./frontend
-
       - name: SonarCloud analyze
-        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+        if: ${{ ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) && secrets.SONAR_TOKEN != '' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,3 +66,140 @@ jobs:
           org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar
           -Dsonar.token=${SONAR_TOKEN}
           -Dsonar.qualitygate.wait=true
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build frontend Docker image
+        run: docker build -t food-diary-frontend .
+
+  deploy-railway:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    needs:
+      - backend-build-and-test
+      - frontend-build
+    timeout-minutes: 20
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
+      RAILWAY_ENVIRONMENT_NAME: ${{ vars.RAILWAY_ENVIRONMENT_NAME != '' && vars.RAILWAY_ENVIRONMENT_NAME || 'production' }}
+      RAILWAY_BACKEND_SERVICE: ${{ vars.RAILWAY_BACKEND_SERVICE != '' && vars.RAILWAY_BACKEND_SERVICE || 'Food_Dairy' }}
+      RAILWAY_FRONTEND_SERVICE: ${{ vars.RAILWAY_FRONTEND_SERVICE != '' && vars.RAILWAY_FRONTEND_SERVICE || 'frontend' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js for Railway CLI
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate Railway configuration
+        run: |
+          if [ -z "${RAILWAY_TOKEN}" ]; then
+            echo "Missing GitHub secret: RAILWAY_TOKEN" >&2
+            exit 1
+          fi
+
+          if [ -z "${RAILWAY_PROJECT_ID}" ]; then
+            echo "Missing GitHub variable: RAILWAY_PROJECT_ID" >&2
+            exit 1
+          fi
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy backend service
+        run: >
+          railway up
+          --project "${RAILWAY_PROJECT_ID}"
+          --environment "${RAILWAY_ENVIRONMENT_NAME}"
+          --service "${RAILWAY_BACKEND_SERVICE}"
+          --ci
+
+      - name: Deploy frontend service
+        working-directory: frontend
+        run: >
+          railway up
+          --project "${RAILWAY_PROJECT_ID}"
+          --environment "${RAILWAY_ENVIRONMENT_NAME}"
+          --service "${RAILWAY_FRONTEND_SERVICE}"
+          --ci
+
+  post-deploy-healthcheck:
+    name: Post-deploy Healthcheck
+    runs-on: ubuntu-latest
+    needs:
+      - deploy-railway
+    timeout-minutes: 15
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+    env:
+      BACKEND_HEALTHCHECK_URL: ${{ vars.BACKEND_HEALTHCHECK_URL }}
+      FRONTEND_HEALTHCHECK_URL: ${{ vars.FRONTEND_HEALTHCHECK_URL }}
+    steps:
+      - name: Validate healthcheck configuration
+        run: |
+          if [ -z "${BACKEND_HEALTHCHECK_URL}" ]; then
+            echo "Missing GitHub variable: BACKEND_HEALTHCHECK_URL" >&2
+            exit 1
+          fi
+
+      - name: Wait for backend healthcheck
+        run: |
+          for attempt in $(seq 1 30); do
+            status_code=$(curl -s -o /tmp/backend-health.txt -w "%{http_code}" "${BACKEND_HEALTHCHECK_URL}" || true)
+            if [ "${status_code}" = "200" ]; then
+              echo "Backend healthcheck passed"
+              cat /tmp/backend-health.txt
+              exit 0
+            fi
+
+            echo "Backend attempt ${attempt}/30: ${status_code:-no response}"
+            sleep 10
+          done
+
+          echo "Backend healthcheck did not become healthy in time" >&2
+          cat /tmp/backend-health.txt || true
+          exit 1
+
+      - name: Wait for frontend healthcheck
+        if: ${{ env.FRONTEND_HEALTHCHECK_URL != '' }}
+        run: |
+          for attempt in $(seq 1 30); do
+            status_code=$(curl -s -o /tmp/frontend-health.txt -w "%{http_code}" "${FRONTEND_HEALTHCHECK_URL}" || true)
+            if [ "${status_code}" = "200" ]; then
+              echo "Frontend healthcheck passed"
+              cat /tmp/frontend-health.txt
+              exit 0
+            fi
+
+            echo "Frontend attempt ${attempt}/30: ${status_code:-no response}"
+            sleep 10
+          done
+
+          echo "Frontend healthcheck did not become healthy in time" >&2
+          cat /tmp/frontend-health.txt || true
+          exit 1

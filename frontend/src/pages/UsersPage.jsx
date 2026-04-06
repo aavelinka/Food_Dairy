@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { getErrorMessage } from '../api/client';
 import { bodyParametersApi, usersApi } from '../api/services';
+import { ActionIconButton, ActionIconLink } from '../components/ActionIconButton';
 import { Panel } from '../components/Panel';
 import { StatusBanner } from '../components/StatusBanner';
 import { GOAL_OPTIONS, SEX_OPTIONS, buildInitials, parseDecimal, parseInteger, pickLatestRecord, todayIso } from '../utils/foodDiary';
@@ -219,12 +219,8 @@ export function UsersPage() {
                     </div>
                   </div>
                   <div className="inline-actions">
-                    <Link className="button-secondary" to={`/users/${user.id}`}>
-                      Профиль
-                    </Link>
-                    <button type="button" className="button-danger" onClick={() => handleDelete(user.id)}>
-                      Удалить
-                    </button>
+                    <ActionIconLink to={`/users/${user.id}`} icon="view" label={`Открыть профиль пользователя ${user.name}`} />
+                    <ActionIconButton icon="delete" tone="danger" label={`Удалить пользователя ${user.name}`} onClick={() => handleDelete(user.id)} />
                   </div>
                 </article>
               ))
