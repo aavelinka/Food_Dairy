@@ -27,6 +27,8 @@ jobs:
     name: Backend Build and Test
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,9 +59,8 @@ jobs:
         run: docker build -t food-diary-backend .
 
       - name: SonarCloud analyze
-        if: ${{ ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) && secrets.SONAR_TOKEN != '' }}
+        if: ${{ env.SONAR_TOKEN != '' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) }}
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           ./mvnw -B -DskipTests
