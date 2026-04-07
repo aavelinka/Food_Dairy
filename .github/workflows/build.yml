@@ -145,7 +145,7 @@ jobs:
           --environment "${RAILWAY_ENVIRONMENT_NAME}"
           --service "${RAILWAY_BACKEND_SERVICE}"
           --verbose
-          --ci
+          --detach
 
       - name: Deploy frontend service
         working-directory: frontend
@@ -157,7 +157,7 @@ jobs:
           --service "${RAILWAY_FRONTEND_SERVICE}"
           --path-as-root
           --verbose
-          --ci
+          --detach
 
   post-deploy-healthcheck:
     name: Post-deploy Healthcheck
