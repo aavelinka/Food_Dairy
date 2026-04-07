@@ -177,17 +177,35 @@ jobs:
             exit 1
           fi
 
+          if ! echo "${BACKEND_HEALTHCHECK_URL}" | grep -Eq '^https?://'; then
+            echo "BACKEND_HEALTHCHECK_URL must start with http:// or https://" >&2
+            exit 1
+          fi
+
+          if echo "${BACKEND_HEALTHCHECK_URL}" | grep -Eq '[<> ]'; then
+            echo "BACKEND_HEALTHCHECK_URL contains placeholder/special characters. Set a real URL." >&2
+            exit 1
+          fi
+
       - name: Wait for backend healthcheck
         run: |
-          for attempt in $(seq 1 30); do
-            status_code=$(curl -s -o /tmp/backend-health.txt -w "%{http_code}" "${BACKEND_HEALTHCHECK_URL}" || true)
+          BACKEND_HEALTH_URL="${BACKEND_HEALTHCHECK_URL%/}"
+          if [[ "${BACKEND_HEALTH_URL}" != */actuator/health ]]; then
+            BACKEND_HEALTH_URL="${BACKEND_HEALTH_URL}/actuator/health"
+          fi
+
+          echo "Backend healthcheck URL: ${BACKEND_HEALTH_URL}"
+          : > /tmp/backend-health.txt
+
+          for attempt in $(seq 1 60); do
+            status_code=$(curl -sS -L --connect-timeout 5 --max-time 20 -o /tmp/backend-health.txt -w "%{http_code}" "${BACKEND_HEALTH_URL}" || true)
             if [ "${status_code}" = "200" ]; then
               echo "Backend healthcheck passed"
-              cat /tmp/backend-health.txt
+              cat /tmp/backend-health.txt || true
               exit 0
             fi
 
-            echo "Backend attempt ${attempt}/30: ${status_code:-no response}"
+            echo "Backend attempt ${attempt}/60: ${status_code:-no response}"
             sleep 10
           done
 
@@ -198,15 +216,17 @@ jobs:
       - name: Wait for frontend healthcheck
         if: ${{ env.FRONTEND_HEALTHCHECK_URL != '' }}
         run: |
-          for attempt in $(seq 1 30); do
-            status_code=$(curl -s -o /tmp/frontend-health.txt -w "%{http_code}" "${FRONTEND_HEALTHCHECK_URL}" || true)
+          : > /tmp/frontend-health.txt
+
+          for attempt in $(seq 1 60); do
+            status_code=$(curl -sS -L --connect-timeout 5 --max-time 20 -o /tmp/frontend-health.txt -w "%{http_code}" "${FRONTEND_HEALTHCHECK_URL}" || true)
             if [ "${status_code}" = "200" ]; then
               echo "Frontend healthcheck passed"
-              cat /tmp/frontend-health.txt
+              cat /tmp/frontend-health.txt || true
               exit 0
             fi
 
-            echo "Frontend attempt ${attempt}/30: ${status_code:-no response}"
+            echo "Frontend attempt ${attempt}/60: ${status_code:-no response}"
             sleep 10
           done
 
