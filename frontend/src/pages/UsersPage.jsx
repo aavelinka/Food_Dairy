@@ -56,7 +56,7 @@ export function UsersPage() {
   const [searchValue, setSearchValue] = useState('');
   const [filters, setFilters] = useState({ sex: '', age: '' });
   const [showFilters, setShowFilters] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [userForm, setUserForm] = useState(emptyUserForm());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -130,21 +130,22 @@ export function UsersPage() {
     setSearchValue('');
   }
 
+  function openCreateForm() {
+    setUserForm(emptyUserForm());
+    setFormError('');
+    setFormSuccess('');
+    setShowCreateForm(true);
+  }
+
+  function closeCreateForm() {
+    setUserForm(emptyUserForm());
+    setFormError('');
+    setFormSuccess('');
+    setShowCreateForm(false);
+  }
+
   return (
     <div className="page-stack">
-      <div className="page-header">
-        <div>
-          <p className="page-kicker">Пользователи</p>
-          <h1>Справочник пользователей</h1>
-          <p className="page-subtitle">Поиск, фильтрация и переход в профиль пользователя.</p>
-        </div>
-        <div className="inline-actions">
-          <button type="button" className="button" onClick={() => setShowCreateForm((current) => !current)}>
-            {showCreateForm ? 'Скрыть форму' : 'Добавить пользователя'}
-          </button>
-        </div>
-      </div>
-
       <div className="toolbar-strip">
         <div className="toolbar-search-group">
           <label className="search-input">
@@ -156,6 +157,9 @@ export function UsersPage() {
           </label>
           <button type="button" className="button-ghost" onClick={() => setShowFilters((current) => !current)}>
             {showFilters ? 'Скрыть фильтрацию' : 'Фильтрация'}
+          </button>
+          <button type="button" className="button" onClick={openCreateForm}>
+            Создать пользователя
           </button>
           <div className="toolbar-count">Найдено пользователей: {visibleUsers.length}</div>
         </div>
@@ -199,8 +203,8 @@ export function UsersPage() {
         </Panel>
       ) : null}
 
-      <div className="content-grid content-grid-wide">
-        <Panel title="Пользователи" description="В списке отображаются только имена и доступные действия администратора.">
+      <div className={`content-grid content-grid-wide${showCreateForm ? '' : ' content-grid-single'}`}>
+        <Panel title="Пользователи">
           <StatusBanner tone="error">{error}</StatusBanner>
           <StatusBanner tone="info">{loading ? 'Загружаю пользователей…' : ''}</StatusBanner>
 
@@ -229,7 +233,14 @@ export function UsersPage() {
         </Panel>
 
         {showCreateForm ? (
-          <Panel title="Новый пользователь" description="Создание пользователя сразу с первичными параметрами тела.">
+          <Panel
+            title="Создать пользователя"
+            actions={
+              <button type="button" className="button-ghost" onClick={closeCreateForm}>
+                Закрыть форму
+              </button>
+            }
+          >
             <StatusBanner tone="error">{formError}</StatusBanner>
             <StatusBanner tone="success">{formSuccess}</StatusBanner>
 
@@ -387,11 +398,7 @@ export function UsersPage() {
               </div>
             </form>
           </Panel>
-        ) : (
-          <Panel title="Создание пользователя" description="Форма скрыта. Нажми «Добавить пользователя», чтобы открыть её снова.">
-            <div className="empty-card">Здесь будет форма создания нового пользователя.</div>
-          </Panel>
-        )}
+        ) : null}
       </div>
     </div>
   );

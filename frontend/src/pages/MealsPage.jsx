@@ -47,7 +47,7 @@ export function MealsPage() {
   const [filterAuthorId, setFilterAuthorId] = useState('');
   const [filterProductIds, setFilterProductIds] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [showForm, setShowForm] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [mealForm, setMealForm] = useState(emptyMealForm());
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -105,6 +105,18 @@ export function MealsPage() {
     setEditingId(null);
     setMealForm(emptyMealForm());
     setFormError('');
+  }
+
+  function openCreateForm() {
+    resetForm();
+    setFormSuccess('');
+    setShowForm(true);
+  }
+
+  function closeForm() {
+    resetForm();
+    setFormSuccess('');
+    setShowForm(false);
   }
 
   async function handleSubmit(event) {
@@ -174,19 +186,6 @@ export function MealsPage() {
 
   return (
     <div className="page-stack">
-      <div className="page-header">
-        <div>
-          <p className="page-kicker">Приемы пищи</p>
-          <h1>Список приемов пищи</h1>
-          <p className="page-subtitle">Глобальный список блюд с привязкой к пользователю и переходом в детальный просмотр.</p>
-        </div>
-        <div className="inline-actions">
-          <button type="button" className="button" onClick={() => setShowForm((current) => !current)}>
-            {showForm ? 'Скрыть форму' : 'Добавить прием пищи'}
-          </button>
-        </div>
-      </div>
-
       <div className="toolbar-strip">
         <div className="toolbar-search-group">
           <label className="search-input">
@@ -198,6 +197,9 @@ export function MealsPage() {
           </label>
           <button type="button" className="button-ghost" onClick={() => setShowFilters((current) => !current)}>
             {showFilters ? 'Скрыть фильтрацию' : 'Фильтрация'}
+          </button>
+          <button type="button" className="button" onClick={openCreateForm}>
+            Создать прием пищи
           </button>
           <div className="toolbar-count">Найдено приемов пищи: {meals.length}</div>
         </div>
@@ -243,8 +245,8 @@ export function MealsPage() {
         </Panel>
       ) : null}
 
-      <div className="content-grid content-grid-wide">
-        <Panel title="Приемы пищи" description="В строке показываются название, автор и действия для просмотра и удаления.">
+      <div className={`content-grid content-grid-wide${showForm ? '' : ' content-grid-single'}`}>
+        <Panel title="Приемы пищи">
           <StatusBanner tone="error">{error}</StatusBanner>
           <StatusBanner tone="info">{loading ? 'Загружаю приемы пищи…' : ''}</StatusBanner>
 
@@ -268,7 +270,14 @@ export function MealsPage() {
         </Panel>
 
         {showForm ? (
-          <Panel title={editingId ? 'Редактирование приема пищи' : 'Новый прием пищи'} description="Создание и редактирование блюда из глобального списка.">
+          <Panel
+            title={editingId ? 'Редактирование приема пищи' : 'Создать прием пищи'}
+            actions={
+              <button type="button" className="button-ghost" onClick={closeForm}>
+                Закрыть форму
+              </button>
+            }
+          >
             <StatusBanner tone="error">{formError}</StatusBanner>
             <StatusBanner tone="success">{formSuccess}</StatusBanner>
 
@@ -388,10 +397,10 @@ export function MealsPage() {
 
               <div className="inline-actions form-actions">
                 <button type="submit" className="button">
-                  {editingId ? 'Сохранить прием пищи' : 'Добавить прием пищи'}
+                  {editingId ? 'Сохранить прием пищи' : 'Создать прием пищи'}
                 </button>
                 {editingId ? (
-                  <button type="button" className="button-ghost" onClick={resetForm}>
+                  <button type="button" className="button-ghost" onClick={openCreateForm}>
                     Отменить редактирование
                   </button>
                 ) : null}

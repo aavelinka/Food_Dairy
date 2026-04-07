@@ -65,7 +65,6 @@ export function ProductSelector({
                   </span>
                   {product.name}
                 </span>
-                <span className="product-option-state">{isSelected ? 'Выбран' : 'Выбрать'}</span>
               </label>
             );
           })

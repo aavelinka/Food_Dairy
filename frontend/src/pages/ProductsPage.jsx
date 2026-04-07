@@ -27,7 +27,7 @@ export function ProductsPage() {
   const [searchValue, setSearchValue] = useState('');
   const [filterMealId, setFilterMealId] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [showForm, setShowForm] = useState(true);
+  const [showForm, setShowForm] = useState(false);
   const [productForm, setProductForm] = useState(emptyProductForm());
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,6 +70,18 @@ export function ProductsPage() {
     setEditingId(null);
     setProductForm(emptyProductForm());
     setFormError('');
+  }
+
+  function openCreateForm() {
+    resetForm();
+    setFormSuccess('');
+    setShowForm(true);
+  }
+
+  function closeForm() {
+    resetForm();
+    setFormSuccess('');
+    setShowForm(false);
   }
 
   async function handleSubmit(event) {
@@ -129,19 +141,6 @@ export function ProductsPage() {
 
   return (
     <div className="page-stack">
-      <div className="page-header">
-        <div>
-          <p className="page-kicker">Продукты</p>
-          <h1>Справочник продуктов</h1>
-          <p className="page-subtitle">Таблица продуктов с КБЖУ и быстрыми действиями администратора.</p>
-        </div>
-        <div className="inline-actions">
-          <button type="button" className="button" onClick={() => setShowForm((current) => !current)}>
-            {showForm ? 'Скрыть форму' : 'Добавить продукт'}
-          </button>
-        </div>
-      </div>
-
       <div className="toolbar-strip">
         <div className="toolbar-search-group">
           <label className="search-input">
@@ -153,6 +152,9 @@ export function ProductsPage() {
           </label>
           <button type="button" className="button-ghost" onClick={() => setShowFilters((current) => !current)}>
             {showFilters ? 'Скрыть фильтрацию' : 'Фильтрация'}
+          </button>
+          <button type="button" className="button" onClick={openCreateForm}>
+            Создать продукт
           </button>
           <div className="toolbar-count">Найдено продуктов: {products.length}</div>
         </div>
@@ -188,8 +190,8 @@ export function ProductsPage() {
         </Panel>
       ) : null}
 
-      <div className="content-grid content-grid-wide">
-        <Panel title="Таблица продуктов" description="Название продукта, КБЖУ и действия для редактирования.">
+      <div className={`content-grid content-grid-wide${showForm ? '' : ' content-grid-single'}`}>
+        <Panel title="Продукты">
           <StatusBanner tone="error">{error}</StatusBanner>
           <StatusBanner tone="info">{loading ? 'Загружаю продукты…' : ''}</StatusBanner>
 
@@ -224,7 +226,14 @@ export function ProductsPage() {
         </Panel>
 
         {showForm ? (
-          <Panel title={editingId ? 'Редактирование продукта' : 'Новый продукт'} description="Поля КБЖУ задаются на 100 грамм продукта.">
+          <Panel
+            title={editingId ? 'Редактирование продукта' : 'Создать продукт'}
+            actions={
+              <button type="button" className="button-ghost" onClick={closeForm}>
+                Закрыть форму
+              </button>
+            }
+          >
             <StatusBanner tone="error">{formError}</StatusBanner>
             <StatusBanner tone="success">{formSuccess}</StatusBanner>
 
@@ -312,10 +321,10 @@ export function ProductsPage() {
 
               <div className="inline-actions">
                 <button type="submit" className="button">
-                  {editingId ? 'Сохранить продукт' : 'Добавить продукт'}
+                  {editingId ? 'Сохранить продукт' : 'Создать продукт'}
                 </button>
                 {editingId ? (
-                  <button type="button" className="button-ghost" onClick={resetForm}>
+                  <button type="button" className="button-ghost" onClick={openCreateForm}>
                     Отменить редактирование
                   </button>
                 ) : null}
