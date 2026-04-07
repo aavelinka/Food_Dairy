@@ -99,7 +99,7 @@ jobs:
   deploy-railway:
     name: Deploy to Railway
     runs-on: ubuntu-latest
-    container: ghcr.io/railwayapp/cli:latest
+    container: ghcr.io/railwayapp/cli:4.36.1
     needs:
       - backend-build-and-test
       - frontend-build
